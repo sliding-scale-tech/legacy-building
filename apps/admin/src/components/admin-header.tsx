@@ -1,6 +1,6 @@
 import { SignOutButton, useAuth } from "@clerk/react";
-import { Button, buttonVariants } from "@mobile-starter/ui/components/button";
-import { cn } from "@mobile-starter/ui/lib/utils";
+import { Button, buttonVariants } from "@legacy-building/ui/components/button";
+import { cn } from "@legacy-building/ui/lib/utils";
 import { Link } from "@tanstack/react-router";
 
 import { ModeToggle } from "@/components/mode-toggle";

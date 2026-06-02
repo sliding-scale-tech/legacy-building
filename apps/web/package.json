@@ -16,9 +16,9 @@
 		"@fontsource-variable/geist": "^5.2.9",
 		"@fontsource-variable/inter": "^5.2.8",
 		"@hookform/resolvers": "^5.2.2",
-		"@mobile-starter/backend": "workspace:*",
-		"@mobile-starter/env": "workspace:*",
-		"@mobile-starter/ui": "workspace:*",
+		"@legacy-building/backend": "workspace:*",
+		"@legacy-building/env": "workspace:*",
+		"@legacy-building/ui": "workspace:*",
 		"@tailwindcss/vite": "^4.2.2",
 		"@tanstack/react-router": "^1.168.22",
 		"class-variance-authority": "^0.7.1",
@@ -37,7 +37,7 @@
 		"zod": "catalog:"
 	},
 	"devDependencies": {
-		"@mobile-starter/config": "workspace:*",
+		"@legacy-building/config": "workspace:*",
 		"@tanstack/react-router-devtools": "^1.166.13",
 		"@tanstack/router-plugin": "^1.167.22",
 		"@types/node": "^22.13.14",

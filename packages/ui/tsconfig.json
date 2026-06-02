@@ -1,11 +1,11 @@
 {
-	"extends": "@mobile-starter/config/tsconfig.base.json",
+	"extends": "@legacy-building/config/tsconfig.base.json",
 	"compilerOptions": {
 		"jsx": "react-jsx",
 		"lib": ["ESNext", "DOM", "DOM.Iterable"],
 		"types": [],
 		"paths": {
-			"@mobile-starter/ui/*": ["./src/*"]
+			"@legacy-building/ui/*": ["./src/*"]
 		}
 	},
 	"include": ["src/**/*.ts", "src/**/*.tsx"],

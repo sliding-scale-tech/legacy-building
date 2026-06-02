@@ -3,18 +3,18 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import {
 	combinedFieldErrors,
 	fieldHasError,
-} from "@mobile-starter/ui/components/auth-field-error";
-import { Button, buttonVariants } from "@mobile-starter/ui/components/button";
+} from "@legacy-building/ui/components/auth-field-error";
+import { Button, buttonVariants } from "@legacy-building/ui/components/button";
 import {
 	Field,
 	FieldError,
 	FieldLabel,
-} from "@mobile-starter/ui/components/field";
-import { Input } from "@mobile-starter/ui/components/input";
-import { APP_NAME } from "@mobile-starter/ui/lib/brand";
-import { firstClerkErrorMessage } from "@mobile-starter/ui/lib/clerk-errors";
-import { navigateAfterAuth } from "@mobile-starter/ui/lib/navigation";
-import { cn } from "@mobile-starter/ui/lib/utils";
+} from "@legacy-building/ui/components/field";
+import { Input } from "@legacy-building/ui/components/input";
+import { APP_NAME } from "@legacy-building/ui/lib/brand";
+import { firstClerkErrorMessage } from "@legacy-building/ui/lib/clerk-errors";
+import { navigateAfterAuth } from "@legacy-building/ui/lib/navigation";
+import { cn } from "@legacy-building/ui/lib/utils";
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { ChevronLeft } from "lucide-react";
 import { useMemo } from "react";

@@ -1,5 +1,5 @@
 {
-	"extends": "@mobile-starter/config/tsconfig.base.json",
+	"extends": "@legacy-building/config/tsconfig.base.json",
 	"compilerOptions": {
 		"types": []
 	},

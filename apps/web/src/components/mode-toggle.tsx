@@ -1,10 +1,10 @@
-import { Button } from "@mobile-starter/ui/components/button";
+import { Button } from "@legacy-building/ui/components/button";
 import {
 	DropdownMenu,
 	DropdownMenuContent,
 	DropdownMenuItem,
 	DropdownMenuTrigger,
-} from "@mobile-starter/ui/components/dropdown-menu";
+} from "@legacy-building/ui/components/dropdown-menu";
 import { Moon, Sun } from "lucide-react";
 
 import { useTheme } from "@/components/theme-provider";

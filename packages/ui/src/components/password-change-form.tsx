@@ -2,14 +2,14 @@
 
 import { useUser } from "@clerk/react";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Button } from "@mobile-starter/ui/components/button";
+import { Button } from "@legacy-building/ui/components/button";
 import {
 	Field,
 	FieldError,
 	FieldLabel,
-} from "@mobile-starter/ui/components/field";
-import { Input } from "@mobile-starter/ui/components/input";
-import { firstClerkErrorMessage } from "@mobile-starter/ui/lib/clerk-errors";
+} from "@legacy-building/ui/components/field";
+import { Input } from "@legacy-building/ui/components/input";
+import { firstClerkErrorMessage } from "@legacy-building/ui/lib/clerk-errors";
 import { Loader2 } from "lucide-react";
 import { Controller, useForm } from "react-hook-form";
 import { toast } from "sonner";

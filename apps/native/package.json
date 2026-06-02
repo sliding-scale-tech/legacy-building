@@ -18,9 +18,9 @@
 		"@expo/vector-icons": "^15.1.1",
 		"@gorhom/bottom-sheet": "^5.2.14",
 		"@hookform/resolvers": "^5.4.0",
-		"@mobile-starter/backend": "workspace:*",
-		"@mobile-starter/env": "workspace:*",
-		"@mobile-starter/ui": "workspace:*",
+		"@legacy-building/backend": "workspace:*",
+		"@legacy-building/env": "workspace:*",
+		"@legacy-building/ui": "workspace:*",
 		"convex": "catalog:",
 		"dotenv": "catalog:",
 		"expo": "~56.0.3",
@@ -56,7 +56,7 @@
 		"zod": "catalog:"
 	},
 	"devDependencies": {
-		"@mobile-starter/config": "workspace:*",
+		"@legacy-building/config": "workspace:*",
 		"@types/node": "^25.9.1",
 		"@types/react": "~19.2.14",
 		"typescript": "catalog:"

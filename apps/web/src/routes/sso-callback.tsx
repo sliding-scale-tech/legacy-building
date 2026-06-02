@@ -2,7 +2,7 @@ import { useClerk, useSignIn, useSignUp } from "@clerk/react";
 import {
 	navigateAfterAuth,
 	navigateTo,
-} from "@mobile-starter/ui/lib/navigation";
+} from "@legacy-building/ui/lib/navigation";
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useCallback, useEffect, useRef } from "react";
 import { ROUTES } from "@/lib/routes";

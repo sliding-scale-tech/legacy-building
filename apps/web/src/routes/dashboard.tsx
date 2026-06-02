@@ -1,9 +1,9 @@
 import { UserButton, useUser } from "@clerk/react";
-import { api } from "@mobile-starter/backend/convex/_generated/api";
-import { buttonVariants } from "@mobile-starter/ui/components/button";
-import { Skeleton } from "@mobile-starter/ui/components/skeleton";
-import { useCurrentUser } from "@mobile-starter/ui/hooks/use-current-user";
-import { cn } from "@mobile-starter/ui/lib/utils";
+import { api } from "@legacy-building/backend/convex/_generated/api";
+import { buttonVariants } from "@legacy-building/ui/components/button";
+import { Skeleton } from "@legacy-building/ui/components/skeleton";
+import { useCurrentUser } from "@legacy-building/ui/hooks/use-current-user";
+import { cn } from "@legacy-building/ui/lib/utils";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import {
 	Authenticated,

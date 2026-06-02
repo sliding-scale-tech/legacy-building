@@ -1,22 +1,22 @@
 "use client";
 
-import { api } from "@mobile-starter/backend/convex/_generated/api";
-import { Button } from "@mobile-starter/ui/components/button";
-import { Checkbox } from "@mobile-starter/ui/components/checkbox";
+import { api } from "@legacy-building/backend/convex/_generated/api";
+import { Button } from "@legacy-building/ui/components/button";
+import { Checkbox } from "@legacy-building/ui/components/checkbox";
 import {
 	Dialog,
 	DialogContent,
 	DialogDescription,
 	DialogTitle,
-} from "@mobile-starter/ui/components/dialog";
-import { Label } from "@mobile-starter/ui/components/label";
-import { useCurrentUser } from "@mobile-starter/ui/hooks/use-current-user";
+} from "@legacy-building/ui/components/dialog";
+import { Label } from "@legacy-building/ui/components/label";
+import { useCurrentUser } from "@legacy-building/ui/hooks/use-current-user";
 import {
 	TERMS_CHECKBOX_LABEL,
 	TERMS_DESCRIPTION,
 	TERMS_PARAGRAPHS,
 	TERMS_TITLE,
-} from "@mobile-starter/ui/lib/terms";
+} from "@legacy-building/ui/lib/terms";
 import { useMutation } from "convex/react";
 import { ConvexError } from "convex/values";
 import { FileText, Loader2 } from "lucide-react";

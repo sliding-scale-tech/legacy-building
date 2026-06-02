@@ -1,4 +1,4 @@
-import { Toaster } from "@mobile-starter/ui/components/sonner";
+import { Toaster } from "@legacy-building/ui/components/sonner";
 import {
 	createRootRouteWithContext,
 	HeadContent,
@@ -17,11 +17,11 @@ export const Route = createRootRouteWithContext<RouterAppContext>()({
 	head: () => ({
 		meta: [
 			{
-				title: "Mobile Starter Admin",
+				title: "Legacy Building Admin",
 			},
 			{
 				name: "description",
-				content: "Mobile Starter admin application",
+				content: "Legacy Building admin application",
 			},
 		],
 		links: [

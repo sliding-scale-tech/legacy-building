@@ -12,11 +12,11 @@
 	},
 	"iconLibrary": "lucide",
 	"aliases": {
-		"components": "@mobile-starter/ui/components",
-		"utils": "@mobile-starter/ui/lib/utils",
-		"hooks": "@mobile-starter/ui/hooks",
-		"lib": "@mobile-starter/ui/lib",
-		"ui": "@mobile-starter/ui/components"
+		"components": "@legacy-building/ui/components",
+		"utils": "@legacy-building/ui/lib/utils",
+		"hooks": "@legacy-building/ui/hooks",
+		"lib": "@legacy-building/ui/lib",
+		"ui": "@legacy-building/ui/components"
 	},
 	"menuColor": "default",
 	"menuAccent": "subtle",

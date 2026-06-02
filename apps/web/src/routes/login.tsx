@@ -1,7 +1,7 @@
 import { useAuth } from "@clerk/react";
-import { buttonVariants } from "@mobile-starter/ui/components/button";
-import { APP_NAME } from "@mobile-starter/ui/lib/brand";
-import { cn } from "@mobile-starter/ui/lib/utils";
+import { buttonVariants } from "@legacy-building/ui/components/button";
+import { APP_NAME } from "@legacy-building/ui/lib/brand";
+import { cn } from "@legacy-building/ui/lib/utils";
 import { createFileRoute, Link, Navigate } from "@tanstack/react-router";
 import { ChevronLeft } from "lucide-react";
 import { useState } from "react";

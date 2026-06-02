@@ -1,5 +1,5 @@
 import { useUser } from "@clerk/expo";
-import { api } from "@mobile-starter/backend/convex/_generated/api";
+import { api } from "@legacy-building/backend/convex/_generated/api";
 import { useQuery } from "convex/react";
 
 export function useNativeCurrentUser() {

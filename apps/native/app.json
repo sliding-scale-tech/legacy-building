@@ -1,13 +1,13 @@
 {
 	"expo": {
-		"scheme": "mobile-starter",
+		"scheme": "legacy-building",
 		"userInterfaceStyle": "automatic",
 		"orientation": "default",
 		"web": {
 			"bundler": "metro"
 		},
-		"name": "mobile-starter",
-		"slug": "mobile-starter",
+		"name": "legacy-building",
+		"slug": "legacy-building",
 		"plugins": ["expo-font"],
 		"experiments": {
 			"typedRoutes": true,
@@ -19,7 +19,7 @@
 			}
 		},
 		"android": {
-			"package": "com.umar32131.mobilestarter"
+			"package": "com.umar32131.legacybuilding"
 		}
 	}
 }

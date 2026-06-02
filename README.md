@@ -1,11 +1,13 @@
-# mobile-starter
+# Legacy Building
 
-This project was created with [Better-T-Stack](https://github.com/AmanVarshney01/create-better-t-stack), a modern TypeScript stack that combines React, TanStack Router, React Native, Expo, Convex, Clerk, TailwindCSS, shadcn/ui, Biome, and Turborepo.
+Monorepo for the Legacy Building product: web app, admin app, mobile app, and shared backend.
+
+Built with React, TanStack Router, React Native, Expo, Convex, Clerk, TailwindCSS, shadcn/ui, Biome, and Turborepo.
 
 ## Project Structure
 
 ```text
-mobile-starter/
+legacy-building/
 ├── apps/
 │   ├── admin/       # Admin app (React + Vite + TanStack Router)
 │   ├── native/      # Mobile app (React Native + Expo)
@@ -111,7 +113,7 @@ React web apps in this stack share shadcn/ui primitives through `packages/ui`.
 Import shared components like this:
 
 ```tsx
-import { Button } from "@mobile-starter/ui/components/button";
+import { Button } from '@legacy-building/ui/components/button';
 ```
 
 ### shadcn CLI in this monorepo
@@ -121,11 +123,11 @@ Shared UI components live in `packages/ui`, but the shadcn CLI must run from a *
 Run shadcn commands from the **project root** with `-c apps/web`:
 
 ```bash
-# From mobile-starter/
+# From project root
 pnpm dlx shadcn@latest <command> -c apps/web
 ```
 
-`apps/web/components.json` routes shared installs to `@mobile-starter/ui/components` and theme updates to `packages/ui/src/styles/globals.css`.
+`apps/web/components.json` routes shared installs to `@legacy-building/ui/components` and theme updates to `packages/ui/src/styles/globals.css`.
 
 ### Apply a preset from the root
 
@@ -176,37 +178,6 @@ Force overwrite an existing shared component:
 pnpm dlx shadcn@latest add button --overwrite --yes -c apps/web
 ```
 
-## Rename For A New App
-
-This repo is a reusable template named `mobile-starter`. To spin up a new app, rename each naming surface intentionally (replace `mobile-starter` / `Mobile Starter` with your app's slug / display name):
-
-- Root package name in `package.json`: `mobile-starter` to your slug
-- Workspace package scope: `@mobile-starter/*` to `@your-app/*`
-- Imports and TypeScript aliases using `@mobile-starter/...`
-- Shared package names in `packages/*/package.json`
-- App dependencies in `apps/*/package.json`
-- Expo identity in `apps/native/app.json`: `scheme`, `name`, `slug`, and the android `package`
-- User-facing branding from `Mobile Starter` (see `packages/ui/src/lib/brand.ts`) to your app name
-- shadcn aliases in `components.json` files
-- Root folder name, repository name, CI config, deployment project names, and docs if needed
-
-After renaming, refresh the lockfile and verify the workspace:
-
-```bash
-pnpm install
-pnpm run check-types
-pnpm run build
-pnpm run dev:native
-```
-
-Also check external services that may reference the old name or URL scheme:
-
-- Clerk redirect URLs and publishable keys
-- Convex project/deployment name
-- Expo/EAS project settings
-- App store bundle/package identifiers, if already configured
-- Hosting/deployment settings for web and admin apps
-
 ## Formatting And Git Hooks
 
 Initialize hooks:
@@ -220,5 +191,3 @@ Format and lint:
 ```bash
 pnpm run check
 ```
-# legacybuilding-monorepo
-# legacybuilding-monorepo

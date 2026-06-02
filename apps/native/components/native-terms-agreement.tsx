@@ -1,10 +1,10 @@
-import { api } from "@mobile-starter/backend/convex/_generated/api";
+import { api } from "@legacy-building/backend/convex/_generated/api";
 import {
 	TERMS_CHECKBOX_LABEL,
 	TERMS_DESCRIPTION,
 	TERMS_PARAGRAPHS,
 	TERMS_TITLE,
-} from "@mobile-starter/ui/lib/terms";
+} from "@legacy-building/ui/lib/terms";
 import { useMutation } from "convex/react";
 import { ConvexError } from "convex/values";
 import { useState } from "react";

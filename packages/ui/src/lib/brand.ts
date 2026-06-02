@@ -1,1 +1,1 @@
-export const APP_NAME = "Mobile Starter";
+export const APP_NAME = "Legacy Building";

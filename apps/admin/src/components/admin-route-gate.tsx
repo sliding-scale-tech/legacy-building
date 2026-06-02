@@ -1,5 +1,5 @@
-import { Skeleton } from "@mobile-starter/ui/components/skeleton";
-import { useCurrentUser } from "@mobile-starter/ui/hooks/use-current-user";
+import { Skeleton } from "@legacy-building/ui/components/skeleton";
+import { useCurrentUser } from "@legacy-building/ui/hooks/use-current-user";
 import { Navigate, useRouterState } from "@tanstack/react-router";
 import type { ReactNode } from "react";
 

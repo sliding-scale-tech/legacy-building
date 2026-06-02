@@ -1,4 +1,4 @@
-import { cn } from "@mobile-starter/ui/lib/utils";
+import { cn } from "@legacy-building/ui/lib/utils";
 import type * as React from "react";
 
 function Card({

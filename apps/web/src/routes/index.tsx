@@ -1,7 +1,7 @@
-import { api } from "@mobile-starter/backend/convex/_generated/api";
-import { buttonVariants } from "@mobile-starter/ui/components/button";
-import { Skeleton } from "@mobile-starter/ui/components/skeleton";
-import { cn } from "@mobile-starter/ui/lib/utils";
+import { api } from "@legacy-building/backend/convex/_generated/api";
+import { buttonVariants } from "@legacy-building/ui/components/button";
+import { Skeleton } from "@legacy-building/ui/components/skeleton";
+import { cn } from "@legacy-building/ui/lib/utils";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useQuery } from "convex/react";
 import { ROUTES } from "@/lib/routes";

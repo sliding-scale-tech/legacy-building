@@ -1,6 +1,6 @@
 import { useUser } from "@clerk/expo";
 import { Ionicons } from "@expo/vector-icons";
-import { api } from "@mobile-starter/backend/convex/_generated/api";
+import { api } from "@legacy-building/backend/convex/_generated/api";
 import {
 	Authenticated,
 	AuthLoading,
@@ -25,7 +25,7 @@ export default function Home() {
 		<Container className="px-4 pb-4">
 			<View className="mb-5 py-6">
 				<Text className="font-semibold text-3xl text-foreground tracking-tight">
-					Mobile Starter
+					Legacy Building
 				</Text>
 				<Text className="mt-1 text-muted text-sm">
 					Full-stack TypeScript starter

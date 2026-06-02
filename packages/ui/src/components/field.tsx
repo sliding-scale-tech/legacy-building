@@ -1,7 +1,7 @@
-import { Label } from "@mobile-starter/ui/components/label";
-import { Separator } from "@mobile-starter/ui/components/separator";
+import { Label } from "@legacy-building/ui/components/label";
+import { Separator } from "@legacy-building/ui/components/separator";
 
-import { cn } from "@mobile-starter/ui/lib/utils";
+import { cn } from "@legacy-building/ui/lib/utils";
 import { cva, type VariantProps } from "class-variance-authority";
 import { useMemo } from "react";
 
