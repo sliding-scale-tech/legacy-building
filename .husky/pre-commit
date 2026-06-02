@@ -1,0 +1,7 @@
+# Unstage Convex generated files before lint-staged (prevents stash conflicts when Convex dev regenerates them)
+git restore --staged packages/backend/convex/_generated/ 2>/dev/null || true
+
+# Lint first; only on success run build, then re-stage generated API types
+pnpm run precommit &&
+  pnpm run build &&
+  git add packages/backend/convex/_generated/api.d.ts

@@ -1,0 +1,15 @@
+packages:
+  - apps/*
+  - packages/*
+
+allowBuilds:
+  msgpackr-extract: true
+  msw: true
+
+catalog:
+  '@types/react-dom': ^19.2.3
+  convex: ^1.33.1
+  dotenv: ^17.2.2
+  next-themes: 'catalog:'
+  typescript: ^6
+  zod: ^4.1.13

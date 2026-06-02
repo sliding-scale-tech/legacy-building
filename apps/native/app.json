@@ -1,0 +1,17 @@
+{
+	"expo": {
+		"scheme": "legacy-building",
+		"userInterfaceStyle": "automatic",
+		"orientation": "default",
+		"web": {
+			"bundler": "metro"
+		},
+		"name": "legacy-building",
+		"slug": "legacy-building",
+		"plugins": ["expo-font"],
+		"experiments": {
+			"typedRoutes": true,
+			"reactCompiler": true
+		}
+	}
+}
