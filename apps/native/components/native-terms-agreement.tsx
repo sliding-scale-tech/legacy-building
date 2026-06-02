@@ -1,15 +1,14 @@
-import { api } from "@legacy-building/backend/convex/_generated/api";
+import { api } from "@mobile-starter/backend/convex/_generated/api";
+import {
+	TERMS_CHECKBOX_LABEL,
+	TERMS_DESCRIPTION,
+	TERMS_PARAGRAPHS,
+	TERMS_TITLE,
+} from "@mobile-starter/ui/lib/terms";
 import { useMutation } from "convex/react";
 import { ConvexError } from "convex/values";
 import { useState } from "react";
-import {
-	Modal,
-	Pressable,
-	ScrollView,
-	StyleSheet,
-	Text,
-	View,
-} from "react-native";
+import { Modal, Pressable, ScrollView, Text, View } from "react-native";
 import { useNativeCurrentUser } from "@/hooks/use-native-current-user";
 
 export function NativeTermsAgreement() {
@@ -44,30 +43,49 @@ export function NativeTermsAgreement() {
 
 	return (
 		<Modal visible animationType="slide" transparent>
-			<View style={styles.backdrop}>
-				<View style={styles.sheet}>
-					<Text style={styles.title}>Terms and Conditions</Text>
-					<ScrollView style={styles.scroll}>
-						<Text style={styles.body}>
-							By continuing you agree to the terms of service and privacy
-							policy. Replace this copy before launch.
-						</Text>
+			<View className="flex-1 justify-end bg-black/50">
+				<View className="max-h-[80%] gap-3 rounded-t-2xl bg-popover p-5">
+					<Text className="font-bold text-foreground text-xl">
+						{TERMS_TITLE}
+					</Text>
+					<Text className="text-muted-foreground text-sm">
+						{TERMS_DESCRIPTION}
+					</Text>
+					<ScrollView className="max-h-[320px]">
+						<View className="gap-3">
+							{TERMS_PARAGRAPHS.map((paragraph) => (
+								<Text
+									key={paragraph.slice(0, 24)}
+									className="text-muted-foreground text-sm leading-5"
+								>
+									{paragraph}
+								</Text>
+							))}
+						</View>
 					</ScrollView>
 					<Pressable
-						style={[styles.checkboxRow, agreed && styles.checkboxRowActive]}
+						className={`flex-row items-start gap-2.5 rounded-lg border p-3 ${agreed ? "border-primary bg-primary/10" : "border-border"}`}
 						onPress={() => setAgreed((v) => !v)}
 					>
-						<Text style={styles.checkboxText}>I agree to the terms</Text>
+						<View
+							className={`mt-0.5 h-5 w-5 items-center justify-center rounded border ${agreed ? "border-primary bg-primary" : "border-border"}`}
+						>
+							{agreed ? (
+								<Text className="font-bold text-primary-foreground text-xs">
+									✓
+								</Text>
+							) : null}
+						</View>
+						<Text className="flex-1 text-foreground text-sm">
+							{TERMS_CHECKBOX_LABEL}
+						</Text>
 					</Pressable>
 					<Pressable
-						style={[
-							styles.button,
-							(!agreed || submitting) && styles.buttonDisabled,
-						]}
+						className="items-center rounded-full bg-primary py-3.5 active:opacity-70 disabled:opacity-50"
 						disabled={!agreed || submitting}
 						onPress={() => void handleAgree()}
 					>
-						<Text style={styles.buttonText}>
+						<Text className="font-semibold text-primary-foreground">
 							{submitting ? "Saving…" : "Continue"}
 						</Text>
 					</Pressable>
@@ -76,57 +94,3 @@ export function NativeTermsAgreement() {
 		</Modal>
 	);
 }
-
-const styles = StyleSheet.create({
-	backdrop: {
-		flex: 1,
-		backgroundColor: "rgba(0,0,0,0.5)",
-		justifyContent: "flex-end",
-	},
-	sheet: {
-		backgroundColor: "#fff",
-		borderTopLeftRadius: 16,
-		borderTopRightRadius: 16,
-		padding: 20,
-		maxHeight: "80%",
-		gap: 12,
-	},
-	title: {
-		fontSize: 20,
-		fontWeight: "700",
-	},
-	scroll: {
-		maxHeight: 200,
-	},
-	body: {
-		fontSize: 14,
-		color: "#555",
-		lineHeight: 20,
-	},
-	checkboxRow: {
-		borderWidth: 1,
-		borderColor: "#ddd",
-		borderRadius: 8,
-		padding: 12,
-	},
-	checkboxRowActive: {
-		borderColor: "#0a7ea4",
-		backgroundColor: "#f0f9fc",
-	},
-	checkboxText: {
-		fontSize: 14,
-	},
-	button: {
-		backgroundColor: "#0a7ea4",
-		borderRadius: 8,
-		paddingVertical: 14,
-		alignItems: "center",
-	},
-	buttonDisabled: {
-		opacity: 0.5,
-	},
-	buttonText: {
-		color: "#fff",
-		fontWeight: "600",
-	},
-});

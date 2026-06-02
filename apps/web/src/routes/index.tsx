@@ -1,6 +1,7 @@
-import { api } from "@legacy-building/backend/convex/_generated/api";
-import { Button } from "@legacy-building/ui/components/button";
-import { Skeleton } from "@legacy-building/ui/components/skeleton";
+import { api } from "@mobile-starter/backend/convex/_generated/api";
+import { buttonVariants } from "@mobile-starter/ui/components/button";
+import { Skeleton } from "@mobile-starter/ui/components/skeleton";
+import { cn } from "@mobile-starter/ui/lib/utils";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useQuery } from "convex/react";
 import { ROUTES } from "@/lib/routes";
@@ -44,15 +45,25 @@ function HomeComponent() {
 						<p className="text-muted-foreground text-sm">Not signed in</p>
 					)}
 					<div className="mt-4 flex flex-wrap gap-2">
-						<Button asChild variant="default">
-							<Link to={ROUTES.login}>Sign in</Link>
-						</Button>
-						<Button asChild variant="outline">
-							<Link to={ROUTES.signup}>Sign up</Link>
-						</Button>
-						<Button asChild variant="outline">
-							<Link to={ROUTES.dashboard}>Dashboard</Link>
-						</Button>
+						<Link
+							to={ROUTES.login}
+							className={cn(buttonVariants({ variant: "default" }))}
+						>
+							Sign in
+						</Link>
+						<Link
+							to={ROUTES.signup}
+							search={{ type: undefined }}
+							className={cn(buttonVariants({ variant: "outline" }))}
+						>
+							Sign up
+						</Link>
+						<Link
+							to={ROUTES.dashboard}
+							className={cn(buttonVariants({ variant: "outline" }))}
+						>
+							Dashboard
+						</Link>
 					</div>
 				</section>
 			</div>

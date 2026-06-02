@@ -1,3 +1,8 @@
+const path = require("node:path");
+const { config: loadEnv } = require("dotenv");
+
+loadEnv({ path: path.resolve(__dirname, ".env") });
+
 const { getDefaultConfig } = require("expo/metro-config");
 const { withUniwindConfig } = require("uniwind/metro");
 const {

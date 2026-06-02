@@ -1,10 +1,15 @@
-import { UserButton } from "@clerk/react";
+import { SignOutButton, useAuth } from "@clerk/react";
+import { Button, buttonVariants } from "@mobile-starter/ui/components/button";
+import { cn } from "@mobile-starter/ui/lib/utils";
 import { Link } from "@tanstack/react-router";
 
 import { ModeToggle } from "@/components/mode-toggle";
 import { ADMIN_APP_BRAND, ADMIN_NAV_LINKS } from "@/lib/nav";
+import { ROUTES } from "@/lib/routes";
 
 export function AdminHeader() {
+	const { isSignedIn } = useAuth();
+
 	return (
 		<header className="border-border border-b bg-background">
 			<div className="mx-auto flex max-w-5xl flex-row items-center justify-between gap-4 px-4 py-3 sm:px-6">
@@ -29,8 +34,31 @@ export function AdminHeader() {
 					</nav>
 				</div>
 				<div className="flex shrink-0 items-center gap-2">
+					{isSignedIn ? (
+						<SignOutButton>
+							<Button variant="outline" size="sm">
+								Sign out
+							</Button>
+						</SignOutButton>
+					) : (
+						<>
+							<Link
+								to={ROUTES.signIn}
+								className={cn(
+									buttonVariants({ variant: "outline", size: "sm" }),
+								)}
+							>
+								Sign in
+							</Link>
+							<Link
+								to={ROUTES.signIn}
+								className={cn(buttonVariants({ size: "sm" }))}
+							>
+								Sign up
+							</Link>
+						</>
+					)}
 					<ModeToggle />
-					<UserButton />
 				</div>
 			</div>
 		</header>

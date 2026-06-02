@@ -1,4 +1,4 @@
-import { Toaster } from "@legacy-building/ui/components/sonner";
+import { Toaster } from "@mobile-starter/ui/components/sonner";
 import {
 	createRootRouteWithContext,
 	HeadContent,
@@ -10,18 +10,18 @@ import { ThemeProvider } from "@/components/theme-provider";
 
 import "../index.css";
 
-export type RouterAppContext = {};
+export type RouterAppContext = Record<string, unknown>;
 
 export const Route = createRootRouteWithContext<RouterAppContext>()({
 	component: RootComponent,
 	head: () => ({
 		meta: [
 			{
-				title: "Legacy Building Admin",
+				title: "Mobile Starter Admin",
 			},
 			{
 				name: "description",
-				content: "Legacy Building admin application",
+				content: "Mobile Starter admin application",
 			},
 		],
 		links: [

@@ -1,8 +1,8 @@
 import "@/global.css";
 import { ClerkProvider, useAuth } from "@clerk/expo";
 import { tokenCache } from "@clerk/expo/token-cache";
-import { env } from "@legacy-building/env/native";
-import { ConvexProvider, ConvexReactClient } from "convex/react";
+import { env } from "@mobile-starter/env/native";
+import { ConvexReactClient } from "convex/react";
 import { ConvexProviderWithClerk } from "convex/react-clerk";
 import { Stack } from "expo-router";
 import { HeroUINativeProvider } from "heroui-native";
@@ -21,12 +21,16 @@ const convex = new ConvexReactClient(env.EXPO_PUBLIC_CONVEX_URL, {
 
 function StackLayout() {
 	return (
-		<Stack screenOptions={{}}>
-			<Stack.Screen name="(drawer)" options={{ headerShown: false }} />
-			<Stack.Screen name="(auth)" options={{ headerShown: false }} />
+		<Stack
+			screenOptions={{
+				headerShown: false,
+			}}
+		>
+			<Stack.Screen name="(drawer)" />
+			<Stack.Screen name="(auth)" />
 			<Stack.Screen
 				name="modal"
-				options={{ title: "Modal", presentation: "modal" }}
+				options={{ title: "Modal", presentation: "modal", headerShown: true }}
 			/>
 		</Stack>
 	);

@@ -1,8 +1,8 @@
 "use client";
 
 import { useUser } from "@clerk/react";
-import { api } from "@legacy-building/backend/convex/_generated/api";
-import type { Doc } from "@legacy-building/backend/convex/_generated/dataModel";
+import { api } from "@mobile-starter/backend/convex/_generated/api";
+import type { Doc } from "@mobile-starter/backend/convex/_generated/dataModel";
 import { useQuery } from "convex/react";
 import type { FunctionReturnType } from "convex/server";
 

@@ -1,8 +1,9 @@
 import { UserButton, useUser } from "@clerk/react";
-import { api } from "@legacy-building/backend/convex/_generated/api";
-import { Button } from "@legacy-building/ui/components/button";
-import { Skeleton } from "@legacy-building/ui/components/skeleton";
-import { useCurrentUser } from "@legacy-building/ui/hooks/use-current-user";
+import { api } from "@mobile-starter/backend/convex/_generated/api";
+import { buttonVariants } from "@mobile-starter/ui/components/button";
+import { Skeleton } from "@mobile-starter/ui/components/skeleton";
+import { useCurrentUser } from "@mobile-starter/ui/hooks/use-current-user";
+import { cn } from "@mobile-starter/ui/lib/utils";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import {
 	Authenticated,
@@ -27,9 +28,9 @@ function RouteComponent() {
 					<p className="text-center text-muted-foreground text-sm">
 						You need to sign in to view your dashboard.
 					</p>
-					<Button asChild>
-						<Link to="/login">Sign in</Link>
-					</Button>
+					<Link to="/login" className={cn(buttonVariants())}>
+						Sign in
+					</Link>
 				</div>
 			</Unauthenticated>
 			<AuthLoading>

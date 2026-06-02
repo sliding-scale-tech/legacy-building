@@ -1,6 +1,6 @@
 import { useAuth } from "@clerk/react";
-import { Skeleton } from "@legacy-building/ui/components/skeleton";
-import { useCurrentUser } from "@legacy-building/ui/hooks/use-current-user";
+import { Skeleton } from "@mobile-starter/ui/components/skeleton";
+import { useCurrentUser } from "@mobile-starter/ui/hooks/use-current-user";
 import { createFileRoute, Navigate } from "@tanstack/react-router";
 import { ShieldCheck } from "lucide-react";
 
@@ -28,9 +28,9 @@ function SignInSkeleton() {
 
 function SignInPage() {
 	const { isLoaded } = useAuth();
-	const { isSignedIn, isLoading, role } = useCurrentUser();
+	const { isSignedIn, isLoading } = useCurrentUser();
 
-	if (!isLoading && isSignedIn && role === "admin") {
+	if (!isLoading && isSignedIn) {
 		return <Navigate to={ROUTES.dashboard} replace />;
 	}
 

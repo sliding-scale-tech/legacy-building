@@ -2,7 +2,8 @@ import { useSignIn } from "@clerk/expo";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { type Href, Link, useRouter } from "expo-router";
 import { Controller, useForm } from "react-hook-form";
-import { Pressable, StyleSheet, Text, TextInput, View } from "react-native";
+import { Pressable, Text, TextInput, View } from "react-native";
+import { GoogleOAuthButton } from "@/components/google-oauth-button";
 import {
 	type SignInFormValues,
 	type SignInMfaCodeFormValues,
@@ -101,10 +102,12 @@ export default function Page() {
 	if (requiresEmailCode) {
 		const mfaErrors = mfaForm.formState.errors;
 		return (
-			<View style={styles.container}>
-				<Text style={styles.title}>Verify your account</Text>
+			<View className="flex-1 bg-background px-5 pt-8">
+				<Text className="mb-2 font-semibold text-2xl text-foreground tracking-tight">
+					Verify your account
+				</Text>
 				{emailCodeFactor ? (
-					<Text style={styles.helper}>
+					<Text className="mb-4 text-muted-foreground text-sm leading-relaxed">
 						We sent a verification code to {emailCodeFactor.safeIdentifier}.
 					</Text>
 				) : null}
@@ -113,43 +116,46 @@ export default function Page() {
 					name="code"
 					render={({ field: { onChange, value } }) => (
 						<TextInput
-							style={styles.input}
+							className="h-12 rounded-full border border-border bg-popover px-5 text-base text-foreground"
 							value={value}
 							placeholder="Enter your verification code"
-							placeholderTextColor="#666666"
+							placeholderTextColor="#999"
 							onChangeText={onChange}
 							keyboardType="numeric"
 						/>
 					)}
 				/>
 				{mfaErrors.code ? (
-					<Text style={styles.error}>{mfaErrors.code.message}</Text>
+					<Text className="mt-1 text-destructive text-xs">
+						{mfaErrors.code.message}
+					</Text>
 				) : null}
 				{errors.fields.code ? (
-					<Text style={styles.error}>{errors.fields.code.message}</Text>
+					<Text className="mt-1 text-destructive text-xs">
+						{errors.fields.code.message}
+					</Text>
 				) : null}
 				{mfaErrors.root ? (
-					<Text style={styles.error}>{mfaErrors.root.message}</Text>
+					<Text className="mt-1 text-destructive text-xs">
+						{mfaErrors.root.message}
+					</Text>
 				) : null}
 				<Pressable
-					style={({ pressed }) => [
-						styles.button,
-						fetchStatus === "fetching" && styles.buttonDisabled,
-						pressed && styles.buttonPressed,
-					]}
+					className="mt-4 h-12 items-center justify-center rounded-full bg-primary active:opacity-70 disabled:opacity-50"
 					onPress={onVerify}
 					disabled={fetchStatus === "fetching"}
 				>
-					<Text style={styles.buttonText}>Verify</Text>
+					<Text className="font-semibold text-base text-primary-foreground">
+						Verify
+					</Text>
 				</Pressable>
 				<Pressable
-					style={({ pressed }) => [
-						styles.secondaryButton,
-						pressed && styles.buttonPressed,
-					]}
+					className="mt-3 h-10 items-center justify-center active:opacity-70"
 					onPress={() => signIn.mfa.sendEmailCode()}
 				>
-					<Text style={styles.secondaryButtonText}>I need a new code</Text>
+					<Text className="font-semibold text-primary text-sm">
+						I need a new code
+					</Text>
 				</Pressable>
 			</View>
 		);
@@ -158,147 +164,102 @@ export default function Page() {
 	const fieldErrors = credentialsForm.formState.errors;
 
 	return (
-		<View style={styles.container}>
-			<Text style={styles.title}>Sign in</Text>
-			<Text style={styles.label}>Email address</Text>
-			<Controller
-				control={credentialsForm.control}
-				name="email"
-				render={({ field: { onChange, value } }) => (
-					<TextInput
-						style={styles.input}
-						autoCapitalize="none"
-						value={value}
-						placeholder="Enter email"
-						placeholderTextColor="#666666"
-						onChangeText={onChange}
-						keyboardType="email-address"
+		<View className="flex-1 bg-background px-5 pt-8">
+			<Text className="mb-6 font-semibold text-2xl text-foreground tracking-tight">
+				Sign in
+			</Text>
+			<View className="gap-4">
+				<View className="gap-1">
+					<Controller
+						control={credentialsForm.control}
+						name="email"
+						render={({ field: { onChange, value } }) => (
+							<TextInput
+								className="h-12 rounded-full border border-border bg-popover px-5 text-base text-foreground"
+								autoCapitalize="none"
+								value={value}
+								placeholder="Email"
+								placeholderTextColor="#999"
+								onChangeText={onChange}
+								keyboardType="email-address"
+							/>
+						)}
 					/>
-				)}
-			/>
-			{fieldErrors.email ? (
-				<Text style={styles.error}>{fieldErrors.email.message}</Text>
-			) : null}
-			{errors.fields.identifier ? (
-				<Text style={styles.error}>{errors.fields.identifier.message}</Text>
-			) : null}
-			<Text style={styles.label}>Password</Text>
-			<Controller
-				control={credentialsForm.control}
-				name="password"
-				render={({ field: { onChange, value } }) => (
-					<TextInput
-						style={styles.input}
-						value={value}
-						placeholder="Enter password"
-						placeholderTextColor="#666666"
-						secureTextEntry
-						onChangeText={onChange}
+					{fieldErrors.email ? (
+						<Text className="ml-2 text-destructive text-xs">
+							{fieldErrors.email.message}
+						</Text>
+					) : null}
+					{errors.fields.identifier ? (
+						<Text className="ml-2 text-destructive text-xs">
+							{errors.fields.identifier.message}
+						</Text>
+					) : null}
+				</View>
+				<View className="gap-1">
+					<Controller
+						control={credentialsForm.control}
+						name="password"
+						render={({ field: { onChange, value } }) => (
+							<TextInput
+								className="h-12 rounded-full border border-border bg-popover px-5 text-base text-foreground"
+								value={value}
+								placeholder="Password"
+								placeholderTextColor="#999"
+								secureTextEntry
+								onChangeText={onChange}
+							/>
+						)}
 					/>
-				)}
-			/>
-			{fieldErrors.password ? (
-				<Text style={styles.error}>{fieldErrors.password.message}</Text>
-			) : null}
-			{errors.fields.password ? (
-				<Text style={styles.error}>{errors.fields.password.message}</Text>
-			) : null}
-			{fieldErrors.root ? (
-				<Text style={styles.error}>{fieldErrors.root.message}</Text>
-			) : null}
-			<Pressable
-				style={({ pressed }) => [
-					styles.button,
-					fetchStatus === "fetching" && styles.buttonDisabled,
-					pressed && styles.buttonPressed,
-				]}
-				onPress={onSubmit}
-				disabled={fetchStatus === "fetching"}
-			>
-				<Text style={styles.buttonText}>Sign in</Text>
-			</Pressable>
-			<Link href="/forgot-password">
-				<Text style={styles.linkText}>Forgot password?</Text>
-			</Link>
-			<View style={styles.linkContainer}>
-				<Text>Don't have an account? </Text>
-				<Link href="/sign-up">
-					<Text style={styles.linkText}>Sign up</Text>
-				</Link>
+					{fieldErrors.password ? (
+						<Text className="ml-2 text-destructive text-xs">
+							{fieldErrors.password.message}
+						</Text>
+					) : null}
+					{errors.fields.password ? (
+						<Text className="ml-2 text-destructive text-xs">
+							{errors.fields.password.message}
+						</Text>
+					) : null}
+				</View>
+				<View className="flex-row items-center justify-between px-2">
+					<Link href="/forgot-password">
+						<Text className="font-medium text-foreground text-sm underline">
+							Forgot password?
+						</Text>
+					</Link>
+					<Link href="/sign-up">
+						<Text className="font-semibold text-foreground text-sm underline">
+							Create account
+						</Text>
+					</Link>
+				</View>
+				{fieldErrors.root ? (
+					<Text className="text-destructive text-xs">
+						{fieldErrors.root.message}
+					</Text>
+				) : null}
+				<Pressable
+					className="mt-1 h-12 items-center justify-center rounded-full bg-primary active:opacity-70 disabled:opacity-50"
+					onPress={onSubmit}
+					disabled={fetchStatus === "fetching"}
+				>
+					<Text className="font-semibold text-base text-primary-foreground">
+						Sign in
+					</Text>
+				</Pressable>
+				<View className="relative py-1">
+					<View className="absolute inset-0 items-center justify-center">
+						<View className="h-px w-full bg-border" />
+					</View>
+					<View className="items-center">
+						<Text className="bg-background px-3 font-medium text-muted-foreground text-xs uppercase tracking-widest">
+							Or
+						</Text>
+					</View>
+				</View>
+				<GoogleOAuthButton />
 			</View>
 		</View>
 	);
 }
-
-const styles = StyleSheet.create({
-	container: {
-		flex: 1,
-		padding: 20,
-		gap: 12,
-	},
-	title: {
-		marginBottom: 8,
-		fontSize: 24,
-		fontWeight: "700",
-	},
-	label: {
-		fontWeight: "600",
-		fontSize: 14,
-	},
-	input: {
-		borderWidth: 1,
-		borderColor: "#ccc",
-		borderRadius: 8,
-		padding: 12,
-		fontSize: 16,
-		backgroundColor: "#fff",
-	},
-	button: {
-		backgroundColor: "#0a7ea4",
-		paddingVertical: 12,
-		paddingHorizontal: 24,
-		borderRadius: 8,
-		alignItems: "center",
-		marginTop: 8,
-	},
-	buttonPressed: {
-		opacity: 0.7,
-	},
-	buttonDisabled: {
-		opacity: 0.5,
-	},
-	buttonText: {
-		color: "#fff",
-		fontWeight: "600",
-	},
-	secondaryButton: {
-		paddingVertical: 12,
-		paddingHorizontal: 24,
-		borderRadius: 8,
-		alignItems: "center",
-		marginTop: 8,
-	},
-	secondaryButtonText: {
-		color: "#0a7ea4",
-		fontWeight: "600",
-	},
-	linkContainer: {
-		flexDirection: "row",
-		gap: 4,
-		marginTop: 12,
-		alignItems: "center",
-	},
-	linkText: {
-		color: "#0a7ea4",
-		fontWeight: "600",
-	},
-	error: {
-		color: "#d32f2f",
-		fontSize: 12,
-		marginTop: -8,
-	},
-	helper: {
-		color: "#555555",
-		fontSize: 13,
-	},
-});

@@ -1,3 +1,4 @@
 {
-	"extends": "@legacy-building/config/tsconfig.base.json"
+	"extends": "@mobile-starter/config/tsconfig.base.json",
+	"files": []
 }

@@ -1,23 +1,23 @@
 import { useClerk, useSignIn } from "@clerk/react";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { api } from "@mobile-starter/backend/convex/_generated/api";
 import {
 	combinedFieldErrors,
 	fieldHasError,
 	hasClerkFieldErrors,
-} from "@legacy-building/ui/components/auth-field-error";
-import { Button } from "@legacy-building/ui/components/button";
+} from "@mobile-starter/ui/components/auth-field-error";
+import { Button } from "@mobile-starter/ui/components/button";
 import {
 	Field,
 	FieldError,
 	FieldLabel,
-} from "@legacy-building/ui/components/field";
-import { Input } from "@legacy-building/ui/components/input";
+} from "@mobile-starter/ui/components/field";
+import { Input } from "@mobile-starter/ui/components/input";
 import {
 	firstClerkErrorCode,
 	firstClerkErrorMessage,
-} from "@legacy-building/ui/lib/clerk-errors";
+} from "@mobile-starter/ui/lib/clerk-errors";
 import { useNavigate } from "@tanstack/react-router";
-import { api } from "@legacy-building/backend/convex/_generated/api";
 import { useConvex } from "convex/react";
 import { Loader2, ShieldCheck } from "lucide-react";
 import { useState } from "react";

@@ -1,5 +1,5 @@
 import { useClerk, useSignIn, useSignUp } from "@clerk/react";
-import { Button } from "@legacy-building/ui/components/button";
+import { Button } from "@mobile-starter/ui/components/button";
 import { useState } from "react";
 import { ROUTES } from "@/lib/routes";
 

@@ -1,5 +1,5 @@
 import { ClerkProvider, useAuth } from "@clerk/react";
-import { env } from "@legacy-building/env/web";
+import { env } from "@mobile-starter/env/web";
 import { createRouter, RouterProvider } from "@tanstack/react-router";
 import { ConvexReactClient } from "convex/react";
 import { ConvexProviderWithClerk } from "convex/react-clerk";

@@ -1,5 +1,5 @@
 {
-	"name": "@legacy-building/backend",
+	"name": "@mobile-starter/backend",
 	"version": "1.0.0",
 	"description": "",
 	"license": "ISC",
@@ -16,7 +16,7 @@
 		"zod": "catalog:"
 	},
 	"devDependencies": {
-		"@legacy-building/config": "workspace:*",
+		"@mobile-starter/config": "workspace:*",
 		"@types/node": "^24.3.0",
 		"typescript": "catalog:"
 	}

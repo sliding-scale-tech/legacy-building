@@ -1,17 +1,25 @@
 {
 	"expo": {
-		"scheme": "legacy-building",
+		"scheme": "mobile-starter",
 		"userInterfaceStyle": "automatic",
 		"orientation": "default",
 		"web": {
 			"bundler": "metro"
 		},
-		"name": "legacy-building",
-		"slug": "legacy-building",
+		"name": "mobile-starter",
+		"slug": "mobile-starter",
 		"plugins": ["expo-font"],
 		"experiments": {
 			"typedRoutes": true,
 			"reactCompiler": true
+		},
+		"extra": {
+			"eas": {
+				"projectId": "fca8389e-a30d-491d-81cb-cdd2e43f2094"
+			}
+		},
+		"android": {
+			"package": "com.umar32131.mobilestarter"
 		}
 	}
 }

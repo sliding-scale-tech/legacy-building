@@ -2,7 +2,7 @@ import { useSignUp } from "@clerk/expo";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { type Href, Link, useRouter } from "expo-router";
 import { Controller, useForm } from "react-hook-form";
-import { Pressable, StyleSheet, Text, TextInput, View } from "react-native";
+import { Pressable, Text, TextInput, View } from "react-native";
 import {
 	type EmailVerificationCodeFormValues,
 	emailVerificationCodeSchema,
@@ -65,13 +65,17 @@ export default function VerifyEmailPage() {
 
 	if (!signUp) {
 		return (
-			<View style={styles.container}>
-				<Text style={styles.title}>Loading verification</Text>
-				<Text style={styles.description}>
+			<View className="flex-1 items-center justify-center bg-background px-5">
+				<Text className="font-semibold text-2xl text-foreground tracking-tight">
+					Loading verification
+				</Text>
+				<Text className="mt-2 text-center text-muted-foreground text-sm leading-relaxed">
 					Please wait while we prepare email verification.
 				</Text>
 				<Link href="/sign-up">
-					<Text style={styles.linkText}>Back to sign up</Text>
+					<Text className="mt-4 font-semibold text-primary text-sm">
+						Back to sign up
+					</Text>
 				</Link>
 			</View>
 		);
@@ -80,130 +84,67 @@ export default function VerifyEmailPage() {
 	const fieldErrors = form.formState.errors;
 
 	return (
-		<View style={styles.container}>
-			<Text style={styles.title}>Verify your email</Text>
-			<Text style={styles.description}>
+		<View className="flex-1 items-center justify-center bg-background px-5">
+			<Text className="font-semibold text-2xl text-foreground tracking-tight">
+				Verify your email
+			</Text>
+			<Text className="mt-2 mb-4 text-center text-muted-foreground text-sm leading-relaxed">
 				Enter the one-time code we sent to your email.
 			</Text>
-			<Controller
-				control={form.control}
-				name="code"
-				render={({ field: { onChange, value } }) => (
-					<TextInput
-						style={styles.input}
-						value={value}
-						placeholder="Verification code"
-						placeholderTextColor="#666666"
-						onChangeText={onChange}
-						keyboardType="numeric"
-						textContentType="oneTimeCode"
-					/>
-				)}
-			/>
-			{fieldErrors.code ? (
-				<Text style={styles.error}>{fieldErrors.code.message}</Text>
-			) : null}
-			{errors.fields.code ? (
-				<Text style={styles.error}>{errors.fields.code.message}</Text>
-			) : null}
-			{fieldErrors.root ? (
-				<Text style={styles.error}>{fieldErrors.root.message}</Text>
-			) : null}
-			<Pressable
-				style={({ pressed }) => [
-					styles.button,
-					fetchStatus === "fetching" && styles.buttonDisabled,
-					pressed && styles.buttonPressed,
-				]}
-				onPress={onVerify}
-				disabled={fetchStatus === "fetching"}
-			>
-				<Text style={styles.buttonText}>Verify</Text>
-			</Pressable>
-			<Pressable
-				style={({ pressed }) => [
-					styles.secondaryButton,
-					pressed && styles.buttonPressed,
-				]}
-				onPress={() => void resendCode()}
-			>
-				<Text style={styles.secondaryButtonText}>Send a new code</Text>
-			</Pressable>
-			<Link href="/sign-up">
-				<Text style={styles.linkText}>Back to sign up</Text>
-			</Link>
+			<View className="w-full gap-3">
+				<Controller
+					control={form.control}
+					name="code"
+					render={({ field: { onChange, value } }) => (
+						<TextInput
+							className="h-12 rounded-full border border-border bg-popover px-5 text-base text-foreground"
+							value={value}
+							placeholder="Verification code"
+							placeholderTextColor="#999"
+							onChangeText={onChange}
+							keyboardType="numeric"
+							textContentType="oneTimeCode"
+						/>
+					)}
+				/>
+				{fieldErrors.code ? (
+					<Text className="ml-2 text-destructive text-xs">
+						{fieldErrors.code.message}
+					</Text>
+				) : null}
+				{errors.fields.code ? (
+					<Text className="ml-2 text-destructive text-xs">
+						{errors.fields.code.message}
+					</Text>
+				) : null}
+				{fieldErrors.root ? (
+					<Text className="text-destructive text-xs">
+						{fieldErrors.root.message}
+					</Text>
+				) : null}
+				<Pressable
+					className="mt-2 h-12 items-center justify-center rounded-full bg-primary active:opacity-70 disabled:opacity-50"
+					onPress={onVerify}
+					disabled={fetchStatus === "fetching"}
+				>
+					<Text className="font-semibold text-base text-primary-foreground">
+						Verify
+					</Text>
+				</Pressable>
+				<Pressable
+					className="mt-1 h-10 items-center justify-center active:opacity-70"
+					onPress={() => void resendCode()}
+				>
+					<Text className="font-semibold text-primary text-sm">
+						Send a new code
+					</Text>
+				</Pressable>
+				<Link href="/sign-up" className="self-center">
+					<Text className="mt-1 font-semibold text-primary text-sm">
+						Back to sign up
+					</Text>
+				</Link>
+			</View>
 		</View>
 	);
 }
-
-const styles = StyleSheet.create({
-	container: {
-		flex: 1,
-		alignItems: "center",
-		justifyContent: "center",
-		padding: 20,
-		gap: 12,
-	},
-	title: {
-		fontSize: 24,
-		fontWeight: "700",
-		textAlign: "center",
-	},
-	description: {
-		color: "#555555",
-		fontSize: 14,
-		textAlign: "center",
-		lineHeight: 20,
-	},
-	input: {
-		borderWidth: 1,
-		borderColor: "#ccc",
-		borderRadius: 8,
-		padding: 12,
-		fontSize: 16,
-		backgroundColor: "#fff",
-		alignSelf: "stretch",
-	},
-	button: {
-		alignSelf: "stretch",
-		backgroundColor: "#0a7ea4",
-		paddingVertical: 12,
-		paddingHorizontal: 24,
-		borderRadius: 8,
-		alignItems: "center",
-		marginTop: 8,
-	},
-	buttonPressed: {
-		opacity: 0.7,
-	},
-	buttonDisabled: {
-		opacity: 0.5,
-	},
-	buttonText: {
-		color: "#fff",
-		fontWeight: "600",
-	},
-	secondaryButton: {
-		alignSelf: "stretch",
-		paddingVertical: 12,
-		paddingHorizontal: 24,
-		borderRadius: 8,
-		alignItems: "center",
-		marginTop: 8,
-	},
-	secondaryButtonText: {
-		color: "#0a7ea4",
-		fontWeight: "600",
-	},
-	linkText: {
-		color: "#0a7ea4",
-		fontWeight: "600",
-		marginTop: 8,
-	},
-	error: {
-		alignSelf: "stretch",
-		color: "#d32f2f",
-		fontSize: 12,
-		marginTop: -8,
-	},
-});

@@ -4,28 +4,28 @@ import {
 	combinedFieldErrors,
 	fieldHasError,
 	hasClerkFieldErrors,
-} from "@legacy-building/ui/components/auth-field-error";
-import { Button } from "@legacy-building/ui/components/button";
+} from "@mobile-starter/ui/components/auth-field-error";
+import { Button } from "@mobile-starter/ui/components/button";
 import {
 	Field,
 	FieldError,
 	FieldLabel,
-} from "@legacy-building/ui/components/field";
-import { Input } from "@legacy-building/ui/components/input";
+} from "@mobile-starter/ui/components/field";
+import { Input } from "@mobile-starter/ui/components/input";
 import {
 	firstClerkErrorCode,
 	firstClerkErrorMessage,
-} from "@legacy-building/ui/lib/clerk-errors";
-import { navigateAfterAuth } from "@legacy-building/ui/lib/navigation";
+} from "@mobile-starter/ui/lib/clerk-errors";
+import { navigateAfterAuth } from "@mobile-starter/ui/lib/navigation";
 import { useNavigate } from "@tanstack/react-router";
 import { useState } from "react";
 import { Controller, useForm } from "react-hook-form";
 import {
 	type ForgotPasswordCodeFormValues,
 	type ForgotPasswordEmailFormValues,
-	type NewPasswordFormValues,
 	forgotPasswordCodeSchema,
 	forgotPasswordEmailSchema,
+	type NewPasswordFormValues,
 	newPasswordSchema,
 } from "@/lib/auth/schemas";
 import { ROUTES } from "@/lib/routes";

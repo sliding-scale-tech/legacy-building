@@ -1,11 +1,11 @@
-# legacy-building
+# mobile-starter
 
 This project was created with [Better-T-Stack](https://github.com/AmanVarshney01/create-better-t-stack), a modern TypeScript stack that combines React, TanStack Router, React Native, Expo, Convex, Clerk, TailwindCSS, shadcn/ui, Biome, and Turborepo.
 
 ## Project Structure
 
 ```text
-legacy-building/
+mobile-starter/
 ├── apps/
 │   ├── admin/       # Admin app (React + Vite + TanStack Router)
 │   ├── native/      # Mobile app (React Native + Expo)
@@ -111,7 +111,7 @@ React web apps in this stack share shadcn/ui primitives through `packages/ui`.
 Import shared components like this:
 
 ```tsx
-import { Button } from "@legacy-building/ui/components/button";
+import { Button } from "@mobile-starter/ui/components/button";
 ```
 
 ### shadcn CLI in this monorepo
@@ -121,11 +121,11 @@ Shared UI components live in `packages/ui`, but the shadcn CLI must run from a *
 Run shadcn commands from the **project root** with `-c apps/web`:
 
 ```bash
-# From legacy-building/
+# From mobile-starter/
 pnpm dlx shadcn@latest <command> -c apps/web
 ```
 
-`apps/web/components.json` routes shared installs to `@legacy-building/ui/components` and theme updates to `packages/ui/src/styles/globals.css`.
+`apps/web/components.json` routes shared installs to `@mobile-starter/ui/components` and theme updates to `packages/ui/src/styles/globals.css`.
 
 ### Apply a preset from the root
 
@@ -176,17 +176,17 @@ Force overwrite an existing shared component:
 pnpm dlx shadcn@latest add button --overwrite --yes -c apps/web
 ```
 
-## Rename To mobile-starter
+## Rename For A New App
 
-To rename the project from `legacy-building` to `mobile-starter`, update each naming surface intentionally:
+This repo is a reusable template named `mobile-starter`. To spin up a new app, rename each naming surface intentionally (replace `mobile-starter` / `Mobile Starter` with your app's slug / display name):
 
-- Root package name in `package.json`: `legacy-building` to `mobile-starter`
-- Workspace package scope: `@legacy-building/*` to `@mobile-starter/*`
-- Imports and TypeScript aliases using `@legacy-building/...`
+- Root package name in `package.json`: `mobile-starter` to your slug
+- Workspace package scope: `@mobile-starter/*` to `@your-app/*`
+- Imports and TypeScript aliases using `@mobile-starter/...`
 - Shared package names in `packages/*/package.json`
 - App dependencies in `apps/*/package.json`
-- Expo identity in `apps/native/app.json`: `scheme`, `name`, and `slug`
-- User-facing branding from `Legacy Building` to `Mobile Starter`
+- Expo identity in `apps/native/app.json`: `scheme`, `name`, `slug`, and the android `package`
+- User-facing branding from `Mobile Starter` (see `packages/ui/src/lib/brand.ts`) to your app name
 - shadcn aliases in `components.json` files
 - Root folder name, repository name, CI config, deployment project names, and docs if needed
 

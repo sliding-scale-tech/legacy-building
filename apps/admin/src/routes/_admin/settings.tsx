@@ -1,6 +1,6 @@
-import { PasswordChangeForm } from "@legacy-building/ui/components/password-change-form";
-import { Skeleton } from "@legacy-building/ui/components/skeleton";
-import { useCurrentUser } from "@legacy-building/ui/hooks/use-current-user";
+import { PasswordChangeForm } from "@mobile-starter/ui/components/password-change-form";
+import { Skeleton } from "@mobile-starter/ui/components/skeleton";
+import { useCurrentUser } from "@mobile-starter/ui/hooks/use-current-user";
 import { createFileRoute } from "@tanstack/react-router";
 import { Authenticated, AuthLoading, Unauthenticated } from "convex/react";
 

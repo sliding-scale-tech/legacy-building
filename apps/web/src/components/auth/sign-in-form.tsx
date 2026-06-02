@@ -4,19 +4,19 @@ import {
 	combinedFieldErrors,
 	fieldHasError,
 	hasClerkFieldErrors,
-} from "@legacy-building/ui/components/auth-field-error";
-import { Button } from "@legacy-building/ui/components/button";
+} from "@mobile-starter/ui/components/auth-field-error";
+import { Button } from "@mobile-starter/ui/components/button";
 import {
 	Field,
 	FieldError,
 	FieldLabel,
-} from "@legacy-building/ui/components/field";
-import { Input } from "@legacy-building/ui/components/input";
+} from "@mobile-starter/ui/components/field";
+import { Input } from "@mobile-starter/ui/components/input";
 import {
 	firstClerkErrorCode,
 	firstClerkErrorMessage,
-} from "@legacy-building/ui/lib/clerk-errors";
-import { navigateAfterAuth } from "@legacy-building/ui/lib/navigation";
+} from "@mobile-starter/ui/lib/clerk-errors";
+import { navigateAfterAuth } from "@mobile-starter/ui/lib/navigation";
 import { Link, useNavigate } from "@tanstack/react-router";
 import { useState } from "react";
 import { Controller, useForm } from "react-hook-form";
@@ -360,8 +360,7 @@ export function SignInForm({ signUpHref, forgotOpen, setForgotOpen }: Props) {
 				type="submit"
 				variant="default"
 				disabled={
-					fetchStatus === "fetching" ||
-					credentialsForm.formState.isSubmitting
+					fetchStatus === "fetching" || credentialsForm.formState.isSubmitting
 				}
 				className="mt-1 h-12 w-full rounded-full font-semibold text-base"
 			>

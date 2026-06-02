@@ -1,4 +1,4 @@
-import { APP_NAME } from "@legacy-building/ui/lib/brand";
+import { APP_NAME } from "@mobile-starter/ui/lib/brand";
 import { LayoutDashboard, Settings } from "lucide-react";
 
 import { ROUTES } from "@/lib/routes";

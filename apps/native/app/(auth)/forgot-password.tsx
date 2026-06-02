@@ -2,11 +2,11 @@ import { useSignIn } from "@clerk/expo";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { type Href, Link, useRouter } from "expo-router";
 import { Controller, useForm } from "react-hook-form";
-import { Pressable, StyleSheet, Text, TextInput, View } from "react-native";
+import { Pressable, Text, TextInput, View } from "react-native";
 import {
 	type ForgotPasswordCodeFormValues,
-	forgotPasswordCodeSchema,
 	type ForgotPasswordEmailFormValues,
+	forgotPasswordCodeSchema,
 	forgotPasswordEmailSchema,
 	type NewPasswordFormValues,
 	newPasswordSchema,
@@ -51,8 +51,7 @@ export default function ForgotPasswordPage() {
 			return;
 		}
 
-		const { error: sendError } =
-			await signIn.resetPasswordEmailCode.sendCode();
+		const { error: sendError } = await signIn.resetPasswordEmailCode.sendCode();
 		if (sendError) {
 			emailForm.setError("root", {
 				message: sendError.longMessage ?? "Could not send reset code.",
@@ -100,43 +99,53 @@ export default function ForgotPasswordPage() {
 	if (signIn.status === "needs_new_password") {
 		const fieldErrors = passwordForm.formState.errors;
 		return (
-			<View style={styles.container}>
-				<Text style={styles.title}>Set new password</Text>
-				<Text style={styles.helper}>Choose a new password for your account.</Text>
-				<Controller
-					control={passwordForm.control}
-					name="password"
-					render={({ field: { onChange, value } }) => (
-						<TextInput
-							style={styles.input}
-							value={value}
-							placeholder="New password"
-							placeholderTextColor="#666666"
-							secureTextEntry
-							onChangeText={onChange}
-						/>
-					)}
-				/>
-				{fieldErrors.password ? (
-					<Text style={styles.error}>{fieldErrors.password.message}</Text>
-				) : null}
-				{errors.fields.password ? (
-					<Text style={styles.error}>{errors.fields.password.message}</Text>
-				) : null}
-				{fieldErrors.root ? (
-					<Text style={styles.error}>{fieldErrors.root.message}</Text>
-				) : null}
-				<Pressable
-					style={({ pressed }) => [
-						styles.button,
-						fetchStatus === "fetching" && styles.buttonDisabled,
-						pressed && styles.buttonPressed,
-					]}
-					disabled={fetchStatus === "fetching"}
-					onPress={submitPassword}
-				>
-					<Text style={styles.buttonText}>Update password</Text>
-				</Pressable>
+			<View className="flex-1 bg-background px-5 pt-8">
+				<Text className="mb-2 font-semibold text-2xl text-foreground tracking-tight">
+					Set new password
+				</Text>
+				<Text className="mb-4 text-muted-foreground text-sm leading-relaxed">
+					Choose a new password for your account.
+				</Text>
+				<View className="gap-3">
+					<Controller
+						control={passwordForm.control}
+						name="password"
+						render={({ field: { onChange, value } }) => (
+							<TextInput
+								className="h-12 rounded-full border border-border bg-popover px-5 text-base text-foreground"
+								value={value}
+								placeholder="New password"
+								placeholderTextColor="#999"
+								secureTextEntry
+								onChangeText={onChange}
+							/>
+						)}
+					/>
+					{fieldErrors.password ? (
+						<Text className="ml-2 text-destructive text-xs">
+							{fieldErrors.password.message}
+						</Text>
+					) : null}
+					{errors.fields.password ? (
+						<Text className="ml-2 text-destructive text-xs">
+							{errors.fields.password.message}
+						</Text>
+					) : null}
+					{fieldErrors.root ? (
+						<Text className="text-destructive text-xs">
+							{fieldErrors.root.message}
+						</Text>
+					) : null}
+					<Pressable
+						className="mt-2 h-12 items-center justify-center rounded-full bg-primary active:opacity-70 disabled:opacity-50"
+						disabled={fetchStatus === "fetching"}
+						onPress={submitPassword}
+					>
+						<Text className="font-semibold text-base text-primary-foreground">
+							Update password
+						</Text>
+					</Pressable>
+				</View>
 			</View>
 		);
 	}
@@ -144,52 +153,61 @@ export default function ForgotPasswordPage() {
 	if (signIn.status === "needs_first_factor") {
 		const fieldErrors = codeForm.formState.errors;
 		return (
-			<View style={styles.container}>
-				<Text style={styles.title}>Enter reset code</Text>
-				<Text style={styles.helper}>Check your email for a reset code.</Text>
-				<Controller
-					control={codeForm.control}
-					name="code"
-					render={({ field: { onChange, value } }) => (
-						<TextInput
-							style={styles.input}
-							value={value}
-							placeholder="Reset code"
-							placeholderTextColor="#666666"
-							keyboardType="numeric"
-							onChangeText={onChange}
-						/>
-					)}
-				/>
-				{fieldErrors.code ? (
-					<Text style={styles.error}>{fieldErrors.code.message}</Text>
-				) : null}
-				{errors.fields.code ? (
-					<Text style={styles.error}>{errors.fields.code.message}</Text>
-				) : null}
-				{fieldErrors.root ? (
-					<Text style={styles.error}>{fieldErrors.root.message}</Text>
-				) : null}
-				<Pressable
-					style={({ pressed }) => [
-						styles.button,
-						fetchStatus === "fetching" && styles.buttonDisabled,
-						pressed && styles.buttonPressed,
-					]}
-					disabled={fetchStatus === "fetching"}
-					onPress={verifyCode}
-				>
-					<Text style={styles.buttonText}>Verify code</Text>
-				</Pressable>
-				<Pressable
-					style={({ pressed }) => [
-						styles.secondaryButton,
-						pressed && styles.buttonPressed,
-					]}
-					onPress={() => void signIn.resetPasswordEmailCode.sendCode()}
-				>
-					<Text style={styles.secondaryButtonText}>Send a new code</Text>
-				</Pressable>
+			<View className="flex-1 bg-background px-5 pt-8">
+				<Text className="mb-2 font-semibold text-2xl text-foreground tracking-tight">
+					Enter reset code
+				</Text>
+				<Text className="mb-4 text-muted-foreground text-sm leading-relaxed">
+					Check your email for a reset code.
+				</Text>
+				<View className="gap-3">
+					<Controller
+						control={codeForm.control}
+						name="code"
+						render={({ field: { onChange, value } }) => (
+							<TextInput
+								className="h-12 rounded-full border border-border bg-popover px-5 text-base text-foreground"
+								value={value}
+								placeholder="Reset code"
+								placeholderTextColor="#999"
+								keyboardType="numeric"
+								onChangeText={onChange}
+							/>
+						)}
+					/>
+					{fieldErrors.code ? (
+						<Text className="ml-2 text-destructive text-xs">
+							{fieldErrors.code.message}
+						</Text>
+					) : null}
+					{errors.fields.code ? (
+						<Text className="ml-2 text-destructive text-xs">
+							{errors.fields.code.message}
+						</Text>
+					) : null}
+					{fieldErrors.root ? (
+						<Text className="text-destructive text-xs">
+							{fieldErrors.root.message}
+						</Text>
+					) : null}
+					<Pressable
+						className="mt-2 h-12 items-center justify-center rounded-full bg-primary active:opacity-70 disabled:opacity-50"
+						disabled={fetchStatus === "fetching"}
+						onPress={verifyCode}
+					>
+						<Text className="font-semibold text-base text-primary-foreground">
+							Verify code
+						</Text>
+					</Pressable>
+					<Pressable
+						className="mt-1 h-10 items-center justify-center active:opacity-70"
+						onPress={() => void signIn.resetPasswordEmailCode.sendCode()}
+					>
+						<Text className="font-semibold text-primary text-sm">
+							Send a new code
+						</Text>
+					</Pressable>
+				</View>
 			</View>
 		);
 	}
@@ -197,111 +215,59 @@ export default function ForgotPasswordPage() {
 	const fieldErrors = emailForm.formState.errors;
 
 	return (
-		<View style={styles.container}>
-			<Text style={styles.title}>Reset password</Text>
-			<Text style={styles.helper}>We will send a reset code to your email.</Text>
-			<Controller
-				control={emailForm.control}
-				name="email"
-				render={({ field: { onChange, value } }) => (
-					<TextInput
-						style={styles.input}
-						autoCapitalize="none"
-						value={value}
-						placeholder="Enter email"
-						placeholderTextColor="#666666"
-						keyboardType="email-address"
-						onChangeText={onChange}
-					/>
-				)}
-			/>
-			{fieldErrors.email ? (
-				<Text style={styles.error}>{fieldErrors.email.message}</Text>
-			) : null}
-			{errors.fields.identifier ? (
-				<Text style={styles.error}>{errors.fields.identifier.message}</Text>
-			) : null}
-			{fieldErrors.root ? (
-				<Text style={styles.error}>{fieldErrors.root.message}</Text>
-			) : null}
-			<Pressable
-				style={({ pressed }) => [
-					styles.button,
-					fetchStatus === "fetching" && styles.buttonDisabled,
-					pressed && styles.buttonPressed,
-				]}
-				disabled={fetchStatus === "fetching"}
-				onPress={sendCode}
-			>
-				<Text style={styles.buttonText}>Send reset code</Text>
-			</Pressable>
-			<Link href="/sign-in">
-				<Text style={styles.linkText}>Back to sign in</Text>
-			</Link>
+		<View className="flex-1 bg-background px-5 pt-8">
+			<Text className="mb-2 font-semibold text-2xl text-foreground tracking-tight">
+				Reset password
+			</Text>
+			<Text className="mb-4 text-muted-foreground text-sm leading-relaxed">
+				We will send a reset code to your email.
+			</Text>
+			<View className="gap-3">
+				<Controller
+					control={emailForm.control}
+					name="email"
+					render={({ field: { onChange, value } }) => (
+						<TextInput
+							className="h-12 rounded-full border border-border bg-popover px-5 text-base text-foreground"
+							autoCapitalize="none"
+							value={value}
+							placeholder="Email"
+							placeholderTextColor="#999"
+							keyboardType="email-address"
+							onChangeText={onChange}
+						/>
+					)}
+				/>
+				{fieldErrors.email ? (
+					<Text className="ml-2 text-destructive text-xs">
+						{fieldErrors.email.message}
+					</Text>
+				) : null}
+				{errors.fields.identifier ? (
+					<Text className="ml-2 text-destructive text-xs">
+						{errors.fields.identifier.message}
+					</Text>
+				) : null}
+				{fieldErrors.root ? (
+					<Text className="text-destructive text-xs">
+						{fieldErrors.root.message}
+					</Text>
+				) : null}
+				<Pressable
+					className="mt-2 h-12 items-center justify-center rounded-full bg-primary active:opacity-70 disabled:opacity-50"
+					disabled={fetchStatus === "fetching"}
+					onPress={sendCode}
+				>
+					<Text className="font-semibold text-base text-primary-foreground">
+						Send reset code
+					</Text>
+				</Pressable>
+				<Link href="/sign-in">
+					<Text className="mt-2 font-semibold text-primary text-sm">
+						Back to sign in
+					</Text>
+				</Link>
+			</View>
 		</View>
 	);
 }
-
-const styles = StyleSheet.create({
-	container: {
-		flex: 1,
-		padding: 20,
-		gap: 12,
-	},
-	title: {
-		marginBottom: 8,
-		fontSize: 24,
-		fontWeight: "700",
-	},
-	input: {
-		borderWidth: 1,
-		borderColor: "#ccc",
-		borderRadius: 8,
-		padding: 12,
-		fontSize: 16,
-		backgroundColor: "#fff",
-	},
-	button: {
-		backgroundColor: "#0a7ea4",
-		paddingVertical: 12,
-		paddingHorizontal: 24,
-		borderRadius: 8,
-		alignItems: "center",
-		marginTop: 8,
-	},
-	buttonPressed: {
-		opacity: 0.7,
-	},
-	buttonDisabled: {
-		opacity: 0.5,
-	},
-	buttonText: {
-		color: "#fff",
-		fontWeight: "600",
-	},
-	secondaryButton: {
-		paddingVertical: 12,
-		paddingHorizontal: 24,
-		borderRadius: 8,
-		alignItems: "center",
-		marginTop: 8,
-	},
-	secondaryButtonText: {
-		color: "#0a7ea4",
-		fontWeight: "600",
-	},
-	linkText: {
-		color: "#0a7ea4",
-		fontWeight: "600",
-		marginTop: 12,
-	},
-	error: {
-		color: "#d32f2f",
-		fontSize: 12,
-		marginTop: -8,
-	},
-	helper: {
-		color: "#555555",
-		fontSize: 13,
-	},
-});

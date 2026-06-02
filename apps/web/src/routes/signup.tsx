@@ -1,8 +1,8 @@
 import { useAuth } from "@clerk/react";
-import { buttonVariants } from "@legacy-building/ui/components/button";
-import { APP_NAME } from "@legacy-building/ui/lib/brand";
-import { cn } from "@legacy-building/ui/lib/utils";
-import { createFileRoute, Link } from "@tanstack/react-router";
+import { buttonVariants } from "@mobile-starter/ui/components/button";
+import { APP_NAME } from "@mobile-starter/ui/lib/brand";
+import { cn } from "@mobile-starter/ui/lib/utils";
+import { createFileRoute, Link, Navigate } from "@tanstack/react-router";
 import { ChevronLeft } from "lucide-react";
 import { GoogleOAuthButton } from "@/components/auth/google-oauth-button";
 import { SignUpForm } from "@/components/auth/sign-up-form";
@@ -17,12 +17,16 @@ export const Route = createFileRoute("/signup")({
 });
 
 function SignUpPage() {
-	const { isLoaded } = useAuth();
+	const { isLoaded, isSignedIn } = useAuth();
 	const { type } = Route.useSearch();
 	const unsafeMetadata = signupMetadataFromType(type ?? null);
 	const signInHref = type
 		? `/login?type=${encodeURIComponent(type)}`
 		: ROUTES.login;
+
+	if (isLoaded && isSignedIn) {
+		return <Navigate to={ROUTES.dashboard} replace />;
+	}
 
 	if (!isLoaded) {
 		return (

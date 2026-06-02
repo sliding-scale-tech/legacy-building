@@ -1,6 +1,6 @@
 import { useUser } from "@clerk/expo";
 import { Ionicons } from "@expo/vector-icons";
-import { api } from "@legacy-building/backend/convex/_generated/api";
+import { api } from "@mobile-starter/backend/convex/_generated/api";
 import {
 	Authenticated,
 	AuthLoading,
@@ -25,7 +25,7 @@ export default function Home() {
 		<Container className="px-4 pb-4">
 			<View className="mb-5 py-6">
 				<Text className="font-semibold text-3xl text-foreground tracking-tight">
-					Legacy Building
+					Mobile Starter
 				</Text>
 				<Text className="mt-1 text-muted text-sm">
 					Full-stack TypeScript starter
@@ -84,12 +84,12 @@ export default function Home() {
 			<Unauthenticated>
 				<View className="mt-4 gap-3">
 					<Link href="/(auth)/sign-in" asChild>
-						<Button variant="secondary">
+						<Button variant="primary" className="w-full">
 							<Button.Label>Sign In</Button.Label>
 						</Button>
 					</Link>
 					<Link href="/(auth)/sign-up" asChild>
-						<Button variant="ghost">
+						<Button variant="tertiary">
 							<Button.Label>Sign Up</Button.Label>
 						</Button>
 					</Link>

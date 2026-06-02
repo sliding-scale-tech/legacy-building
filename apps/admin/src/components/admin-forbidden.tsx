@@ -1,6 +1,6 @@
-import { Button, buttonVariants } from "@legacy-building/ui/components/button";
-import { APP_NAME } from "@legacy-building/ui/lib/brand";
-import { cn } from "@legacy-building/ui/lib/utils";
+import { Button, buttonVariants } from "@mobile-starter/ui/components/button";
+import { APP_NAME } from "@mobile-starter/ui/lib/brand";
+import { cn } from "@mobile-starter/ui/lib/utils";
 import { Link } from "@tanstack/react-router";
 import { Home, LogIn, ShieldAlert } from "lucide-react";
 

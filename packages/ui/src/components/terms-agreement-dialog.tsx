@@ -1,33 +1,27 @@
 "use client";
 
-import { api } from "@legacy-building/backend/convex/_generated/api";
-import { Button } from "@legacy-building/ui/components/button";
-import { Checkbox } from "@legacy-building/ui/components/checkbox";
+import { api } from "@mobile-starter/backend/convex/_generated/api";
+import { Button } from "@mobile-starter/ui/components/button";
+import { Checkbox } from "@mobile-starter/ui/components/checkbox";
 import {
 	Dialog,
 	DialogContent,
 	DialogDescription,
 	DialogTitle,
-} from "@legacy-building/ui/components/dialog";
-import { Label } from "@legacy-building/ui/components/label";
-import { useCurrentUser } from "@legacy-building/ui/hooks/use-current-user";
+} from "@mobile-starter/ui/components/dialog";
+import { Label } from "@mobile-starter/ui/components/label";
+import { useCurrentUser } from "@mobile-starter/ui/hooks/use-current-user";
+import {
+	TERMS_CHECKBOX_LABEL,
+	TERMS_DESCRIPTION,
+	TERMS_PARAGRAPHS,
+	TERMS_TITLE,
+} from "@mobile-starter/ui/lib/terms";
 import { useMutation } from "convex/react";
 import { ConvexError } from "convex/values";
 import { FileText, Loader2 } from "lucide-react";
 import { useState } from "react";
 import { toast } from "sonner";
-
-const DUMMY_TERMS = [
-	"Welcome. By using this service you agree to the terms outlined below. These are placeholder terms used during development; replace them before launch.",
-	"1. Acceptable use. You agree not to misuse the service, attempt to access it via methods other than the interface and instructions we provide, or interfere with other users.",
-	"2. Account responsibility. You are responsible for safeguarding your credentials and for any activity that occurs under your account.",
-	"3. Privacy. We collect the minimum data needed to operate the service, including session and device metadata for security purposes.",
-	"4. Content. You retain ownership of any content you upload. You grant us a limited license to host and display that content as needed to run the service.",
-	"5. Termination. We may suspend or terminate access if these terms are violated. You may stop using the service at any time.",
-	"6. Disclaimers. The service is provided as-is, without warranties of any kind. We are not liable for indirect or consequential damages.",
-	"7. Changes. We may update these terms over time and will request renewed agreement when changes are material.",
-	"If you have questions, contact support before continuing. By checking the box and clicking Continue, you confirm you have read and accept these terms.",
-];
 
 export function TermsAgreementDialog() {
 	const { convexUser, isSignedIn, isLoading } = useCurrentUser();
@@ -78,15 +72,15 @@ export function TermsAgreementDialog() {
 				<div className="flex items-center gap-2 border-border border-b bg-muted/40 px-6 py-5">
 					<FileText className="size-4 text-primary" aria-hidden />
 					<div>
-						<DialogTitle className="text-lg">Terms and Conditions</DialogTitle>
+						<DialogTitle className="text-lg">{TERMS_TITLE}</DialogTitle>
 						<DialogDescription className="mt-0.5">
-							Read and accept to continue.
+							{TERMS_DESCRIPTION}
 						</DialogDescription>
 					</div>
 				</div>
 
 				<div className="max-h-[55svh] space-y-3 overflow-y-auto px-6 py-5 text-muted-foreground text-sm leading-relaxed">
-					{DUMMY_TERMS.map((paragraph) => (
+					{TERMS_PARAGRAPHS.map((paragraph) => (
 						<p key={paragraph.slice(0, 24)}>{paragraph}</p>
 					))}
 				</div>
@@ -104,8 +98,7 @@ export function TermsAgreementDialog() {
 							htmlFor="agree-terms"
 							className="cursor-pointer select-none font-normal text-foreground text-sm leading-snug"
 						>
-							I have read and agree to the Terms and Conditions and Privacy
-							Policy.
+							{TERMS_CHECKBOX_LABEL}
 						</Label>
 					</div>
 

@@ -1,8 +1,8 @@
 import { useAuth } from "@clerk/react";
-import { buttonVariants } from "@legacy-building/ui/components/button";
-import { APP_NAME } from "@legacy-building/ui/lib/brand";
-import { cn } from "@legacy-building/ui/lib/utils";
-import { createFileRoute, Link } from "@tanstack/react-router";
+import { buttonVariants } from "@mobile-starter/ui/components/button";
+import { APP_NAME } from "@mobile-starter/ui/lib/brand";
+import { cn } from "@mobile-starter/ui/lib/utils";
+import { createFileRoute, Link, Navigate } from "@tanstack/react-router";
 import { ChevronLeft } from "lucide-react";
 import { useState } from "react";
 import { GoogleOAuthButton } from "@/components/auth/google-oauth-button";
@@ -14,9 +14,13 @@ export const Route = createFileRoute("/login")({
 });
 
 function LoginPage() {
-	const { isLoaded } = useAuth();
+	const { isLoaded, isSignedIn } = useAuth();
 	const [forgotOpen, setForgotOpen] = useState(false);
 	const signUpHref = ROUTES.signup;
+
+	if (isLoaded && isSignedIn) {
+		return <Navigate to={ROUTES.dashboard} replace />;
+	}
 
 	if (!isLoaded) {
 		return (
@@ -88,6 +92,7 @@ function LoginPage() {
 										Don&apos;t have an account?{" "}
 										<Link
 											to={signUpHref}
+											search={{ type: undefined }}
 											className="font-semibold text-foreground underline underline-offset-4 hover:text-foreground/80"
 										>
 											Sign up

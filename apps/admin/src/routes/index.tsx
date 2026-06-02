@@ -1,4 +1,4 @@
-import { useCurrentUser } from "@legacy-building/ui/hooks/use-current-user";
+import { useCurrentUser } from "@mobile-starter/ui/hooks/use-current-user";
 import { createFileRoute, Navigate } from "@tanstack/react-router";
 
 import Loader from "@/components/loader";

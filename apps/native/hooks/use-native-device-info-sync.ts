@@ -1,5 +1,5 @@
 import { useUser } from "@clerk/expo";
-import { api } from "@legacy-building/backend/convex/_generated/api";
+import { api } from "@mobile-starter/backend/convex/_generated/api";
 import { useMutation } from "convex/react";
 import { useEffect, useRef } from "react";
 import { Platform } from "react-native";

@@ -3,19 +3,19 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import {
 	combinedFieldErrors,
 	fieldHasError,
-} from "@legacy-building/ui/components/auth-field-error";
-import { Button } from "@legacy-building/ui/components/button";
+} from "@mobile-starter/ui/components/auth-field-error";
+import { Button } from "@mobile-starter/ui/components/button";
 import {
 	Field,
 	FieldError,
 	FieldLabel,
-} from "@legacy-building/ui/components/field";
-import { Input } from "@legacy-building/ui/components/input";
-import { firstClerkErrorMessage } from "@legacy-building/ui/lib/clerk-errors";
+} from "@mobile-starter/ui/components/field";
+import { Input } from "@mobile-starter/ui/components/input";
+import { firstClerkErrorMessage } from "@mobile-starter/ui/lib/clerk-errors";
 import {
 	navigateAfterAuth,
 	navigateTo,
-} from "@legacy-building/ui/lib/navigation";
+} from "@mobile-starter/ui/lib/navigation";
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { Controller, useForm } from "react-hook-form";
 import {
@@ -60,7 +60,8 @@ function VerifyEmailPage() {
 			if (finalizeError) {
 				form.setError("root", {
 					message:
-						firstClerkErrorMessage(finalizeError) ?? "Could not finish sign-up.",
+						firstClerkErrorMessage(finalizeError) ??
+						"Could not finish sign-up.",
 				});
 			}
 			return;
@@ -118,7 +119,11 @@ function VerifyEmailPage() {
 					Enter the one-time code we sent to your email.
 				</p>
 
-				<form onSubmit={onVerify} className="mt-8 flex flex-col gap-4" noValidate>
+				<form
+					onSubmit={onVerify}
+					className="mt-8 flex flex-col gap-4"
+					noValidate
+				>
 					<Controller
 						name="code"
 						control={form.control}

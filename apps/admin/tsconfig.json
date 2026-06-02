@@ -11,7 +11,7 @@
 		"rootDirs": ["."],
 		"paths": {
 			"@/*": ["./src/*"],
-			"@legacy-building/ui/*": ["../../packages/ui/src/*"]
+			"@mobile-starter/ui/*": ["../../packages/ui/src/*"]
 		}
 	}
 }

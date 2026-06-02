@@ -1,8 +1,13 @@
+import { SignOutButton, useAuth } from "@clerk/react";
+import { Button, buttonVariants } from "@mobile-starter/ui/components/button";
+import { cn } from "@mobile-starter/ui/lib/utils";
 import { Link } from "@tanstack/react-router";
 
+import { ROUTES } from "@/lib/routes";
 import { ModeToggle } from "./mode-toggle";
 
 export default function Header() {
+	const { isSignedIn } = useAuth();
 	const links = [
 		{ to: "/", label: "Home" },
 		{ to: "/dashboard", label: "Dashboard" },
@@ -21,6 +26,31 @@ export default function Header() {
 					})}
 				</nav>
 				<div className="flex items-center gap-2">
+					{isSignedIn ? (
+						<SignOutButton>
+							<Button variant="outline" size="sm">
+								Sign out
+							</Button>
+						</SignOutButton>
+					) : (
+						<>
+							<Link
+								to={ROUTES.login}
+								className={cn(
+									buttonVariants({ variant: "outline", size: "sm" }),
+								)}
+							>
+								Sign in
+							</Link>
+							<Link
+								to={ROUTES.signup}
+								search={{ type: undefined }}
+								className={cn(buttonVariants({ size: "sm" }))}
+							>
+								Sign up
+							</Link>
+						</>
+					)}
 					<ModeToggle />
 				</div>
 			</div>

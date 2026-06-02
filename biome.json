@@ -73,5 +73,17 @@
 		"parser": {
 			"tailwindDirectives": true
 		}
-	}
+	},
+	"overrides": [
+		{
+			"includes": ["apps/native/global.css"],
+			"linter": {
+				"rules": {
+					"suspicious": {
+						"noDuplicateCustomProperties": "off"
+					}
+				}
+			}
+		}
+	]
 }

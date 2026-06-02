@@ -2,7 +2,8 @@ import { useAuth, useSignUp } from "@clerk/expo";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { type Href, Link, useRouter } from "expo-router";
 import { Controller, useForm } from "react-hook-form";
-import { Pressable, StyleSheet, Text, TextInput, View } from "react-native";
+import { Pressable, Text, TextInput, View } from "react-native";
+import { GoogleOAuthButton } from "@/components/google-oauth-button";
 import {
 	type EmailVerificationCodeFormValues,
 	emailVerificationCodeSchema,
@@ -81,51 +82,61 @@ export default function Page() {
 	) {
 		const verifyErrors = verifyForm.formState.errors;
 		return (
-			<View style={styles.container}>
-				<Text style={styles.title}>Verify your account</Text>
-				<Controller
-					control={verifyForm.control}
-					name="code"
-					render={({ field: { onChange, value } }) => (
-						<TextInput
-							style={styles.input}
-							value={value}
-							placeholder="Enter your verification code"
-							placeholderTextColor="#666666"
-							onChangeText={onChange}
-							keyboardType="numeric"
-						/>
-					)}
-				/>
-				{verifyErrors.code ? (
-					<Text style={styles.error}>{verifyErrors.code.message}</Text>
-				) : null}
-				{errors.fields.code ? (
-					<Text style={styles.error}>{errors.fields.code.message}</Text>
-				) : null}
-				{verifyErrors.root ? (
-					<Text style={styles.error}>{verifyErrors.root.message}</Text>
-				) : null}
-				<Pressable
-					style={({ pressed }) => [
-						styles.button,
-						fetchStatus === "fetching" && styles.buttonDisabled,
-						pressed && styles.buttonPressed,
-					]}
-					onPress={onVerify}
-					disabled={fetchStatus === "fetching"}
-				>
-					<Text style={styles.buttonText}>Verify</Text>
-				</Pressable>
-				<Pressable
-					style={({ pressed }) => [
-						styles.secondaryButton,
-						pressed && styles.buttonPressed,
-					]}
-					onPress={() => signUp.verifications.sendEmailCode()}
-				>
-					<Text style={styles.secondaryButtonText}>I need a new code</Text>
-				</Pressable>
+			<View className="flex-1 bg-background px-5 pt-8">
+				<Text className="mb-2 font-semibold text-2xl text-foreground tracking-tight">
+					Verify your account
+				</Text>
+				<Text className="mb-4 text-muted-foreground text-sm leading-relaxed">
+					Enter the code we sent to your email.
+				</Text>
+				<View className="gap-3">
+					<Controller
+						control={verifyForm.control}
+						name="code"
+						render={({ field: { onChange, value } }) => (
+							<TextInput
+								className="h-12 rounded-full border border-border bg-popover px-5 text-base text-foreground"
+								value={value}
+								placeholder="Enter your verification code"
+								placeholderTextColor="#999"
+								onChangeText={onChange}
+								keyboardType="numeric"
+							/>
+						)}
+					/>
+					{verifyErrors.code ? (
+						<Text className="ml-2 text-destructive text-xs">
+							{verifyErrors.code.message}
+						</Text>
+					) : null}
+					{errors.fields.code ? (
+						<Text className="ml-2 text-destructive text-xs">
+							{errors.fields.code.message}
+						</Text>
+					) : null}
+					{verifyErrors.root ? (
+						<Text className="ml-2 text-destructive text-xs">
+							{verifyErrors.root.message}
+						</Text>
+					) : null}
+					<Pressable
+						className="mt-2 h-12 items-center justify-center rounded-full bg-primary active:opacity-70 disabled:opacity-50"
+						onPress={onVerify}
+						disabled={fetchStatus === "fetching"}
+					>
+						<Text className="font-semibold text-base text-primary-foreground">
+							Verify
+						</Text>
+					</Pressable>
+					<Pressable
+						className="mt-1 h-10 items-center justify-center active:opacity-70"
+						onPress={() => signUp.verifications.sendEmailCode()}
+					>
+						<Text className="font-semibold text-primary text-sm">
+							I need a new code
+						</Text>
+					</Pressable>
+				</View>
 			</View>
 		);
 	}
@@ -133,141 +144,101 @@ export default function Page() {
 	const fieldErrors = credentialsForm.formState.errors;
 
 	return (
-		<View style={styles.container}>
-			<Text style={styles.title}>Sign up</Text>
-			<Text style={styles.label}>Email address</Text>
-			<Controller
-				control={credentialsForm.control}
-				name="email"
-				render={({ field: { onChange, value } }) => (
-					<TextInput
-						style={styles.input}
-						autoCapitalize="none"
-						value={value}
-						placeholder="Enter email"
-						placeholderTextColor="#666666"
-						onChangeText={onChange}
-						keyboardType="email-address"
+		<View className="flex-1 bg-background px-5 pt-8">
+			<Text className="mb-6 font-semibold text-2xl text-foreground tracking-tight">
+				Sign up
+			</Text>
+			<View className="gap-4">
+				<View className="gap-1">
+					<Controller
+						control={credentialsForm.control}
+						name="email"
+						render={({ field: { onChange, value } }) => (
+							<TextInput
+								className="h-12 rounded-full border border-border bg-popover px-5 text-base text-foreground"
+								autoCapitalize="none"
+								value={value}
+								placeholder="Email"
+								placeholderTextColor="#999"
+								onChangeText={onChange}
+								keyboardType="email-address"
+							/>
+						)}
 					/>
-				)}
-			/>
-			{fieldErrors.email ? (
-				<Text style={styles.error}>{fieldErrors.email.message}</Text>
-			) : null}
-			{errors.fields.emailAddress ? (
-				<Text style={styles.error}>{errors.fields.emailAddress.message}</Text>
-			) : null}
-			<Text style={styles.label}>Password</Text>
-			<Controller
-				control={credentialsForm.control}
-				name="password"
-				render={({ field: { onChange, value } }) => (
-					<TextInput
-						style={styles.input}
-						value={value}
-						placeholder="Enter password"
-						placeholderTextColor="#666666"
-						secureTextEntry
-						onChangeText={onChange}
+					{fieldErrors.email ? (
+						<Text className="ml-2 text-destructive text-xs">
+							{fieldErrors.email.message}
+						</Text>
+					) : null}
+					{errors.fields.emailAddress ? (
+						<Text className="ml-2 text-destructive text-xs">
+							{errors.fields.emailAddress.message}
+						</Text>
+					) : null}
+				</View>
+				<View className="gap-1">
+					<Controller
+						control={credentialsForm.control}
+						name="password"
+						render={({ field: { onChange, value } }) => (
+							<TextInput
+								className="h-12 rounded-full border border-border bg-popover px-5 text-base text-foreground"
+								value={value}
+								placeholder="Password"
+								placeholderTextColor="#999"
+								secureTextEntry
+								onChangeText={onChange}
+							/>
+						)}
 					/>
-				)}
-			/>
-			{fieldErrors.password ? (
-				<Text style={styles.error}>{fieldErrors.password.message}</Text>
-			) : null}
-			{errors.fields.password ? (
-				<Text style={styles.error}>{errors.fields.password.message}</Text>
-			) : null}
-			{fieldErrors.root ? (
-				<Text style={styles.error}>{fieldErrors.root.message}</Text>
-			) : null}
-			<Pressable
-				style={({ pressed }) => [
-					styles.button,
-					fetchStatus === "fetching" && styles.buttonDisabled,
-					pressed && styles.buttonPressed,
-				]}
-				onPress={onSubmit}
-				disabled={fetchStatus === "fetching"}
-			>
-				<Text style={styles.buttonText}>Sign up</Text>
-			</Pressable>
-			<View style={styles.linkContainer}>
-				<Text>Already have an account? </Text>
-				<Link href="/sign-in">
-					<Text style={styles.linkText}>Sign in</Text>
-				</Link>
+					{fieldErrors.password ? (
+						<Text className="ml-2 text-destructive text-xs">
+							{fieldErrors.password.message}
+						</Text>
+					) : null}
+					{errors.fields.password ? (
+						<Text className="ml-2 text-destructive text-xs">
+							{errors.fields.password.message}
+						</Text>
+					) : null}
+				</View>
+				{fieldErrors.root ? (
+					<Text className="text-destructive text-xs">
+						{fieldErrors.root.message}
+					</Text>
+				) : null}
+				<Pressable
+					className="mt-1 h-12 items-center justify-center rounded-full bg-primary active:opacity-70 disabled:opacity-50"
+					onPress={onSubmit}
+					disabled={fetchStatus === "fetching"}
+				>
+					<Text className="font-semibold text-base text-primary-foreground">
+						Sign up
+					</Text>
+				</Pressable>
+				<View className="relative py-1">
+					<View className="absolute inset-0 items-center justify-center">
+						<View className="h-px w-full bg-border" />
+					</View>
+					<View className="items-center">
+						<Text className="bg-background px-3 font-medium text-muted-foreground text-xs uppercase tracking-widest">
+							Or
+						</Text>
+					</View>
+				</View>
+				<GoogleOAuthButton />
+				<View className="mt-2 flex-row items-center justify-center gap-1">
+					<Text className="text-muted-foreground text-sm">
+						Already have an account?
+					</Text>
+					<Link href="/sign-in">
+						<Text className="font-semibold text-foreground text-sm underline">
+							Sign in
+						</Text>
+					</Link>
+				</View>
+				<View nativeID="clerk-captcha" />
 			</View>
-			<View nativeID="clerk-captcha" />
 		</View>
 	);
 }
-
-const styles = StyleSheet.create({
-	container: {
-		flex: 1,
-		padding: 20,
-		gap: 12,
-	},
-	title: {
-		marginBottom: 8,
-		fontSize: 24,
-		fontWeight: "700",
-	},
-	label: {
-		fontWeight: "600",
-		fontSize: 14,
-	},
-	input: {
-		borderWidth: 1,
-		borderColor: "#ccc",
-		borderRadius: 8,
-		padding: 12,
-		fontSize: 16,
-		backgroundColor: "#fff",
-	},
-	button: {
-		backgroundColor: "#0a7ea4",
-		paddingVertical: 12,
-		paddingHorizontal: 24,
-		borderRadius: 8,
-		alignItems: "center",
-		marginTop: 8,
-	},
-	buttonPressed: {
-		opacity: 0.7,
-	},
-	buttonDisabled: {
-		opacity: 0.5,
-	},
-	buttonText: {
-		color: "#fff",
-		fontWeight: "600",
-	},
-	secondaryButton: {
-		paddingVertical: 12,
-		paddingHorizontal: 24,
-		borderRadius: 8,
-		alignItems: "center",
-		marginTop: 8,
-	},
-	secondaryButtonText: {
-		color: "#0a7ea4",
-		fontWeight: "600",
-	},
-	linkContainer: {
-		flexDirection: "row",
-		gap: 4,
-		marginTop: 12,
-		alignItems: "center",
-	},
-	linkText: {
-		color: "#0a7ea4",
-		fontWeight: "600",
-	},
-	error: {
-		color: "#d32f2f",
-		fontSize: 12,
-		marginTop: -8,
-	},
-});
