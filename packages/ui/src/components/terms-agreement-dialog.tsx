@@ -11,12 +11,13 @@ import {
 } from "@legacy-building/ui/components/dialog";
 import { Label } from "@legacy-building/ui/components/label";
 import { useCurrentUser } from "@legacy-building/ui/hooks/use-current-user";
+import { legalRoutes } from "@legacy-building/ui/lib/brand-journal";
 import {
-	TERMS_CHECKBOX_LABEL,
 	TERMS_DESCRIPTION,
 	TERMS_PARAGRAPHS,
 	TERMS_TITLE,
 } from "@legacy-building/ui/lib/terms";
+import { cn } from "@legacy-building/ui/lib/utils";
 import { useMutation } from "convex/react";
 import { ConvexError } from "convex/values";
 import { FileText, Loader2 } from "lucide-react";
@@ -67,38 +68,65 @@ export function TermsAgreementDialog() {
 		>
 			<DialogContent
 				showCloseButton={false}
-				className="w-[calc(100vw-2rem)] max-w-2xl overflow-hidden p-0"
+				overlayClassName="z-[1990] bg-[rgba(82,82,82,0.6)] supports-backdrop-filter:backdrop-blur-[2px]"
+				className={cn(
+					"z-[2000] w-[calc(100vw-2rem)] max-w-2xl gap-0 overflow-hidden rounded-2xl border border-[#e6e6e6] bg-white p-0 text-[#1a1a1a] shadow-[0_8px_32px_rgba(0,0,0,0.12)] ring-0 sm:max-w-2xl",
+				)}
 			>
-				<div className="flex items-center gap-2 border-border border-b bg-muted/40 px-6 py-5">
-					<FileText className="size-4 text-primary" aria-hidden />
+				<div className="flex items-center gap-3 border-[#e6e6e6] border-b bg-[#ebf6f6] px-6 py-5">
+					<div className="flex size-9 shrink-0 items-center justify-center rounded-full bg-[#008080]/10">
+						<FileText className="size-4 text-[#008080]" aria-hidden />
+					</div>
 					<div>
-						<DialogTitle className="text-lg">{TERMS_TITLE}</DialogTitle>
-						<DialogDescription className="mt-0.5">
+						<DialogTitle className="font-semibold text-[#1a1a1a] text-lg">
+							{TERMS_TITLE}
+						</DialogTitle>
+						<DialogDescription className="mt-0.5 text-[#525252] text-sm">
 							{TERMS_DESCRIPTION}
 						</DialogDescription>
 					</div>
 				</div>
 
-				<div className="max-h-[55svh] space-y-3 overflow-y-auto px-6 py-5 text-muted-foreground text-sm leading-relaxed">
+				<div className="max-h-[min(55svh,420px)] space-y-3 overflow-y-auto px-6 py-5 text-[#525252] text-sm leading-relaxed">
 					{TERMS_PARAGRAPHS.map((paragraph) => (
 						<p key={paragraph.slice(0, 24)}>{paragraph}</p>
 					))}
 				</div>
 
-				<div className="space-y-4 border-border border-t bg-muted/30 px-6 py-4">
+				<div className="space-y-4 border-[#e6e6e6] border-t bg-[#f7f7f7] px-6 py-4">
 					<div className="flex items-start gap-2.5">
 						<Checkbox
 							id="agree-terms"
 							checked={agreed}
 							onCheckedChange={(checked) => setAgreed(checked === true)}
 							disabled={submitting}
-							className="mt-0.5"
+							className="mt-0.5 border-[#c7c7c7] data-checked:border-[#008080] data-checked:bg-[#008080]"
 						/>
 						<Label
 							htmlFor="agree-terms"
-							className="cursor-pointer select-none font-normal text-foreground text-sm leading-snug"
+							className="cursor-pointer select-none font-normal text-[#1a1a1a] text-sm leading-snug"
 						>
-							{TERMS_CHECKBOX_LABEL}
+							I have read and agree to the{" "}
+							<a
+								href={legalRoutes.terms}
+								target="_blank"
+								rel="noopener noreferrer"
+								className="font-medium text-[#008080] underline underline-offset-2"
+								onClick={(e) => e.stopPropagation()}
+							>
+								Terms and Conditions
+							</a>{" "}
+							and{" "}
+							<a
+								href={legalRoutes.privacy}
+								target="_blank"
+								rel="noopener noreferrer"
+								className="font-medium text-[#008080] underline underline-offset-2"
+								onClick={(e) => e.stopPropagation()}
+							>
+								Privacy Policy
+							</a>
+							.
 						</Label>
 					</div>
 
@@ -106,7 +134,7 @@ export function TermsAgreementDialog() {
 						type="button"
 						onClick={handleAgree}
 						disabled={!agreed || submitting}
-						className="w-full transition-transform active:scale-[0.98]"
+						className="h-11 w-full rounded-xl bg-[#008080] font-medium text-base text-white hover:bg-[#006b6b] disabled:opacity-50"
 					>
 						{submitting ? (
 							<>

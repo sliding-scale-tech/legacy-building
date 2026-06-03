@@ -1,0 +1,40 @@
+import { buttonVariants } from "@legacy-building/ui/components/button";
+import { cn } from "@legacy-building/ui/lib/utils";
+import { createFileRoute, Link, Outlet } from "@tanstack/react-router";
+import { Authenticated, AuthLoading, Unauthenticated } from "convex/react";
+
+import { DashboardHeader } from "@/components/journal/dashboard/DashboardHeader";
+import { ROUTES } from "@/lib/routes";
+
+export const Route = createFileRoute("/dashboard")({
+	component: DashboardLayout,
+});
+
+function DashboardLayout() {
+	return (
+		<>
+			<Authenticated>
+				<div className="relative flex min-h-svh w-full flex-col bg-white">
+					<DashboardHeader />
+					<Outlet />
+				</div>
+			</Authenticated>
+			<Unauthenticated>
+				<div className="flex min-h-[50svh] flex-col items-center justify-center gap-4 px-4">
+					<h1 className="font-semibold text-2xl">Sign in required</h1>
+					<p className="text-center text-muted-foreground text-sm">
+						You need to sign in to view your dashboard.
+					</p>
+					<Link to={ROUTES.login} className={cn(buttonVariants())}>
+						Sign in
+					</Link>
+				</div>
+			</Unauthenticated>
+			<AuthLoading>
+				<div className="container mx-auto max-w-3xl px-4 py-8">
+					<div className="h-8 w-48 animate-pulse rounded bg-muted" />
+				</div>
+			</AuthLoading>
+		</>
+	);
+}

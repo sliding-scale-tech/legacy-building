@@ -10,6 +10,7 @@ import {
 } from "@legacy-building/ui/components/field";
 import { Input } from "@legacy-building/ui/components/input";
 import { firstClerkErrorMessage } from "@legacy-building/ui/lib/clerk-errors";
+import { cn } from "@legacy-building/ui/lib/utils";
 import { Loader2 } from "lucide-react";
 import { Controller, useForm } from "react-hook-form";
 import { toast } from "sonner";
@@ -28,7 +29,24 @@ const passwordSchema = z
 
 type PasswordFormValues = z.infer<typeof passwordSchema>;
 
-export function PasswordChangeForm() {
+const lightInputClassName =
+	"rounded-xl border border-[#e6e6e6] bg-white text-[#1a1a1a] shadow-none placeholder:text-[#a3a3a3] focus-visible:border-[#008080] focus-visible:ring-[#008080]/25";
+
+const lightLabelClassName = "text-[#1a1a1a]";
+
+type PasswordChangeFormProps = {
+	/** Use on white dashboard cards where global dark theme hides inputs */
+	appearance?: "default" | "light";
+	/** Account page: tighter layout + site button radius */
+	compact?: boolean;
+	onSuccess?: () => void;
+};
+
+export function PasswordChangeForm({
+	appearance = "default",
+	compact = false,
+	onSuccess,
+}: PasswordChangeFormProps) {
 	const { user, isLoaded } = useUser();
 
 	const form = useForm<PasswordFormValues>({
@@ -43,12 +61,21 @@ export function PasswordChangeForm() {
 	if (!isLoaded) return null;
 
 	if (!user?.passwordEnabled) {
-		return (
-			<p className="text-muted-foreground text-sm">
-				You signed in with a social provider, so password changes happen there.
-			</p>
-		);
+		return null;
 	}
+
+	const inputClassName = cn(
+		appearance === "light" ? lightInputClassName : undefined,
+		compact && "h-11 rounded-[12px] border-[#c7c7c7]",
+	);
+	const labelClassName =
+		appearance === "light" ? lightLabelClassName : undefined;
+	const submitClassName = cn(
+		appearance === "light"
+			? "bg-[#008080] text-white hover:bg-[#006b6b]"
+			: undefined,
+		compact && "h-11 rounded-[12px] px-6 font-medium text-sm",
+	);
 
 	const onSubmit = form.handleSubmit(
 		async ({ currentPassword, newPassword }) => {
@@ -60,6 +87,7 @@ export function PasswordChangeForm() {
 				});
 				form.reset();
 				toast.success("Password updated.");
+				onSuccess?.();
 			} catch (err) {
 				const msg = firstClerkErrorMessage(err) ?? "Could not update password.";
 				form.setError("root", { message: msg });
@@ -82,7 +110,9 @@ export function PasswordChangeForm() {
 				control={form.control}
 				render={({ field, fieldState }) => (
 					<Field data-invalid={fieldState.invalid}>
-						<FieldLabel htmlFor={field.name}>Current password</FieldLabel>
+						<FieldLabel htmlFor={field.name} className={labelClassName}>
+							Current password
+						</FieldLabel>
 						<Input
 							{...field}
 							id={field.name}
@@ -90,6 +120,7 @@ export function PasswordChangeForm() {
 							autoComplete="current-password"
 							disabled={isSubmitting}
 							aria-invalid={fieldState.invalid}
+							className={inputClassName}
 						/>
 						{fieldState.invalid ? (
 							<FieldError errors={[fieldState.error]} />
@@ -98,13 +129,15 @@ export function PasswordChangeForm() {
 				)}
 			/>
 
-			<div className="grid gap-4 sm:grid-cols-2">
+			<div className={cn("grid gap-4", !compact && "sm:grid-cols-2")}>
 				<Controller
 					name="newPassword"
 					control={form.control}
 					render={({ field, fieldState }) => (
 						<Field data-invalid={fieldState.invalid}>
-							<FieldLabel htmlFor={field.name}>New password</FieldLabel>
+							<FieldLabel htmlFor={field.name} className={labelClassName}>
+								New password
+							</FieldLabel>
 							<Input
 								{...field}
 								id={field.name}
@@ -112,6 +145,7 @@ export function PasswordChangeForm() {
 								autoComplete="new-password"
 								disabled={isSubmitting}
 								aria-invalid={fieldState.invalid}
+								className={inputClassName}
 							/>
 							{fieldState.invalid ? (
 								<FieldError errors={[fieldState.error]} />
@@ -124,7 +158,9 @@ export function PasswordChangeForm() {
 					control={form.control}
 					render={({ field, fieldState }) => (
 						<Field data-invalid={fieldState.invalid}>
-							<FieldLabel htmlFor={field.name}>Confirm new password</FieldLabel>
+							<FieldLabel htmlFor={field.name} className={labelClassName}>
+								Confirm new password
+							</FieldLabel>
 							<Input
 								{...field}
 								id={field.name}
@@ -132,6 +168,7 @@ export function PasswordChangeForm() {
 								autoComplete="new-password"
 								disabled={isSubmitting}
 								aria-invalid={fieldState.invalid}
+								className={inputClassName}
 							/>
 							{fieldState.invalid ? (
 								<FieldError errors={[fieldState.error]} />
@@ -148,7 +185,10 @@ export function PasswordChangeForm() {
 			<Button
 				type="submit"
 				disabled={isSubmitting}
-				className="self-start transition-transform active:scale-[0.98]"
+				className={cn(
+					"self-start transition-transform active:scale-[0.98]",
+					submitClassName,
+				)}
 			>
 				{isSubmitting ? (
 					<>

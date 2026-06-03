@@ -1,11 +1,11 @@
 import { verifyWebhook } from "@clerk/backend/webhooks";
-import { registerRoutes } from "@convex-dev/stripe";
 import { httpRouter } from "convex/server";
-import { components, internal } from "./_generated/api";
+import { internal } from "./_generated/api";
 import { httpAction } from "./_generated/server";
 import type { ClerkUser } from "./helpers";
 import {
 	getEmailAndName,
+	getInitialNameFromClerk,
 	roleFromClerkMetadata,
 	storeClerkProfilePicture,
 } from "./helpers";
@@ -37,11 +37,13 @@ const handleClerkWebhook = httpAction(async (ctx, request) => {
 			case "user.created":
 			case "user.updated": {
 				const clerkUser = event.data as ClerkUser;
-				const { email, name } = getEmailAndName(clerkUser);
+				const { email } = getEmailAndName(clerkUser);
 				if (!email) {
 					console.warn("Clerk user webhook missing email:", clerkUser.id);
 					break;
 				}
+
+				const name = getInitialNameFromClerk(clerkUser);
 
 				const profilePictureId = await storeClerkProfilePicture(
 					ctx,
@@ -85,10 +87,6 @@ http.route({
 	path: "/clerk/register",
 	method: "POST",
 	handler: handleClerkWebhook,
-});
-
-registerRoutes(http, components.stripe, {
-	webhookPath: "/stripe/webhook",
 });
 
 export default http;

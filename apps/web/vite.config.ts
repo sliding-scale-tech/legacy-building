@@ -9,6 +9,18 @@ export default defineConfig({
 	},
 	resolve: {
 		tsconfigPaths: true,
+		dedupe: ["react", "react-dom"],
+	},
+	optimizeDeps: {
+		include: [
+			"react",
+			"react-dom",
+			"react/jsx-runtime",
+			"@react-pdf/renderer",
+			"@dnd-kit/core",
+			"@dnd-kit/sortable",
+			"@dnd-kit/utilities",
+		],
 	},
 	plugins: [
 		tailwindcss(),
