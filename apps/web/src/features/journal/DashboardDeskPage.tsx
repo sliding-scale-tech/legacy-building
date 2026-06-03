@@ -1,0 +1,119 @@
+import { useUser } from "@clerk/react";
+import { api } from "@legacy-building/backend/convex/_generated/api";
+import type { Id } from "@legacy-building/backend/convex/_generated/dataModel";
+import { useCurrentUser } from "@legacy-building/ui/hooks/use-current-user";
+import { assets } from "@legacy-building/ui/lib/brand-journal";
+import { useQuery } from "convex/react";
+import { useCallback, useState } from "react";
+import { ProfileAvatarEditor } from "@/components/account/profile-avatar-editor";
+import { DashboardFooter } from "@/components/journal/dashboard/DashboardFooter";
+import { DashboardHeader } from "@/components/journal/dashboard/DashboardHeader";
+import { DeskHeroCard } from "@/components/journal/dashboard/DeskHeroCard";
+import { DeskRecentJournal } from "@/components/journal/dashboard/DeskRecentJournal";
+import { AddJournalEntryPanel } from "@/components/journal/library/AddJournalEntryPanel";
+import { JournalDetailSheet } from "@/components/journal/library/JournalDetailSheet";
+import { DEFAULT_STORY_TAB, type StoryTab } from "@/lib/journal/journalTypes";
+
+export function DashboardDeskPage() {
+	const { user } = useUser();
+	const { convexUser } = useCurrentUser();
+
+	const [storyTab, setStoryTab] = useState<StoryTab>(DEFAULT_STORY_TAB);
+	const [selectedJournalId, setSelectedJournalId] =
+		useState<Id<"journals"> | null>(null);
+	const [entryPanelJournalId, setEntryPanelJournalId] =
+		useState<Id<"journals"> | null>(null);
+	const [entryPanelOpen, setEntryPanelOpen] = useState(false);
+
+	const journals = useQuery(api.journal.queries.listByType, { type: storyTab });
+
+	const userName =
+		convexUser?.name ??
+		user?.fullName ??
+		user?.firstName ??
+		user?.primaryEmailAddress?.emailAddress ??
+		"there";
+
+	const avatarUrl =
+		convexUser?.profilePictureUrl ?? user?.imageUrl ?? assets.defaultAvatar;
+	const hasCustomPhoto = Boolean(convexUser?.profilePictureId);
+
+	const handleOpenJournal = useCallback(
+		(journalId: Id<"journals">, tab: StoryTab) => {
+			setStoryTab(tab);
+			setEntryPanelOpen(false);
+			setEntryPanelJournalId(null);
+			setSelectedJournalId(journalId);
+		},
+		[],
+	);
+
+	const handleAddEntry = useCallback(
+		(journalId: Id<"journals">, tab: StoryTab) => {
+			setStoryTab(tab);
+			setSelectedJournalId(null);
+			setEntryPanelJournalId(journalId);
+			setEntryPanelOpen(true);
+		},
+		[],
+	);
+
+	const handleEntryPanelOpenChange = useCallback((next: boolean) => {
+		setEntryPanelOpen(next);
+		if (!next) {
+			window.setTimeout(() => setEntryPanelJournalId(null), 300);
+		}
+	}, []);
+
+	return (
+		<div className="relative flex min-h-svh w-full flex-col bg-white">
+			<div className="mt-20 flex flex-1 flex-col px-4 py-4 sm:px-6 sm:py-5 md:px-10">
+				<DeskHeroCard>
+					<div className="relative flex w-full max-w-[1200px] flex-1 flex-col items-center justify-center lg:min-h-[420px]">
+						<div
+							className={[
+								"mb-6 w-full max-w-[300px] shrink-0 self-center",
+								"lg:absolute lg:top-[18%] lg:left-0 lg:mb-0 lg:self-auto",
+								"xl:top-[22%]",
+							].join(" ")}
+						>
+							<DeskRecentJournal
+								onOpenJournal={handleOpenJournal}
+								onAddEntry={handleAddEntry}
+							/>
+						</div>
+
+						<div className="flex flex-col items-center justify-center gap-4 sm:gap-6">
+							<ProfileAvatarEditor
+								variant="desk"
+								src={avatarUrl}
+								hasCustomPhoto={hasCustomPhoto}
+							/>
+							<h1 className="text-center font-semibold text-[#1a1a1a] text-[clamp(1.25rem,4vw,1.75rem)] leading-[1.4]">
+								Hi, {userName}{" "}
+							</h1>
+						</div>
+					</div>
+				</DeskHeroCard>
+			</div>
+
+			<DashboardFooter />
+
+			<JournalDetailSheet
+				journalId={selectedJournalId}
+				open={selectedJournalId !== null}
+				onOpenChange={(next) => {
+					if (!next) setSelectedJournalId(null);
+				}}
+				onDeleted={() => setSelectedJournalId(null)}
+			/>
+
+			<AddJournalEntryPanel
+				journalId={entryPanelJournalId}
+				journals={journals ?? []}
+				open={entryPanelOpen}
+				onOpenChange={handleEntryPanelOpenChange}
+			/>
+		</div>
+	);
+}

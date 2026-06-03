@@ -10,7 +10,15 @@
 
 import type * as helpers from "../helpers.js";
 import type * as http from "../http.js";
-import type * as stripe from "../stripe.js";
+import type * as journal_auth from "../journal/auth.js";
+import type * as journal_enrich from "../journal/enrich.js";
+import type * as journal_entries_mutations from "../journal/entries/mutations.js";
+import type * as journal_entries_queries from "../journal/entries/queries.js";
+import type * as journal_migrations from "../journal/migrations.js";
+import type * as journal_mutations from "../journal/mutations.js";
+import type * as journal_queries from "../journal/queries.js";
+import type * as journal_sort from "../journal/sort.js";
+import type * as journal_storage from "../journal/storage.js";
 import type * as user_actionHelpers from "../user/actionHelpers.js";
 import type * as user_mutations from "../user/mutations.js";
 import type * as user_queries from "../user/queries.js";
@@ -24,7 +32,15 @@ import type {
 declare const fullApi: ApiFromModules<{
   helpers: typeof helpers;
   http: typeof http;
-  stripe: typeof stripe;
+  "journal/auth": typeof journal_auth;
+  "journal/enrich": typeof journal_enrich;
+  "journal/entries/mutations": typeof journal_entries_mutations;
+  "journal/entries/queries": typeof journal_entries_queries;
+  "journal/migrations": typeof journal_migrations;
+  "journal/mutations": typeof journal_mutations;
+  "journal/queries": typeof journal_queries;
+  "journal/sort": typeof journal_sort;
+  "journal/storage": typeof journal_storage;
   "user/actionHelpers": typeof user_actionHelpers;
   "user/mutations": typeof user_mutations;
   "user/queries": typeof user_queries;
@@ -56,6 +72,4 @@ export declare const internal: FilterApi<
   FunctionReference<any, "internal">
 >;
 
-export declare const components: {
-  stripe: import("@convex-dev/stripe/_generated/component.js").ComponentApi<"stripe">;
-};
+export declare const components: {};
