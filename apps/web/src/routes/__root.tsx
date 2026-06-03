@@ -3,6 +3,7 @@ import {
 	createRootRouteWithContext,
 	HeadContent,
 	Outlet,
+	useRouterState,
 } from "@tanstack/react-router";
 import { TanStackRouterDevtools } from "@tanstack/react-router-devtools";
 
@@ -35,6 +36,11 @@ export const Route = createRootRouteWithContext<RouterAppContext>()({
 });
 
 function RootComponent() {
+	const pathname = useRouterState({ select: (s) => s.location.pathname });
+	const isDashboard = pathname.startsWith("/dashboard");
+	const isLegalPage = pathname === "/terms" || pathname === "/privacy";
+	const showMarketingHeader = !isDashboard && !isLegalPage;
+
 	return (
 		<>
 			<HeadContent />
@@ -44,8 +50,14 @@ function RootComponent() {
 				disableTransitionOnChange
 				storageKey="vite-ui-theme"
 			>
-				<div className="grid h-svh grid-rows-[auto_1fr]">
-					<Header />
+				<div
+					className={
+						isDashboard || isLegalPage
+							? "min-h-svh"
+							: "grid h-svh grid-rows-[auto_1fr]"
+					}
+				>
+					{showMarketingHeader ? <Header /> : null}
 					<Outlet />
 				</div>
 				<Toaster richColors />

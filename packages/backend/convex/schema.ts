@@ -22,6 +22,11 @@ const userSubscriptionStatusValidator = v.union(
 	v.literal("none"),
 );
 
+export const journalType = v.union(
+	v.literal("my_story"),
+	v.literal("their_story"),
+);
+
 export default defineSchema({
 	users: defineTable({
 		clerkId: v.string(),
@@ -37,4 +42,34 @@ export default defineSchema({
 		.index("by_clerk_id", ["clerkId"])
 		.index("by_email", ["email"])
 		.index("by_stripe_customer_id", ["stripeCustomerId"]),
+
+	journals: defineTable({
+		userId: v.string(),
+		title: v.string(),
+		dateMs: v.number(),
+		type: journalType,
+		dedication: v.optional(v.string()),
+		coverImageUrl: v.optional(v.string()),
+		coverImageId: v.optional(v.id("_storage")),
+		updatedAtMs: v.optional(v.number()),
+		/** Manual library order within a story tab (lower = earlier). */
+		sortOrder: v.optional(v.number()),
+	})
+		.index("by_userId", ["userId"])
+		.index("by_userId_and_type", ["userId", "type"]),
+
+	journalEntries: defineTable({
+		userId: v.string(),
+		journalId: v.id("journals"),
+		title: v.string(),
+		dateMs: v.number(),
+		body: v.optional(v.string()),
+		mode: v.union(v.literal("writing"), v.literal("recording")),
+		imageUrl: v.optional(v.string()),
+		audioUrl: v.optional(v.string()),
+		imageId: v.optional(v.id("_storage")),
+		audioId: v.optional(v.id("_storage")),
+	})
+		.index("by_journalId", ["journalId"])
+		.index("by_userId", ["userId"]),
 });

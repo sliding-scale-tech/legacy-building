@@ -1,0 +1,35 @@
+import { Button } from "@/components/journal/ui/button";
+
+type JournalExportFooterProps = {
+	onExport: () => void;
+	onOrderBook?: () => void;
+	exporting?: boolean;
+	disabled?: boolean;
+};
+
+export function JournalExportFooter({
+	onExport,
+	onOrderBook,
+	exporting = false,
+	disabled = false,
+}: JournalExportFooterProps) {
+	return (
+		<div className="flex shrink-0 flex-col gap-2.5 border-[#e6e6e6] border-t bg-[#f7f7f7] px-5 py-4">
+			<Button
+				type="button"
+				disabled={disabled || exporting}
+				onClick={onExport}
+				className="min-h-11 w-full rounded-xl px-5 font-medium text-sm leading-[1.4] hover:opacity-95"
+			>
+				{exporting ? "Exporting…" : "Export selected entries"}
+			</Button>
+			<Button
+				type="button"
+				onClick={onOrderBook}
+				className="min-h-11 w-full rounded-xl px-5 font-medium text-sm leading-[1.4] hover:opacity-95"
+			>
+				Order book
+			</Button>
+		</div>
+	);
+}

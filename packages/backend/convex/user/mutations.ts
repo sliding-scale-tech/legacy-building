@@ -6,6 +6,10 @@ import {
 	type MutationCtx,
 	mutation,
 } from "../_generated/server";
+import {
+	deleteEntryStorageFiles,
+	deleteJournalCoverStorage,
+} from "../journal/storage";
 
 async function deleteProfilePictureIfExists(
 	ctx: MutationCtx,
@@ -33,7 +37,6 @@ export const createOrUpdateFromClerk = internalMutation({
 		if (existing) {
 			await ctx.db.patch(existing._id, {
 				email: args.email.trim().toLowerCase(),
-				name: args.name,
 				...(args.profilePictureId !== undefined
 					? { profilePictureId: args.profilePictureId }
 					: {}),
@@ -95,13 +98,13 @@ export const updateProfile = mutation({
 		if (trimmed.length < 2) {
 			throw new ConvexError({
 				code: "INVALID_NAME",
-				message: "Name must be at least 2 characters.",
+				message: "Username must be at least 2 characters.",
 			});
 		}
 		if (trimmed.length > 80) {
 			throw new ConvexError({
 				code: "INVALID_NAME",
-				message: "Name must be 80 characters or less.",
+				message: "Username must be 80 characters or less.",
 			});
 		}
 
@@ -229,19 +232,61 @@ export const setDeviceInfo = mutation({
 	},
 });
 
+async function deleteAllDataForClerkUser(
+	ctx: MutationCtx,
+	clerkId: string,
+): Promise<void> {
+	const journals = await ctx.db
+		.query("journals")
+		.withIndex("by_userId", (q) => q.eq("userId", clerkId))
+		.collect();
+
+	for (const journal of journals) {
+		const entries = await ctx.db
+			.query("journalEntries")
+			.withIndex("by_journalId", (q) => q.eq("journalId", journal._id))
+			.collect();
+
+		for (const entry of entries) {
+			await deleteEntryStorageFiles(ctx, entry);
+			await ctx.db.delete(entry._id);
+		}
+
+		await deleteJournalCoverStorage(ctx, journal);
+		await ctx.db.delete(journal._id);
+	}
+
+	const user = await ctx.db
+		.query("users")
+		.withIndex("by_clerk_id", (q) => q.eq("clerkId", clerkId))
+		.unique();
+
+	if (user) {
+		await deleteProfilePictureIfExists(ctx, user.profilePictureId);
+		await ctx.db.delete(user._id);
+	}
+}
+
+export const deleteMyAccount = mutation({
+	args: {},
+	handler: async (ctx) => {
+		const identity = await ctx.auth.getUserIdentity();
+		if (!identity) {
+			throw new ConvexError({
+				code: "UNAUTHENTICATED",
+				message: "You must be signed in to delete your account.",
+			});
+		}
+
+		await deleteAllDataForClerkUser(ctx, identity.subject);
+	},
+});
+
 export const deleteByClerkId = internalMutation({
 	args: {
 		clerkId: v.string(),
 	},
 	handler: async (ctx, { clerkId }) => {
-		const existing = await ctx.db
-			.query("users")
-			.withIndex("by_clerk_id", (q) => q.eq("clerkId", clerkId))
-			.unique();
-
-		if (existing) {
-			await deleteProfilePictureIfExists(ctx, existing.profilePictureId);
-			await ctx.db.delete(existing._id);
-		}
+		await deleteAllDataForClerkUser(ctx, clerkId);
 	},
 });
