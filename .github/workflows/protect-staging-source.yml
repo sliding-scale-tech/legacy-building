@@ -1,0 +1,25 @@
+name: Protect staging branch source
+
+on:
+    pull_request:
+        branches:
+            - staging
+
+jobs:
+    validate:
+        runs-on: ubuntu-latest
+
+        steps:
+            - name: Allow only feature/bugfix/hotfix/release → staging
+              env:
+                  BRANCH: ${{ github.head_ref }}
+              run: |
+                  echo "Source: $BRANCH"
+
+                  if [[ "$BRANCH" =~ ^(feature|bugfix|hotfix|release)/[a-z0-9._-]+$ ]]; then
+                    echo "OK"
+                    exit 0
+                  fi
+
+                  echo "❌ Invalid source branch for staging"
+                  exit 1

@@ -1,0 +1,26 @@
+name: Protect main branch source
+
+on:
+    pull_request:
+        branches:
+            - main
+
+jobs:
+    enforce-source:
+        runs-on: ubuntu-latest
+
+        steps:
+            - name: Allow only staging → main
+              env:
+                  HEAD_REF: ${{ github.head_ref }}
+                  BASE_REF: ${{ github.base_ref }}
+              run: |
+                  echo "Head: $HEAD_REF"
+                  echo "Base: $BASE_REF"
+
+                  if [[ "$HEAD_REF" != "staging" ]]; then
+                    echo "❌ Only staging can merge into main"
+                    exit 1
+                  fi
+
+                  echo "✅ Allowed"
