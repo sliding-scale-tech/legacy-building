@@ -9,6 +9,7 @@ import { TanStackRouterDevtools } from "@tanstack/react-router-devtools";
 
 import Header from "@/components/header";
 import { ThemeProvider } from "@/components/theme-provider";
+import { isAuthPath, ROUTES } from "@/lib/routes";
 
 import "../index.css";
 
@@ -39,7 +40,10 @@ function RootComponent() {
 	const pathname = useRouterState({ select: (s) => s.location.pathname });
 	const isDashboard = pathname.startsWith("/dashboard");
 	const isLegalPage = pathname === "/terms" || pathname === "/privacy";
-	const showMarketingHeader = !isDashboard && !isLegalPage;
+	const isAuthRoute = isAuthPath(pathname);
+	const isWelcome = pathname === ROUTES.welcome;
+	const showMarketingHeader =
+		!isDashboard && !isLegalPage && !isAuthRoute && !isWelcome;
 
 	return (
 		<>
@@ -47,6 +51,7 @@ function RootComponent() {
 			<ThemeProvider
 				attribute="class"
 				defaultTheme="dark"
+				forcedTheme={isAuthRoute ? "light" : undefined}
 				disableTransitionOnChange
 				storageKey="vite-ui-theme"
 			>

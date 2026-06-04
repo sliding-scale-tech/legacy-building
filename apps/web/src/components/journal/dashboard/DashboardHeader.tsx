@@ -8,7 +8,7 @@ import {
 import { cn } from "@legacy-building/ui/lib/utils";
 import { Link, useRouterState } from "@tanstack/react-router";
 
-import { DashboardProfileAvatar } from "@/components/journal/dashboard/DashboardProfileAvatar";
+import { DashboardHeaderProfileMenu } from "@/components/journal/dashboard/DashboardHeaderProfileMenu";
 import { ROUTES } from "@/lib/routes";
 
 const navLinks = [
@@ -85,11 +85,7 @@ export function DashboardHeader() {
 					className="flex shrink-0 items-center justify-end"
 					style={{ minWidth: dashboardLayout.headerAvatarMinWidth }}
 				>
-					<DashboardProfileAvatar
-						size="header"
-						src={avatarUrl}
-						accountHref={ROUTES.dashboardAccount}
-					/>
+					<DashboardHeaderProfileMenu avatarUrl={avatarUrl} />
 				</div>
 			</div>
 		</header>

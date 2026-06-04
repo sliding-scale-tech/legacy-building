@@ -1,13 +1,12 @@
 import { useClerk, useUser } from "@clerk/react";
 import { api } from "@legacy-building/backend/convex/_generated/api";
-import { Input } from "@legacy-building/ui/components/input";
 import { firstClerkErrorMessage } from "@legacy-building/ui/lib/clerk-errors";
 import { cn } from "@legacy-building/ui/lib/utils";
 import { useNavigate } from "@tanstack/react-router";
 import { useMutation } from "convex/react";
 import { Loader2 } from "lucide-react";
 import { useState } from "react";
-
+import { accountInputClass } from "@/components/account/accountFormStyles";
 import {
 	AlertDialog,
 	AlertDialogAction,
@@ -17,6 +16,7 @@ import {
 	AlertDialogFooter,
 	AlertDialogTitle,
 } from "@/components/journal/ui/alert-dialog";
+import { Input } from "@/components/journal/ui/input";
 import {
 	messageFromUnknownError,
 	toastMutationError,
@@ -58,7 +58,7 @@ export function DeleteAccountDialog({
 			await signOut();
 			toastMutationSuccess("Your account has been deleted.");
 			resetAndClose();
-			void navigate({ to: ROUTES.home });
+			void navigate({ to: ROUTES.login });
 		} catch (err) {
 			const clerkMsg = firstClerkErrorMessage(err);
 			toastMutationError(
@@ -113,7 +113,7 @@ export function DeleteAccountDialog({
 						placeholder={CONFIRM_TEXT}
 						disabled={deleting}
 						autoComplete="off"
-						className="border-[#e6e6e6]"
+						className={accountInputClass}
 					/>
 				</div>
 				<AlertDialogFooter className="mt-2 flex flex-row flex-nowrap items-stretch gap-3 sm:flex-row sm:justify-stretch">
