@@ -81,6 +81,31 @@ export const agreeToTerms = mutation({
 	},
 });
 
+export const completeWelcome = mutation({
+	args: {},
+	handler: async (ctx) => {
+		const identity = await ctx.auth.getUserIdentity();
+		if (!identity) {
+			throw new ConvexError({
+				code: "UNAUTHENTICATED",
+				message: "You must be signed in.",
+			});
+		}
+		const user = await ctx.db
+			.query("users")
+			.withIndex("by_clerk_id", (q) => q.eq("clerkId", identity.subject))
+			.unique();
+		if (!user) {
+			throw new ConvexError({
+				code: "USER_NOT_REGISTERED",
+				message: "No Convex user found for this account yet.",
+			});
+		}
+		if (user.welcomeCompletedAt) return;
+		await ctx.db.patch(user._id, { welcomeCompletedAt: Date.now() });
+	},
+});
+
 export const updateProfile = mutation({
 	args: {
 		name: v.string(),

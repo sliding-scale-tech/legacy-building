@@ -4,6 +4,7 @@ import { createFileRoute, Link, Outlet } from "@tanstack/react-router";
 import { Authenticated, AuthLoading, Unauthenticated } from "convex/react";
 
 import { DashboardHeader } from "@/components/journal/dashboard/DashboardHeader";
+import { WelcomeGuard } from "@/components/welcome/WelcomeGuard";
 import { ROUTES } from "@/lib/routes";
 
 export const Route = createFileRoute("/dashboard")({
@@ -14,10 +15,12 @@ function DashboardLayout() {
 	return (
 		<>
 			<Authenticated>
-				<div className="relative flex min-h-svh w-full flex-col bg-white">
-					<DashboardHeader />
-					<Outlet />
-				</div>
+				<WelcomeGuard>
+					<div className="relative flex min-h-svh w-full flex-col bg-white">
+						<DashboardHeader />
+						<Outlet />
+					</div>
+				</WelcomeGuard>
 			</Authenticated>
 			<Unauthenticated>
 				<div className="flex min-h-[50svh] flex-col items-center justify-center gap-4 px-4">

@@ -9,6 +9,7 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as WelcomeRouteImport } from './routes/welcome'
 import { Route as VerifyEmailRouteImport } from './routes/verify-email'
 import { Route as TermsRouteImport } from './routes/terms'
 import { Route as SsoCallbackRouteImport } from './routes/sso-callback'
@@ -23,6 +24,11 @@ import { Route as DashboardLibraryRouteImport } from './routes/dashboard/library
 import { Route as DashboardDeskRouteImport } from './routes/dashboard/desk'
 import { Route as DashboardAccountRouteImport } from './routes/dashboard/account'
 
+const WelcomeRoute = WelcomeRouteImport.update({
+  id: '/welcome',
+  path: '/welcome',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const VerifyEmailRoute = VerifyEmailRouteImport.update({
   id: '/verify-email',
   path: '/verify-email',
@@ -98,6 +104,7 @@ export interface FileRoutesByFullPath {
   '/sso-callback': typeof SsoCallbackRoute
   '/terms': typeof TermsRoute
   '/verify-email': typeof VerifyEmailRoute
+  '/welcome': typeof WelcomeRoute
   '/dashboard/account': typeof DashboardAccountRoute
   '/dashboard/desk': typeof DashboardDeskRoute
   '/dashboard/library': typeof DashboardLibraryRoute
@@ -112,6 +119,7 @@ export interface FileRoutesByTo {
   '/sso-callback': typeof SsoCallbackRoute
   '/terms': typeof TermsRoute
   '/verify-email': typeof VerifyEmailRoute
+  '/welcome': typeof WelcomeRoute
   '/dashboard/account': typeof DashboardAccountRoute
   '/dashboard/desk': typeof DashboardDeskRoute
   '/dashboard/library': typeof DashboardLibraryRoute
@@ -128,6 +136,7 @@ export interface FileRoutesById {
   '/sso-callback': typeof SsoCallbackRoute
   '/terms': typeof TermsRoute
   '/verify-email': typeof VerifyEmailRoute
+  '/welcome': typeof WelcomeRoute
   '/dashboard/account': typeof DashboardAccountRoute
   '/dashboard/desk': typeof DashboardDeskRoute
   '/dashboard/library': typeof DashboardLibraryRoute
@@ -145,6 +154,7 @@ export interface FileRouteTypes {
     | '/sso-callback'
     | '/terms'
     | '/verify-email'
+    | '/welcome'
     | '/dashboard/account'
     | '/dashboard/desk'
     | '/dashboard/library'
@@ -159,6 +169,7 @@ export interface FileRouteTypes {
     | '/sso-callback'
     | '/terms'
     | '/verify-email'
+    | '/welcome'
     | '/dashboard/account'
     | '/dashboard/desk'
     | '/dashboard/library'
@@ -174,6 +185,7 @@ export interface FileRouteTypes {
     | '/sso-callback'
     | '/terms'
     | '/verify-email'
+    | '/welcome'
     | '/dashboard/account'
     | '/dashboard/desk'
     | '/dashboard/library'
@@ -190,10 +202,18 @@ export interface RootRouteChildren {
   SsoCallbackRoute: typeof SsoCallbackRoute
   TermsRoute: typeof TermsRoute
   VerifyEmailRoute: typeof VerifyEmailRoute
+  WelcomeRoute: typeof WelcomeRoute
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/welcome': {
+      id: '/welcome'
+      path: '/welcome'
+      fullPath: '/welcome'
+      preLoaderRoute: typeof WelcomeRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/verify-email': {
       id: '/verify-email'
       path: '/verify-email'
@@ -325,6 +345,7 @@ const rootRouteChildren: RootRouteChildren = {
   SsoCallbackRoute: SsoCallbackRoute,
   TermsRoute: TermsRoute,
   VerifyEmailRoute: VerifyEmailRoute,
+  WelcomeRoute: WelcomeRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

@@ -73,3 +73,7 @@ export const legalRoutes = {
 	terms: "/terms",
 	privacy: "/privacy",
 } as const;
+
+export const youtube = {
+	welcomeVideoId: "xFus-G0NNqI",
+} as const;
