@@ -1,5 +1,5 @@
 import { APP_NAME } from "@legacy-building/ui/lib/brand";
-import { LayoutDashboard, Settings } from "lucide-react";
+import { CreditCard, LayoutDashboard, Settings, Users } from "lucide-react";
 
 import { ROUTES } from "@/lib/routes";
 
@@ -10,6 +10,8 @@ export const ADMIN_APP_BRAND = {
 
 export const ADMIN_NAV_LINKS = [
 	{ to: ROUTES.dashboard, label: "Dashboard", icon: LayoutDashboard },
+	{ to: ROUTES.users, label: "Users", icon: Users },
+	{ to: ROUTES.subscriptions, label: "Subscriptions", icon: CreditCard },
 	{ to: ROUTES.settings, label: "Settings", icon: Settings },
 ] as const;
 

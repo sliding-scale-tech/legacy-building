@@ -8,6 +8,10 @@
  * @module
  */
 
+import type * as admin_actions from "../admin/actions.js";
+import type * as admin_helpers from "../admin/helpers.js";
+import type * as admin_mutations from "../admin/mutations.js";
+import type * as admin_queries from "../admin/queries.js";
 import type * as helpers from "../helpers.js";
 import type * as http from "../http.js";
 import type * as journal_auth from "../journal/auth.js";
@@ -30,6 +34,10 @@ import type {
 } from "convex/server";
 
 declare const fullApi: ApiFromModules<{
+  "admin/actions": typeof admin_actions;
+  "admin/helpers": typeof admin_helpers;
+  "admin/mutations": typeof admin_mutations;
+  "admin/queries": typeof admin_queries;
   helpers: typeof helpers;
   http: typeof http;
   "journal/auth": typeof journal_auth;

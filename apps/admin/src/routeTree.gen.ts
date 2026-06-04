@@ -12,6 +12,8 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as SignInRouteImport } from './routes/sign-in'
 import { Route as AdminRouteImport } from './routes/_admin'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as AdminUsersRouteImport } from './routes/_admin/users'
+import { Route as AdminSubscriptionsRouteImport } from './routes/_admin/subscriptions'
 import { Route as AdminSettingsRouteImport } from './routes/_admin/settings'
 import { Route as AdminDashboardRouteImport } from './routes/_admin/dashboard'
 
@@ -29,6 +31,16 @@ const IndexRoute = IndexRouteImport.update({
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AdminUsersRoute = AdminUsersRouteImport.update({
+  id: '/users',
+  path: '/users',
+  getParentRoute: () => AdminRoute,
+} as any)
+const AdminSubscriptionsRoute = AdminSubscriptionsRouteImport.update({
+  id: '/subscriptions',
+  path: '/subscriptions',
+  getParentRoute: () => AdminRoute,
+} as any)
 const AdminSettingsRoute = AdminSettingsRouteImport.update({
   id: '/settings',
   path: '/settings',
@@ -45,12 +57,16 @@ export interface FileRoutesByFullPath {
   '/sign-in': typeof SignInRoute
   '/dashboard': typeof AdminDashboardRoute
   '/settings': typeof AdminSettingsRoute
+  '/subscriptions': typeof AdminSubscriptionsRoute
+  '/users': typeof AdminUsersRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/sign-in': typeof SignInRoute
   '/dashboard': typeof AdminDashboardRoute
   '/settings': typeof AdminSettingsRoute
+  '/subscriptions': typeof AdminSubscriptionsRoute
+  '/users': typeof AdminUsersRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -59,12 +75,26 @@ export interface FileRoutesById {
   '/sign-in': typeof SignInRoute
   '/_admin/dashboard': typeof AdminDashboardRoute
   '/_admin/settings': typeof AdminSettingsRoute
+  '/_admin/subscriptions': typeof AdminSubscriptionsRoute
+  '/_admin/users': typeof AdminUsersRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/sign-in' | '/dashboard' | '/settings'
+  fullPaths:
+    | '/'
+    | '/sign-in'
+    | '/dashboard'
+    | '/settings'
+    | '/subscriptions'
+    | '/users'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/sign-in' | '/dashboard' | '/settings'
+  to:
+    | '/'
+    | '/sign-in'
+    | '/dashboard'
+    | '/settings'
+    | '/subscriptions'
+    | '/users'
   id:
     | '__root__'
     | '/'
@@ -72,6 +102,8 @@ export interface FileRouteTypes {
     | '/sign-in'
     | '/_admin/dashboard'
     | '/_admin/settings'
+    | '/_admin/subscriptions'
+    | '/_admin/users'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -103,6 +135,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/_admin/users': {
+      id: '/_admin/users'
+      path: '/users'
+      fullPath: '/users'
+      preLoaderRoute: typeof AdminUsersRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/_admin/subscriptions': {
+      id: '/_admin/subscriptions'
+      path: '/subscriptions'
+      fullPath: '/subscriptions'
+      preLoaderRoute: typeof AdminSubscriptionsRouteImport
+      parentRoute: typeof AdminRoute
+    }
     '/_admin/settings': {
       id: '/_admin/settings'
       path: '/settings'
@@ -123,11 +169,15 @@ declare module '@tanstack/react-router' {
 interface AdminRouteChildren {
   AdminDashboardRoute: typeof AdminDashboardRoute
   AdminSettingsRoute: typeof AdminSettingsRoute
+  AdminSubscriptionsRoute: typeof AdminSubscriptionsRoute
+  AdminUsersRoute: typeof AdminUsersRoute
 }
 
 const AdminRouteChildren: AdminRouteChildren = {
   AdminDashboardRoute: AdminDashboardRoute,
   AdminSettingsRoute: AdminSettingsRoute,
+  AdminSubscriptionsRoute: AdminSubscriptionsRoute,
+  AdminUsersRoute: AdminUsersRoute,
 }
 
 const AdminRouteWithChildren = AdminRoute._addFileChildren(AdminRouteChildren)

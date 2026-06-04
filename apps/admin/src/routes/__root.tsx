@@ -3,10 +3,13 @@ import {
 	createRootRouteWithContext,
 	HeadContent,
 	Outlet,
+	useRouterState,
 } from "@tanstack/react-router";
 import { TanStackRouterDevtools } from "@tanstack/react-router-devtools";
 
 import { ThemeProvider } from "@/components/theme-provider";
+import { adminPageClass } from "@/lib/admin-theme";
+import { isAdminAuthPath } from "@/lib/auth-routes";
 
 import "../index.css";
 
@@ -34,16 +37,20 @@ export const Route = createRootRouteWithContext<RouterAppContext>()({
 });
 
 function RootComponent() {
+	const pathname = useRouterState({ select: (s) => s.location.pathname });
+	const isAuthRoute = isAdminAuthPath(pathname);
+
 	return (
 		<>
 			<HeadContent />
 			<ThemeProvider
-				attribute="class"
-				defaultTheme="dark"
-				disableTransitionOnChange
+				defaultTheme="system"
+				forcedTheme={isAuthRoute ? "light" : undefined}
 				storageKey="admin-ui-theme"
 			>
-				<div className="min-h-svh bg-background text-foreground">
+				<div
+					className={`min-h-svh text-foreground ${isAuthRoute ? "bg-[#ebf6f6]" : adminPageClass}`}
+				>
 					<Outlet />
 				</div>
 				<Toaster richColors />
