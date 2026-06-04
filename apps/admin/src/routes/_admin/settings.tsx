@@ -4,6 +4,8 @@ import { useCurrentUser } from "@legacy-building/ui/hooks/use-current-user";
 import { createFileRoute } from "@tanstack/react-router";
 import { Authenticated, AuthLoading, Unauthenticated } from "convex/react";
 
+import { adminCardClass, adminContainerClass } from "@/lib/admin-theme";
+
 export const Route = createFileRoute("/_admin/settings")({
 	component: SettingsPage,
 });
@@ -27,9 +29,9 @@ function Section({
 	children: React.ReactNode;
 }) {
 	return (
-		<section className="rounded-xl border border-border bg-card p-5 transition-shadow hover:shadow-sm sm:p-6">
+		<section className={`${adminCardClass} p-5 sm:p-6`}>
 			<header className="mb-4">
-				<h2 className="font-heading font-semibold text-base tracking-tight">
+				<h2 className="font-heading font-semibold text-base text-foreground tracking-tight">
 					{title}
 				</h2>
 				{description ? (
@@ -46,7 +48,7 @@ function SettingsPage() {
 	const email = convexUser?.email ?? "";
 
 	return (
-		<div className="mx-auto w-full max-w-3xl p-6 sm:p-8">
+		<div className={`${adminContainerClass} max-w-3xl`}>
 			<Authenticated>
 				{isLoading || !convexUser ? (
 					<SettingsSkeleton />

@@ -24,6 +24,7 @@ import { useState } from "react";
 import { Controller, useForm } from "react-hook-form";
 import { toast } from "sonner";
 
+import { adminPrimaryButtonClass } from "@/lib/admin-theme";
 import { type SignInFormValues, signInSchema } from "@/lib/auth/schemas";
 import { ROUTES } from "@/lib/routes";
 
@@ -206,7 +207,7 @@ export function AdminSignInForm() {
 				type="submit"
 				variant="default"
 				disabled={isBusy}
-				className="mt-1 h-12 w-full rounded-full font-semibold text-base transition-transform active:scale-[0.98]"
+				className={`mt-1 h-12 w-full rounded-full font-semibold text-base transition-transform active:scale-[0.98] ${adminPrimaryButtonClass}`}
 			>
 				{verifyingAdmin ? (
 					<>

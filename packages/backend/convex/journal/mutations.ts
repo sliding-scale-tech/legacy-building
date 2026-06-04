@@ -4,11 +4,7 @@ import { type MutationCtx, mutation } from "../_generated/server";
 import { journalType } from "../schema";
 import { getOwnedJournal, requireClerkUserId } from "./auth";
 import { journalLibrarySortKey } from "./sort";
-import {
-	deleteEntryStorageFiles,
-	deleteJournalCoverStorage,
-	deleteStorageFile,
-} from "./storage";
+import { deleteEntryStorageFiles, deleteJournalCoverStorage } from "./storage";
 
 async function nextSortOrderForType(
 	ctx: MutationCtx,
@@ -112,8 +108,8 @@ export const reorder = mutation({
 			seen.add(id);
 		}
 
-		for (let index = 0; index < args.orderedIds.length; index++) {
-			await ctx.db.patch(args.orderedIds[index], { sortOrder: index * 1000 });
+		for (const [index, journalId] of args.orderedIds.entries()) {
+			await ctx.db.patch(journalId, { sortOrder: index * 1000 });
 		}
 	},
 });
