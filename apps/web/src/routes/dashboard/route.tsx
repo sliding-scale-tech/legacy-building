@@ -4,6 +4,7 @@ import { createFileRoute, Link, Outlet } from "@tanstack/react-router";
 import { Authenticated, AuthLoading, Unauthenticated } from "convex/react";
 
 import { SuspendedGuard } from "@/components/account/SuspendedGuard";
+import { PricingProvider } from "@/components/billing/PricingProvider";
 import { DashboardUserGate } from "@/components/dashboard/DashboardUserGate";
 import { DashboardHeader } from "@/components/journal/dashboard/DashboardHeader";
 import { WelcomeGuard } from "@/components/welcome/WelcomeGuard";
@@ -20,10 +21,12 @@ function DashboardLayout() {
 				<DashboardUserGate>
 					<SuspendedGuard>
 						<WelcomeGuard>
-							<div className="relative flex min-h-svh w-full flex-col bg-white">
-								<DashboardHeader />
-								<Outlet />
-							</div>
+							<PricingProvider>
+								<div className="relative flex min-h-svh w-full flex-col bg-white">
+									<DashboardHeader />
+									<Outlet />
+								</div>
+							</PricingProvider>
 						</WelcomeGuard>
 					</SuspendedGuard>
 				</DashboardUserGate>

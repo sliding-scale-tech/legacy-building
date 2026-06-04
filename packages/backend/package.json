@@ -10,8 +10,10 @@
 	},
 	"dependencies": {
 		"@clerk/backend": "^3.4.14",
+		"@convex-dev/stripe": "^0.1.4",
 		"convex": "catalog:",
 		"dotenv": "catalog:",
+		"stripe": "^22.2.0",
 		"zod": "catalog:"
 	},
 	"devDependencies": {

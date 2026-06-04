@@ -8,6 +8,7 @@ import {
 import { cn } from "@legacy-building/ui/lib/utils";
 import { Link, useRouterState } from "@tanstack/react-router";
 
+import { usePricing } from "@/components/billing/PricingProvider";
 import { DashboardHeaderProfileMenu } from "@/components/journal/dashboard/DashboardHeaderProfileMenu";
 import { ROUTES } from "@/lib/routes";
 
@@ -24,6 +25,7 @@ export function DashboardHeader() {
 	const pathname = useRouterState({ select: (s) => s.location.pathname });
 	const { user } = useUser();
 	const { convexUser } = useCurrentUser();
+	const { openPricing } = usePricing();
 	const avatarUrl =
 		convexUser?.profilePictureUrl ?? user?.imageUrl ?? assets.defaultAvatar;
 
@@ -79,6 +81,17 @@ export function DashboardHeader() {
 							</Link>
 						);
 					})}
+					<button
+						type="button"
+						onClick={openPricing}
+						className={cn(
+							navLinkClass,
+							"cursor-pointer font-normal hover:text-white/90",
+						)}
+						style={{ color: brand.navInactive }}
+					>
+						Pricing
+					</button>
 				</nav>
 
 				<div

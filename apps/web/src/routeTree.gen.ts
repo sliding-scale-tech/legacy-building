@@ -22,6 +22,7 @@ import { Route as DashboardIndexRouteImport } from './routes/dashboard/index'
 import { Route as LoginContinueRouteImport } from './routes/login.continue'
 import { Route as DashboardLibraryRouteImport } from './routes/dashboard/library'
 import { Route as DashboardDeskRouteImport } from './routes/dashboard/desk'
+import { Route as DashboardBillingRouteImport } from './routes/dashboard/billing'
 import { Route as DashboardAccountRouteImport } from './routes/dashboard/account'
 
 const WelcomeRoute = WelcomeRouteImport.update({
@@ -89,6 +90,11 @@ const DashboardDeskRoute = DashboardDeskRouteImport.update({
   path: '/desk',
   getParentRoute: () => DashboardRouteRoute,
 } as any)
+const DashboardBillingRoute = DashboardBillingRouteImport.update({
+  id: '/billing',
+  path: '/billing',
+  getParentRoute: () => DashboardRouteRoute,
+} as any)
 const DashboardAccountRoute = DashboardAccountRouteImport.update({
   id: '/account',
   path: '/account',
@@ -106,6 +112,7 @@ export interface FileRoutesByFullPath {
   '/verify-email': typeof VerifyEmailRoute
   '/welcome': typeof WelcomeRoute
   '/dashboard/account': typeof DashboardAccountRoute
+  '/dashboard/billing': typeof DashboardBillingRoute
   '/dashboard/desk': typeof DashboardDeskRoute
   '/dashboard/library': typeof DashboardLibraryRoute
   '/login/continue': typeof LoginContinueRoute
@@ -121,6 +128,7 @@ export interface FileRoutesByTo {
   '/verify-email': typeof VerifyEmailRoute
   '/welcome': typeof WelcomeRoute
   '/dashboard/account': typeof DashboardAccountRoute
+  '/dashboard/billing': typeof DashboardBillingRoute
   '/dashboard/desk': typeof DashboardDeskRoute
   '/dashboard/library': typeof DashboardLibraryRoute
   '/login/continue': typeof LoginContinueRoute
@@ -138,6 +146,7 @@ export interface FileRoutesById {
   '/verify-email': typeof VerifyEmailRoute
   '/welcome': typeof WelcomeRoute
   '/dashboard/account': typeof DashboardAccountRoute
+  '/dashboard/billing': typeof DashboardBillingRoute
   '/dashboard/desk': typeof DashboardDeskRoute
   '/dashboard/library': typeof DashboardLibraryRoute
   '/login/continue': typeof LoginContinueRoute
@@ -156,6 +165,7 @@ export interface FileRouteTypes {
     | '/verify-email'
     | '/welcome'
     | '/dashboard/account'
+    | '/dashboard/billing'
     | '/dashboard/desk'
     | '/dashboard/library'
     | '/login/continue'
@@ -171,6 +181,7 @@ export interface FileRouteTypes {
     | '/verify-email'
     | '/welcome'
     | '/dashboard/account'
+    | '/dashboard/billing'
     | '/dashboard/desk'
     | '/dashboard/library'
     | '/login/continue'
@@ -187,6 +198,7 @@ export interface FileRouteTypes {
     | '/verify-email'
     | '/welcome'
     | '/dashboard/account'
+    | '/dashboard/billing'
     | '/dashboard/desk'
     | '/dashboard/library'
     | '/login/continue'
@@ -298,6 +310,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof DashboardDeskRouteImport
       parentRoute: typeof DashboardRouteRoute
     }
+    '/dashboard/billing': {
+      id: '/dashboard/billing'
+      path: '/billing'
+      fullPath: '/dashboard/billing'
+      preLoaderRoute: typeof DashboardBillingRouteImport
+      parentRoute: typeof DashboardRouteRoute
+    }
     '/dashboard/account': {
       id: '/dashboard/account'
       path: '/account'
@@ -310,6 +329,7 @@ declare module '@tanstack/react-router' {
 
 interface DashboardRouteRouteChildren {
   DashboardAccountRoute: typeof DashboardAccountRoute
+  DashboardBillingRoute: typeof DashboardBillingRoute
   DashboardDeskRoute: typeof DashboardDeskRoute
   DashboardLibraryRoute: typeof DashboardLibraryRoute
   DashboardIndexRoute: typeof DashboardIndexRoute
@@ -317,6 +337,7 @@ interface DashboardRouteRouteChildren {
 
 const DashboardRouteRouteChildren: DashboardRouteRouteChildren = {
   DashboardAccountRoute: DashboardAccountRoute,
+  DashboardBillingRoute: DashboardBillingRoute,
   DashboardDeskRoute: DashboardDeskRoute,
   DashboardLibraryRoute: DashboardLibraryRoute,
   DashboardIndexRoute: DashboardIndexRoute,
