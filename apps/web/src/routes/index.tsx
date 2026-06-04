@@ -16,7 +16,7 @@ function RootRedirect() {
 	}
 
 	if (isSignedIn) {
-		return <Navigate to={ROUTES.dashboard} replace />;
+		return <Navigate to={ROUTES.dashboardDesk} replace />;
 	}
 
 	return <Navigate to={ROUTES.login} replace />;

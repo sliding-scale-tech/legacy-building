@@ -39,6 +39,9 @@ export const getRecentForDesk = query({
 		const journal = journals.sort(
 			(a, b) => journalActivityMs(b) - journalActivityMs(a),
 		)[0];
+		if (!journal) {
+			return null;
+		}
 
 		const enriched = await enrichJournal(ctx, journal);
 

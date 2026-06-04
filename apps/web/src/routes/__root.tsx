@@ -51,7 +51,7 @@ function RootComponent() {
 			<ThemeProvider
 				attribute="class"
 				defaultTheme="dark"
-				forcedTheme={isAuthRoute ? "light" : undefined}
+				forcedTheme={isAuthRoute || isDashboard ? "light" : undefined}
 				disableTransitionOnChange
 				storageKey="vite-ui-theme"
 			>

@@ -5,31 +5,84 @@ import {
 	DropdownMenuItem,
 	DropdownMenuTrigger,
 } from "@legacy-building/ui/components/dropdown-menu";
+import { cn } from "@legacy-building/ui/lib/utils";
 import { Moon, Sun } from "lucide-react";
+import { useTheme } from "next-themes";
+import { useEffect, useState } from "react";
 
-import { useTheme } from "@/components/theme-provider";
+type ModeToggleProps = {
+	variant?: "default" | "header";
+};
 
-export function ModeToggle() {
-	const { setTheme } = useTheme();
+export function ModeToggle({ variant = "default" }: ModeToggleProps) {
+	const { theme, setTheme, resolvedTheme } = useTheme();
+	const [mounted, setMounted] = useState(false);
+
+	useEffect(() => {
+		setMounted(true);
+	}, []);
+
+	if (!mounted) {
+		return (
+			<Button
+				variant="outline"
+				size="icon"
+				className="size-9 shrink-0"
+				aria-hidden
+				disabled
+			/>
+		);
+	}
+
+	const isDark = resolvedTheme === "dark";
+
+	const triggerButton = (
+		<Button
+			type="button"
+			variant="outline"
+			size="icon"
+			className={cn(
+				"relative size-9 shrink-0",
+				variant === "header" &&
+					"border-white/30 bg-white/10 text-white hover:bg-white/20 hover:text-white",
+			)}
+			aria-label="Toggle theme"
+		>
+			{isDark ? (
+				<Moon className="size-[1.15rem]" aria-hidden />
+			) : (
+				<Sun className="size-[1.15rem]" aria-hidden />
+			)}
+		</Button>
+	);
 
 	return (
-		<DropdownMenu>
-			<DropdownMenuTrigger render={<Button variant="outline" size="icon" />}>
-				<Sun className="h-[1.2rem] w-[1.2rem] rotate-0 scale-100 transition-all dark:-rotate-90 dark:scale-0" />
-				<Moon className="absolute h-[1.2rem] w-[1.2rem] rotate-90 scale-0 transition-all dark:rotate-0 dark:scale-100" />
-				<span className="sr-only">Toggle theme</span>
-			</DropdownMenuTrigger>
-			<DropdownMenuContent align="end">
-				<DropdownMenuItem onClick={() => setTheme("light")}>
-					Light
-				</DropdownMenuItem>
-				<DropdownMenuItem onClick={() => setTheme("dark")}>
-					Dark
-				</DropdownMenuItem>
-				<DropdownMenuItem onClick={() => setTheme("system")}>
-					System
-				</DropdownMenuItem>
-			</DropdownMenuContent>
-		</DropdownMenu>
+		<div className="relative shrink-0">
+			<DropdownMenu>
+				<DropdownMenuTrigger render={triggerButton} />
+				<DropdownMenuContent
+					align="end"
+					side="bottom"
+					sideOffset={10}
+					className="w-auto min-w-[9.5rem] rounded-xl p-1 shadow-lg"
+				>
+					<DropdownMenuItem onClick={() => setTheme("light")}>
+						<span className={theme === "light" ? "font-semibold" : undefined}>
+							Light
+						</span>
+					</DropdownMenuItem>
+					<DropdownMenuItem onClick={() => setTheme("dark")}>
+						<span className={theme === "dark" ? "font-semibold" : undefined}>
+							Dark
+						</span>
+					</DropdownMenuItem>
+					<DropdownMenuItem onClick={() => setTheme("system")}>
+						<span className={theme === "system" ? "font-semibold" : undefined}>
+							System
+						</span>
+					</DropdownMenuItem>
+				</DropdownMenuContent>
+			</DropdownMenu>
+		</div>
 	);
 }

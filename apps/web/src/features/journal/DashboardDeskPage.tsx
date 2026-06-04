@@ -7,7 +7,6 @@ import { useQuery } from "convex/react";
 import { useCallback, useState } from "react";
 import { ProfileAvatarEditor } from "@/components/account/profile-avatar-editor";
 import { DashboardFooter } from "@/components/journal/dashboard/DashboardFooter";
-import { DashboardHeader } from "@/components/journal/dashboard/DashboardHeader";
 import { DeskHeroCard } from "@/components/journal/dashboard/DeskHeroCard";
 import { DeskRecentJournal } from "@/components/journal/dashboard/DeskRecentJournal";
 import { AddJournalEntryPanel } from "@/components/journal/library/AddJournalEntryPanel";

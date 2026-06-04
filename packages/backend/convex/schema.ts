@@ -22,6 +22,11 @@ const userSubscriptionStatusValidator = v.union(
 	v.literal("none"),
 );
 
+const accountStatusValidator = v.union(
+	v.literal("active"),
+	v.literal("suspended"),
+);
+
 export const journalType = v.union(
 	v.literal("my_story"),
 	v.literal("their_story"),
@@ -39,6 +44,7 @@ export default defineSchema({
 		welcomeCompletedAt: v.optional(v.number()),
 		stripeCustomerId: v.optional(v.string()),
 		subscriptionStatus: v.optional(userSubscriptionStatusValidator),
+		accountStatus: v.optional(accountStatusValidator),
 	})
 		.index("by_clerk_id", ["clerkId"])
 		.index("by_email", ["email"])

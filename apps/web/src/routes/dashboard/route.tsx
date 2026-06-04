@@ -3,6 +3,8 @@ import { cn } from "@legacy-building/ui/lib/utils";
 import { createFileRoute, Link, Outlet } from "@tanstack/react-router";
 import { Authenticated, AuthLoading, Unauthenticated } from "convex/react";
 
+import { SuspendedGuard } from "@/components/account/SuspendedGuard";
+import { DashboardUserGate } from "@/components/dashboard/DashboardUserGate";
 import { DashboardHeader } from "@/components/journal/dashboard/DashboardHeader";
 import { WelcomeGuard } from "@/components/welcome/WelcomeGuard";
 import { ROUTES } from "@/lib/routes";
@@ -15,12 +17,16 @@ function DashboardLayout() {
 	return (
 		<>
 			<Authenticated>
-				<WelcomeGuard>
-					<div className="relative flex min-h-svh w-full flex-col bg-white">
-						<DashboardHeader />
-						<Outlet />
-					</div>
-				</WelcomeGuard>
+				<DashboardUserGate>
+					<SuspendedGuard>
+						<WelcomeGuard>
+							<div className="relative flex min-h-svh w-full flex-col bg-white">
+								<DashboardHeader />
+								<Outlet />
+							</div>
+						</WelcomeGuard>
+					</SuspendedGuard>
+				</DashboardUserGate>
 			</Authenticated>
 			<Unauthenticated>
 				<div className="flex min-h-[50svh] flex-col items-center justify-center gap-4 px-4">

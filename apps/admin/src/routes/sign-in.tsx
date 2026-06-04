@@ -5,6 +5,7 @@ import { createFileRoute, Navigate } from "@tanstack/react-router";
 import { ShieldCheck } from "lucide-react";
 
 import { AdminSignInForm } from "@/components/auth/sign-in-form";
+import { adminPageClass } from "@/lib/admin-theme";
 import { ADMIN_APP_BRAND } from "@/lib/nav";
 import { ROUTES } from "@/lib/routes";
 
@@ -35,7 +36,9 @@ function SignInPage() {
 	}
 
 	return (
-		<div className="relative flex min-h-svh flex-col bg-background text-foreground">
+		<div
+			className={`relative flex min-h-svh flex-col text-foreground ${adminPageClass}`}
+		>
 			<div className="flex flex-1 flex-col items-center justify-center px-5 py-10 sm:px-8">
 				<div className="fade-in-50 slide-in-from-bottom-3 w-full max-w-md animate-in duration-500">
 					<header className="mb-8 flex shrink-0 items-center gap-3">

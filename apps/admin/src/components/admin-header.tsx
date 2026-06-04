@@ -1,64 +1,132 @@
 import { SignOutButton, useAuth } from "@clerk/react";
-import { Button, buttonVariants } from "@legacy-building/ui/components/button";
+import { Button } from "@legacy-building/ui/components/button";
+import {
+	assets,
+	brand,
+	dashboardLayout,
+} from "@legacy-building/ui/lib/brand-journal";
 import { cn } from "@legacy-building/ui/lib/utils";
-import { Link } from "@tanstack/react-router";
+import { Link, useRouterState } from "@tanstack/react-router";
 
 import { ModeToggle } from "@/components/mode-toggle";
-import { ADMIN_APP_BRAND, ADMIN_NAV_LINKS } from "@/lib/nav";
+import { isAdminAuthPath } from "@/lib/auth-routes";
+import { ADMIN_NAV_LINKS } from "@/lib/nav";
 import { ROUTES } from "@/lib/routes";
+
+const navLinkClass =
+	"mx-2 text-base leading-[1.4] transition-colors duration-200 sm:mx-3";
 
 export function AdminHeader() {
 	const { isSignedIn } = useAuth();
+	const pathname = useRouterState({ select: (s) => s.location.pathname });
+	const onAuthRoute = isAdminAuthPath(pathname);
+
+	if (onAuthRoute) {
+		return null;
+	}
 
 	return (
-		<header className="border-border border-b bg-background">
-			<div className="mx-auto flex max-w-5xl flex-row items-center justify-between gap-4 px-4 py-3 sm:px-6">
-				<div className="flex min-w-0 flex-1 items-center gap-6">
-					<Link
-						to={ADMIN_APP_BRAND.href}
-						className="shrink-0 font-heading font-semibold text-foreground text-sm tracking-tight transition-opacity hover:opacity-80 sm:text-base"
-					>
-						{ADMIN_APP_BRAND.name}
-					</Link>
-					<nav className="flex gap-1 sm:gap-2">
-						{ADMIN_NAV_LINKS.map(({ to, label, icon: Icon }) => (
+		<header
+			className={cn(
+				"fixed inset-x-0 top-0 z-[1504] flex min-h-[80px] items-center justify-center",
+				"bg-center bg-cover bg-no-repeat shadow-[0_2px_2px_0_#f7f7f7]",
+			)}
+			style={{
+				backgroundImage: `url("${assets.headerBackground}")`,
+				paddingLeft: dashboardLayout.headerPaddingLeft,
+				paddingRight: dashboardLayout.headerPaddingRight,
+			}}
+		>
+			<div
+				className="flex w-full max-w-[1200px] items-center justify-between gap-2 sm:gap-4"
+				style={{ minHeight: dashboardLayout.headerMinHeight }}
+			>
+				<Link
+					to={ROUTES.dashboard}
+					className="relative shrink-0"
+					style={{
+						width: dashboardLayout.logoWidth,
+						height: dashboardLayout.logoHeight,
+					}}
+				>
+					<img
+						src={assets.whiteLogo}
+						alt="Legacy Building Admin"
+						className="absolute inset-0 size-full object-contain object-left"
+					/>
+				</Link>
+
+				<nav
+					className="hidden min-w-0 flex-1 items-center justify-center md:flex"
+					aria-label="Admin"
+				>
+					{ADMIN_NAV_LINKS.map((item) => {
+						const isActive =
+							pathname === item.to ||
+							(item.to !== ROUTES.dashboard &&
+								pathname.startsWith(`${item.to}/`));
+						return (
 							<Link
-								key={to}
-								to={to}
-								className="flex items-center gap-1.5 rounded-full px-3 py-1.5 text-muted-foreground text-sm transition-colors hover:bg-accent hover:text-foreground [&.active]:bg-accent [&.active]:text-foreground"
+								key={item.to}
+								to={item.to}
+								className={cn(
+									navLinkClass,
+									isActive
+										? "font-semibold text-white"
+										: "font-normal hover:text-white/90",
+								)}
+								style={{
+									color: isActive ? brand.white : brand.navInactive,
+								}}
 							>
-								<Icon className="size-4 shrink-0" aria-hidden />
-								<span className="hidden sm:inline">{label}</span>
+								{item.label}
 							</Link>
-						))}
+						);
+					})}
+				</nav>
+
+				<div
+					className="flex shrink-0 items-center justify-end gap-2"
+					style={{ minWidth: dashboardLayout.headerAvatarMinWidth }}
+				>
+					<nav
+						className="flex items-center gap-1 md:hidden"
+						aria-label="Admin mobile"
+					>
+						{ADMIN_NAV_LINKS.map((item) => {
+							const Icon = item.icon;
+							const isActive = pathname === item.to;
+							return (
+								<Link
+									key={item.to}
+									to={item.to}
+									className={cn(
+										"flex size-9 items-center justify-center rounded-full transition-colors",
+										isActive
+											? "bg-white/20 text-white"
+											: "text-white/70 hover:text-white",
+									)}
+									aria-label={item.label}
+									title={item.label}
+								>
+									<Icon className="size-4" aria-hidden />
+								</Link>
+							);
+						})}
 					</nav>
-				</div>
-				<div className="flex shrink-0 items-center gap-2">
+					<ModeToggle variant="header" />
 					{isSignedIn ? (
 						<SignOutButton>
-							<Button variant="outline" size="sm">
+							<Button
+								type="button"
+								variant="ghost"
+								size="sm"
+								className="h-9 rounded-full border border-white/30 bg-white/10 px-4 font-medium text-sm text-white hover:bg-white/20 hover:text-white"
+							>
 								Sign out
 							</Button>
 						</SignOutButton>
-					) : (
-						<>
-							<Link
-								to={ROUTES.signIn}
-								className={cn(
-									buttonVariants({ variant: "outline", size: "sm" }),
-								)}
-							>
-								Sign in
-							</Link>
-							<Link
-								to={ROUTES.signIn}
-								className={cn(buttonVariants({ size: "sm" }))}
-							>
-								Sign up
-							</Link>
-						</>
-					)}
-					<ModeToggle />
+					) : null}
 				</div>
 			</div>
 		</header>

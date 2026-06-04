@@ -56,6 +56,50 @@ export const createOrUpdateFromClerk = internalMutation({
 	},
 });
 
+/** Creates the Convex user row if the Clerk webhook has not run yet (e.g. right after signup). */
+export const ensureCurrentUser = mutation({
+	args: {},
+	handler: async (ctx) => {
+		const identity = await ctx.auth.getUserIdentity();
+		if (!identity) {
+			throw new ConvexError({
+				code: "UNAUTHENTICATED",
+				message: "You must be signed in.",
+			});
+		}
+
+		const existing = await ctx.db
+			.query("users")
+			.withIndex("by_clerk_id", (q) => q.eq("clerkId", identity.subject))
+			.unique();
+
+		if (existing) {
+			return existing._id;
+		}
+
+		const email = identity.email?.trim().toLowerCase();
+		if (!email) {
+			throw new ConvexError({
+				code: "MISSING_EMAIL",
+				message: "Your account is missing an email address.",
+			});
+		}
+
+		const nameFromIdentity = identity.name?.trim();
+		const name =
+			nameFromIdentity && nameFromIdentity.length >= 2
+				? nameFromIdentity
+				: (email.split("@")[0] ?? "User");
+
+		return await ctx.db.insert("users", {
+			clerkId: identity.subject,
+			email,
+			name,
+			role: "user",
+		});
+	},
+});
+
 export const agreeToTerms = mutation({
 	args: {},
 	handler: async (ctx) => {
