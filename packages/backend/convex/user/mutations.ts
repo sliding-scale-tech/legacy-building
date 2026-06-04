@@ -58,8 +58,11 @@ export const createOrUpdateFromClerk = internalMutation({
 
 /** Creates the Convex user row if the Clerk webhook has not run yet (e.g. right after signup). */
 export const ensureCurrentUser = mutation({
-	args: {},
-	handler: async (ctx) => {
+	args: {
+		/** Clerk username at sign-up; maps to Convex `users.name`. */
+		preferredName: v.optional(v.string()),
+	},
+	handler: async (ctx, args) => {
 		const identity = await ctx.auth.getUserIdentity();
 		if (!identity) {
 			throw new ConvexError({
@@ -85,11 +88,15 @@ export const ensureCurrentUser = mutation({
 			});
 		}
 
+		const preferred = args.preferredName?.trim();
 		const nameFromIdentity = identity.name?.trim();
 		const name =
-			nameFromIdentity && nameFromIdentity.length >= 2
+			(preferred && preferred.length >= 2 ? preferred : undefined) ??
+			(nameFromIdentity && nameFromIdentity.length >= 2
 				? nameFromIdentity
-				: (email.split("@")[0] ?? "User");
+				: undefined) ??
+			email.split("@")[0] ??
+			"User";
 
 		return await ctx.db.insert("users", {
 			clerkId: identity.subject,

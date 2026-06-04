@@ -47,11 +47,13 @@ export const dashboardLayout = {
 export const assets = {
 	favicon:
 		"https://80f7ebbdfe50de63f29ee1570f54307b.cdn.bubble.io/cdn-cgi/image/w=128,h=,f=auto,dpr=1,fit=contain/f1775019895521x225525945447615700/favicon.png",
-	logo: "https://80f7ebbdfe50de63f29ee1570f54307b.cdn.bubble.io/cdn-cgi/image/w=384,h=384,f=auto,dpr=1,fit=contain/f1777634183357x710043754012557300/logo_LB.png",
+	logo: "https://80f7ebbdfe50de63f29ee1570f54307b.cdn.bubble.io/cdn-cgi/image/w=384,h=384,f=auto,dpr=2,fit=contain/f1777634183357x710043754012557300/logo_LB.png",
 	heroBackground:
 		"https://80f7ebbdfe50de63f29ee1570f54307b.cdn.bubble.io/cdn-cgi/image/w=1024,h=738,f=auto,dpr=1,fit=cover/f1770806706801x964274406078293100/IMG_3497%20%282%29.PNG",
 	heroPanelImage:
 		"https://80f7ebbdfe50de63f29ee1570f54307b.cdn.bubble.io/cdn-cgi/image/w=,h=,f=auto,dpr=1,fit=cover/f1773403070196x543437914641407000/IMG_3497.png",
+	authPanelBackground:
+		"https://80f7ebbdfe50de63f29ee1570f54307b.cdn.bubble.io/cdn-cgi/image/w=768,h=914,f=auto,dpr=2,fit=cover/f1773403070196x543437914641407000/IMG_3497.png",
 	loaderLottie:
 		"https://lottie.host/439c6a07-3c1e-46a5-9107-95e5ea9e86c5/tmOWSnHsPq.lottie",
 	whiteLogo:

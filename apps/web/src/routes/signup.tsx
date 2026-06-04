@@ -1,9 +1,7 @@
 import { useAuth } from "@clerk/react";
-import { APP_NAME } from "@legacy-building/ui/lib/brand";
 import { createFileRoute, Link, Navigate } from "@tanstack/react-router";
-import { GoogleOAuthButton } from "@/components/auth/google-oauth-button";
+import { AuthLayout } from "@/components/auth/auth-layout";
 import { SignUpForm } from "@/components/auth/sign-up-form";
-import { signupMetadataFromType } from "@/lib/auth/signup-metadata";
 import { ROUTES } from "@/lib/routes";
 
 export const Route = createFileRoute("/signup")({
@@ -16,7 +14,6 @@ export const Route = createFileRoute("/signup")({
 function SignUpPage() {
 	const { isLoaded, isSignedIn } = useAuth();
 	const { type } = Route.useSearch();
-	const unsafeMetadata = signupMetadataFromType(type ?? null);
 	const signInHref = type
 		? `/login?type=${encodeURIComponent(type)}`
 		: ROUTES.login;
@@ -28,7 +25,7 @@ function SignUpPage() {
 	if (!isLoaded) {
 		return (
 			<div
-				className="flex min-h-svh flex-col items-center justify-center gap-4"
+				className="flex min-h-svh flex-col items-center justify-center gap-4 bg-background"
 				aria-busy="true"
 				aria-live="polite"
 			>
@@ -42,49 +39,27 @@ function SignUpPage() {
 	}
 
 	return (
-		<div className="relative flex min-h-svh flex-col bg-background text-foreground">
-			<div className="flex flex-1 flex-col items-center justify-center px-5 py-10 sm:px-8">
-				<div className="w-full max-w-md">
-					<header className="mb-8 flex shrink-0 items-center">
-						<span className="font-heading font-semibold text-foreground text-lg tracking-tight">
-							{APP_NAME}
-						</span>
-					</header>
-
-					<main className="flex w-full flex-col">
-						<h1 className="font-heading font-semibold text-4xl text-foreground leading-tight tracking-tight sm:text-[2.5rem]">
-							Create your account.
-						</h1>
-						<p className="mt-3 text-base text-muted-foreground leading-relaxed">
-							Sign up to get started. It only takes a minute.
-						</p>
-						<div className="mt-8 flex flex-col gap-6">
-							<SignUpForm unsafeMetadata={unsafeMetadata} />
-							<div className="relative py-1">
-								<div className="absolute inset-0 flex items-center" aria-hidden>
-									<span className="w-full border-border border-t" />
-								</div>
-								<div className="relative flex justify-center font-medium text-muted-foreground text-xs uppercase tracking-[0.14em]">
-									<span className="bg-background px-3">Or</span>
-								</div>
-							</div>
-							<GoogleOAuthButton
-								mode="sign-up"
-								unsafeMetadata={unsafeMetadata}
-							/>
-							<p className="text-center text-muted-foreground text-sm">
-								Already have an account?{" "}
-								<Link
-									to={signInHref}
-									className="font-semibold text-foreground underline underline-offset-4 hover:text-foreground/80"
-								>
-									Sign in
-								</Link>
-							</p>
-						</div>
-					</main>
-				</div>
+		<AuthLayout>
+			<div className="flex flex-col gap-1">
+				<h1 className="font-bold font-heading text-[1.75rem] text-foreground leading-tight tracking-tight">
+					Create an Account
+				</h1>
+				<p className="text-muted-foreground text-sm">
+					Create your account to start writing your story.
+				</p>
 			</div>
-		</div>
+			<div className="mt-6 flex flex-col gap-4">
+				<SignUpForm signupType={type} />
+				<p className="text-center text-muted-foreground text-sm">
+					Already have an Account?{" "}
+					<Link
+						to={signInHref}
+						className="font-semibold text-primary hover:opacity-80"
+					>
+						Login
+					</Link>
+				</p>
+			</div>
+		</AuthLayout>
 	);
 }

@@ -1,12 +1,17 @@
 import { useSignIn } from "@clerk/expo";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { type Href, Link, useRouter } from "expo-router";
+import { type Href, useRouter } from "expo-router";
+import { useState } from "react";
 import { Controller, useForm } from "react-hook-form";
-import { Pressable, Text, TextInput, View } from "react-native";
+import { Text, View } from "react-native";
+
+import { AuthCodeField } from "@/components/auth/auth-code-field";
+import { AuthField } from "@/components/auth/auth-field";
+import { AuthHeader } from "@/components/auth/auth-header";
+import { AuthPrimaryButton } from "@/components/auth/auth-primary-button";
+import { AuthScreen } from "@/components/auth/auth-screen";
 import {
-	type ForgotPasswordCodeFormValues,
 	type ForgotPasswordEmailFormValues,
-	forgotPasswordCodeSchema,
 	forgotPasswordEmailSchema,
 	type NewPasswordFormValues,
 	newPasswordSchema,
@@ -19,20 +24,17 @@ function pushDecoratedUrl(
 ) {
 	const url = decorateUrl(href);
 	const nextHref = url.startsWith("http") ? new URL(url).pathname : url;
-	router.push(nextHref as Href);
+	router.replace(nextHref as Href);
 }
 
 export default function ForgotPasswordPage() {
 	const { signIn, errors, fetchStatus } = useSignIn();
 	const router = useRouter();
+	const [codeRootError, setCodeRootError] = useState<string | undefined>();
 
 	const emailForm = useForm<ForgotPasswordEmailFormValues>({
 		resolver: zodResolver(forgotPasswordEmailSchema),
 		defaultValues: { email: "" },
-	});
-	const codeForm = useForm<ForgotPasswordCodeFormValues>({
-		resolver: zodResolver(forgotPasswordCodeSchema),
-		defaultValues: { code: "" },
 	});
 	const passwordForm = useForm<NewPasswordFormValues>({
 		resolver: zodResolver(newPasswordSchema),
@@ -50,24 +52,22 @@ export default function ForgotPasswordPage() {
 			});
 			return;
 		}
-
 		const { error: sendError } = await signIn.resetPasswordEmailCode.sendCode();
 		if (sendError) {
 			emailForm.setError("root", {
-				message: sendError.longMessage ?? "Could not send reset code.",
+				message: sendError.longMessage ?? "Could not send reset email.",
 			});
 		}
 	});
 
-	const verifyCode = codeForm.handleSubmit(async ({ code }) => {
+	const verifyCode = async (code: string) => {
 		if (!signIn) return;
+		setCodeRootError(undefined);
 		const { error } = await signIn.resetPasswordEmailCode.verifyCode({ code });
 		if (error) {
-			codeForm.setError("root", {
-				message: error.longMessage ?? "Could not verify reset code.",
-			});
+			setCodeRootError(error.longMessage ?? "Could not verify reset code.");
 		}
-	});
+	};
 
 	const submitPassword = passwordForm.handleSubmit(async ({ password }) => {
 		if (!signIn) return;
@@ -80,17 +80,15 @@ export default function ForgotPasswordPage() {
 			});
 			return;
 		}
-
 		if (signIn.status === "complete") {
 			await signIn.finalize({
 				navigate: ({ session, decorateUrl }) => {
 					if (session?.currentTask) return;
-					pushDecoratedUrl(router, decorateUrl, "/");
+					pushDecoratedUrl(router, decorateUrl, "/(drawer)");
 				},
 			});
 			return;
 		}
-
 		passwordForm.setError("root", {
 			message: "Password reset could not be completed.",
 		});
@@ -99,175 +97,106 @@ export default function ForgotPasswordPage() {
 	if (signIn.status === "needs_new_password") {
 		const fieldErrors = passwordForm.formState.errors;
 		return (
-			<View className="flex-1 bg-background px-5 pt-8">
-				<Text className="mb-2 font-semibold text-2xl text-foreground tracking-tight">
-					Set new password
-				</Text>
-				<Text className="mb-4 text-muted-foreground text-sm leading-relaxed">
-					Choose a new password for your account.
-				</Text>
-				<View className="gap-3">
-					<Controller
-						control={passwordForm.control}
-						name="password"
-						render={({ field: { onChange, value } }) => (
-							<TextInput
-								className="h-12 rounded-full border border-border bg-popover px-5 text-base text-foreground"
-								value={value}
-								placeholder="New password"
-								placeholderTextColor="#999"
-								secureTextEntry
-								onChangeText={onChange}
-							/>
-						)}
+			<AuthScreen
+				header={
+					<AuthHeader
+						title="Reset Password"
+						backHref="/sign-in"
+						backLabel="Log in"
 					/>
-					{fieldErrors.password ? (
-						<Text className="ml-2 text-destructive text-xs">
-							{fieldErrors.password.message}
-						</Text>
-					) : null}
-					{errors.fields.password ? (
-						<Text className="ml-2 text-destructive text-xs">
-							{errors.fields.password.message}
-						</Text>
-					) : null}
-					{fieldErrors.root ? (
-						<Text className="text-destructive text-xs">
+				}
+			>
+				<View className="gap-5">
+					<AuthField
+						label="New password"
+						secureTextEntry
+						value={passwordForm.watch("password")}
+						onChangeText={(v) => passwordForm.setValue("password", v)}
+						error={
+							fieldErrors.password?.message ?? errors.fields.password?.message
+						}
+					/>
+					{fieldErrors.root?.message ? (
+						<Text className="text-red-300 text-xs">
 							{fieldErrors.root.message}
 						</Text>
 					) : null}
-					<Pressable
-						className="mt-2 h-12 items-center justify-center rounded-full bg-primary active:opacity-70 disabled:opacity-50"
-						disabled={fetchStatus === "fetching"}
+					<AuthPrimaryButton
+						label="Update password"
 						onPress={submitPassword}
-					>
-						<Text className="font-semibold text-base text-primary-foreground">
-							Update password
-						</Text>
-					</Pressable>
+						loading={fetchStatus === "fetching"}
+					/>
 				</View>
-			</View>
+			</AuthScreen>
 		);
 	}
 
 	if (signIn.status === "needs_first_factor") {
-		const fieldErrors = codeForm.formState.errors;
 		return (
-			<View className="flex-1 bg-background px-5 pt-8">
-				<Text className="mb-2 font-semibold text-2xl text-foreground tracking-tight">
-					Enter reset code
-				</Text>
-				<Text className="mb-4 text-muted-foreground text-sm leading-relaxed">
-					Check your email for a reset code.
-				</Text>
-				<View className="gap-3">
-					<Controller
-						control={codeForm.control}
-						name="code"
-						render={({ field: { onChange, value } }) => (
-							<TextInput
-								className="h-12 rounded-full border border-border bg-popover px-5 text-base text-foreground"
-								value={value}
-								placeholder="Reset code"
-								placeholderTextColor="#999"
-								keyboardType="numeric"
-								onChangeText={onChange}
-							/>
-						)}
+			<AuthScreen
+				header={
+					<AuthHeader
+						title="Reset Password"
+						backHref="/sign-in"
+						backLabel="Log in"
 					/>
-					{fieldErrors.code ? (
-						<Text className="ml-2 text-destructive text-xs">
-							{fieldErrors.code.message}
-						</Text>
-					) : null}
-					{errors.fields.code ? (
-						<Text className="ml-2 text-destructive text-xs">
-							{errors.fields.code.message}
-						</Text>
-					) : null}
-					{fieldErrors.root ? (
-						<Text className="text-destructive text-xs">
-							{fieldErrors.root.message}
-						</Text>
-					) : null}
-					<Pressable
-						className="mt-2 h-12 items-center justify-center rounded-full bg-primary active:opacity-70 disabled:opacity-50"
-						disabled={fetchStatus === "fetching"}
-						onPress={verifyCode}
-					>
-						<Text className="font-semibold text-base text-primary-foreground">
-							Verify code
-						</Text>
-					</Pressable>
-					<Pressable
-						className="mt-1 h-10 items-center justify-center active:opacity-70"
-						onPress={() => void signIn.resetPasswordEmailCode.sendCode()}
-					>
-						<Text className="font-semibold text-primary text-sm">
-							Send a new code
-						</Text>
-					</Pressable>
-				</View>
-			</View>
+				}
+			>
+				<AuthCodeField
+					hint="Check your email for a reset code."
+					fieldError={errors.fields.code?.message}
+					rootError={codeRootError}
+					loading={fetchStatus === "fetching"}
+					onVerify={verifyCode}
+				/>
+			</AuthScreen>
 		);
 	}
 
 	const fieldErrors = emailForm.formState.errors;
 
 	return (
-		<View className="flex-1 bg-background px-5 pt-8">
-			<Text className="mb-2 font-semibold text-2xl text-foreground tracking-tight">
-				Reset password
-			</Text>
-			<Text className="mb-4 text-muted-foreground text-sm leading-relaxed">
-				We will send a reset code to your email.
-			</Text>
-			<View className="gap-3">
+		<AuthScreen
+			header={
+				<AuthHeader
+					title="Reset Password"
+					backHref="/sign-in"
+					backLabel="Log in"
+				/>
+			}
+		>
+			<View className="gap-5">
+				<Text className="text-base text-primary-foreground leading-6">
+					Enter the email associated with your account
+				</Text>
 				<Controller
 					control={emailForm.control}
 					name="email"
 					render={({ field: { onChange, value } }) => (
-						<TextInput
-							className="h-12 rounded-full border border-border bg-popover px-5 text-base text-foreground"
-							autoCapitalize="none"
+						<AuthField
+							hideLabel
 							value={value}
-							placeholder="Email"
-							placeholderTextColor="#999"
-							keyboardType="email-address"
 							onChangeText={onChange}
+							autoCapitalize="none"
+							keyboardType="email-address"
+							autoComplete="email"
+							error={
+								fieldErrors.email?.message ?? errors.fields.identifier?.message
+							}
 						/>
 					)}
 				/>
-				{fieldErrors.email ? (
-					<Text className="ml-2 text-destructive text-xs">
-						{fieldErrors.email.message}
-					</Text>
-				) : null}
-				{errors.fields.identifier ? (
-					<Text className="ml-2 text-destructive text-xs">
-						{errors.fields.identifier.message}
-					</Text>
-				) : null}
-				{fieldErrors.root ? (
-					<Text className="text-destructive text-xs">
+				{fieldErrors.root?.message ? (
+					<Text className="text-red-300 text-xs">
 						{fieldErrors.root.message}
 					</Text>
 				) : null}
-				<Pressable
-					className="mt-2 h-12 items-center justify-center rounded-full bg-primary active:opacity-70 disabled:opacity-50"
-					disabled={fetchStatus === "fetching"}
+				<AuthPrimaryButton
+					label="Send Reset Email"
 					onPress={sendCode}
-				>
-					<Text className="font-semibold text-base text-primary-foreground">
-						Send reset code
-					</Text>
-				</Pressable>
-				<Link href="/sign-in">
-					<Text className="mt-2 font-semibold text-primary text-sm">
-						Back to sign in
-					</Text>
-				</Link>
+					loading={fetchStatus === "fetching"}
+				/>
 			</View>
-		</View>
+		</AuthScreen>
 	);
 }

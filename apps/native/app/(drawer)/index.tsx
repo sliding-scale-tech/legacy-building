@@ -7,8 +7,8 @@ import {
 	Unauthenticated,
 	useQuery,
 } from "convex/react";
-import { Link } from "expo-router";
-import { Button, Separator, Spinner, Surface } from "heroui-native";
+import { Redirect } from "expo-router";
+import { Separator, Spinner, Surface } from "heroui-native";
 import { Text, View } from "react-native";
 
 import { Container } from "@/components/container";
@@ -82,18 +82,7 @@ export default function Home() {
 				</Surface>
 			</Authenticated>
 			<Unauthenticated>
-				<View className="mt-4 gap-3">
-					<Link href="/(auth)/sign-in" asChild>
-						<Button variant="primary" className="w-full">
-							<Button.Label>Sign In</Button.Label>
-						</Button>
-					</Link>
-					<Link href="/(auth)/sign-up" asChild>
-						<Button variant="tertiary">
-							<Button.Label>Sign Up</Button.Label>
-						</Button>
-					</Link>
-				</View>
+				<Redirect href="/(auth)" />
 			</Unauthenticated>
 			<AuthLoading>
 				<View className="mt-4 items-center">

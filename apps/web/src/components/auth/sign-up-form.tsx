@@ -1,11 +1,13 @@
 import { useSignUp } from "@clerk/react";
 import { zodResolver } from "@hookform/resolvers/zod";
 import {
+	clerkFieldMessage,
 	combinedFieldErrors,
 	fieldHasError,
 	hasClerkFieldErrors,
 } from "@legacy-building/ui/components/auth-field-error";
 import { Button } from "@legacy-building/ui/components/button";
+import { Checkbox } from "@legacy-building/ui/components/checkbox";
 import {
 	Field,
 	FieldError,
@@ -14,26 +16,39 @@ import {
 import { Input } from "@legacy-building/ui/components/input";
 import { firstClerkErrorMessage } from "@legacy-building/ui/lib/clerk-errors";
 import { navigateAfterAuth } from "@legacy-building/ui/lib/navigation";
-import { useNavigate } from "@tanstack/react-router";
+import { Link, useNavigate } from "@tanstack/react-router";
 import { Controller, useForm } from "react-hook-form";
+import { PasswordInput } from "@/components/auth/password-input";
 import { type SignUpFormValues, signUpSchema } from "@/lib/auth/schemas";
-import { splitFullName } from "@/lib/auth/signup-metadata";
+import { signupMetadataFromType } from "@/lib/auth/signup-metadata";
 import { ROUTES } from "@/lib/routes";
 
 const authFieldClass =
-	"h-12 rounded-full border-border bg-popover px-5 text-base shadow-sm placeholder:text-muted-foreground md:text-sm";
+	"h-11 rounded-lg border-border bg-background px-4 text-base shadow-none placeholder:text-muted-foreground md:text-sm";
+
+const authLabelClass = "font-medium text-foreground text-sm";
+
+const submitButtonClass =
+	"mt-2 h-11 w-full rounded-full bg-primary font-semibold text-base text-primary-foreground hover:bg-primary/90";
 
 type Props = {
-	unsafeMetadata?: Record<string, unknown>;
+	/** Optional `?type=` search param (role metadata). */
+	signupType?: string;
 };
 
-export function SignUpForm({ unsafeMetadata }: Props) {
+export function SignUpForm({ signupType }: Props) {
 	const { signUp, errors, fetchStatus } = useSignUp();
 	const navigate = useNavigate();
 
 	const form = useForm<SignUpFormValues>({
 		resolver: zodResolver(signUpSchema),
-		defaultValues: { fullName: "", email: "", password: "" },
+		defaultValues: {
+			username: "",
+			email: "",
+			password: "",
+			confirmPassword: "",
+			acceptTerms: false as unknown as true,
+		},
 	});
 
 	const finalizeSignUp = async () => {
@@ -49,22 +64,28 @@ export function SignUpForm({ unsafeMetadata }: Props) {
 		}
 	};
 
-	const onSubmit = form.handleSubmit(async ({ fullName, email, password }) => {
+	const onSubmit = form.handleSubmit(async ({ username, email, password }) => {
 		form.clearErrors("root");
 		if (!signUp) return;
 
-		const { firstName, lastName } = splitFullName(fullName);
+		await signUp.reset();
 
+		const trimmedUsername = username.trim();
+		const roleMetadata = signupMetadataFromType(signupType ?? null);
 		const { error: signUpError } = await signUp.password({
 			emailAddress: email.trim(),
 			password,
-			firstName,
-			lastName,
-			unsafeMetadata,
+			username: trimmedUsername,
+			...(roleMetadata ? { unsafeMetadata: roleMetadata } : {}),
 		});
 
 		if (signUpError) {
 			console.error(signUpError);
+			form.setError("root", {
+				message:
+					firstClerkErrorMessage(signUpError) ??
+					"Could not sign up. Please try again.",
+			});
 			return;
 		}
 
@@ -98,29 +119,34 @@ export function SignUpForm({ unsafeMetadata }: Props) {
 	const rootError = form.formState.errors.root;
 
 	return (
-		<form onSubmit={onSubmit} className="flex flex-col gap-4" noValidate>
+		<form onSubmit={onSubmit} className="flex flex-col gap-3" noValidate>
 			<Controller
-				name="fullName"
+				name="username"
 				control={form.control}
-				render={({ field, fieldState }) => (
-					<Field data-invalid={fieldState.invalid}>
-						<FieldLabel htmlFor={field.name} className="sr-only">
-							Full name
-						</FieldLabel>
-						<Input
-							{...field}
-							id={field.name}
-							type="text"
-							autoComplete="name"
-							placeholder="Full name"
-							className={authFieldClass}
-							aria-invalid={fieldState.invalid}
-						/>
-						{fieldState.invalid ? (
-							<FieldError errors={[fieldState.error]} />
-						) : null}
-					</Field>
-				)}
+				render={({ field, fieldState }) => {
+					const clerkMessage = clerkFieldMessage(errors.fields.username);
+					const invalid = fieldHasError(fieldState.invalid, clerkMessage);
+					return (
+						<Field data-invalid={invalid}>
+							<FieldLabel htmlFor={field.name} className={authLabelClass}>
+								Username
+							</FieldLabel>
+							<Input
+								{...field}
+								id={field.name}
+								type="text"
+								autoComplete="username"
+								className={authFieldClass}
+								aria-invalid={invalid}
+							/>
+							{invalid ? (
+								<FieldError
+									errors={combinedFieldErrors(fieldState.error, clerkMessage)}
+								/>
+							) : null}
+						</Field>
+					);
+				}}
 			/>
 			<Controller
 				name="email"
@@ -130,7 +156,7 @@ export function SignUpForm({ unsafeMetadata }: Props) {
 					const invalid = fieldHasError(fieldState.invalid, clerkMessage);
 					return (
 						<Field data-invalid={invalid}>
-							<FieldLabel htmlFor={field.name} className="sr-only">
+							<FieldLabel htmlFor={field.name} className={authLabelClass}>
 								Email
 							</FieldLabel>
 							<Input
@@ -138,7 +164,6 @@ export function SignUpForm({ unsafeMetadata }: Props) {
 								id={field.name}
 								type="email"
 								autoComplete="email"
-								placeholder="Email"
 								className={authFieldClass}
 								aria-invalid={invalid}
 							/>
@@ -159,15 +184,13 @@ export function SignUpForm({ unsafeMetadata }: Props) {
 					const invalid = fieldHasError(fieldState.invalid, clerkMessage);
 					return (
 						<Field data-invalid={invalid}>
-							<FieldLabel htmlFor={field.name} className="sr-only">
+							<FieldLabel htmlFor={field.name} className={authLabelClass}>
 								Password
 							</FieldLabel>
-							<Input
+							<PasswordInput
 								{...field}
 								id={field.name}
-								type="password"
 								autoComplete="new-password"
-								placeholder="Password (6+ characters)"
 								className={authFieldClass}
 								aria-invalid={invalid}
 							/>
@@ -180,6 +203,68 @@ export function SignUpForm({ unsafeMetadata }: Props) {
 					);
 				}}
 			/>
+			<Controller
+				name="confirmPassword"
+				control={form.control}
+				render={({ field, fieldState }) => (
+					<Field data-invalid={fieldState.invalid}>
+						<FieldLabel htmlFor={field.name} className={authLabelClass}>
+							Confirm Password
+						</FieldLabel>
+						<PasswordInput
+							{...field}
+							id={field.name}
+							autoComplete="new-password"
+							className={authFieldClass}
+							aria-invalid={fieldState.invalid}
+						/>
+						{fieldState.invalid ? (
+							<FieldError errors={[fieldState.error]} />
+						) : null}
+					</Field>
+				)}
+			/>
+			<Controller
+				name="acceptTerms"
+				control={form.control}
+				render={({ field, fieldState }) => (
+					<Field data-invalid={fieldState.invalid}>
+						<div className="flex items-start gap-2.5">
+							<Checkbox
+								id={field.name}
+								name={field.name}
+								checked={field.value === true}
+								onCheckedChange={(checked) => field.onChange(checked === true)}
+								onBlur={field.onBlur}
+								aria-invalid={fieldState.invalid}
+								className="mt-0.5 size-[18px] rounded border-primary/60"
+							/>
+							<label
+								htmlFor={field.name}
+								className="cursor-pointer select-none text-foreground text-sm leading-snug"
+							>
+								I agree to the{" "}
+								<Link
+									to={ROUTES.terms}
+									className="underline underline-offset-2 hover:text-primary"
+								>
+									Terms of Service
+								</Link>{" "}
+								and{" "}
+								<Link
+									to={ROUTES.privacy}
+									className="underline underline-offset-2 hover:text-primary"
+								>
+									Privacy Policy
+								</Link>
+							</label>
+						</div>
+						{fieldState.invalid ? (
+							<FieldError errors={[fieldState.error]} />
+						) : null}
+					</Field>
+				)}
+			/>
 			{rootError && !hasClerkFieldErrors(errors.fields) ? (
 				<FieldError errors={[rootError]} />
 			) : null}
@@ -187,9 +272,9 @@ export function SignUpForm({ unsafeMetadata }: Props) {
 				type="submit"
 				variant="default"
 				disabled={fetchStatus === "fetching" || form.formState.isSubmitting}
-				className="mt-1 h-12 w-full rounded-full font-semibold text-base"
+				className={submitButtonClass}
 			>
-				Create account
+				Sign Up
 			</Button>
 			<div id="clerk-captcha" />
 		</form>

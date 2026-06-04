@@ -1,3 +1,4 @@
+import { useUser } from "@clerk/react";
 import { api } from "@legacy-building/backend/convex/_generated/api";
 import { Button } from "@legacy-building/ui/components/button";
 import { useCurrentUser } from "@legacy-building/ui/hooks/use-current-user";
@@ -11,7 +12,23 @@ type DashboardUserGateProps = {
 
 const CONNECTION_TIMEOUT_MS = 20_000;
 
+function preferredNameFromClerkUser(
+	user: ReturnType<typeof useUser>["user"],
+): string | undefined {
+	const clerkUsername = user?.username?.trim();
+	if (clerkUsername && clerkUsername.length >= 2) {
+		return clerkUsername;
+	}
+	const legacy = user?.unsafeMetadata?.displayName;
+	if (typeof legacy === "string") {
+		const trimmed = legacy.trim();
+		if (trimmed.length >= 2) return trimmed;
+	}
+	return undefined;
+}
+
 export function DashboardUserGate({ children }: DashboardUserGateProps) {
+	const { user } = useUser();
 	const { convexUser, isLoading, isSignedIn } = useCurrentUser();
 	const ensureCurrentUser = useMutation(api.user.mutations.ensureCurrentUser);
 
@@ -43,7 +60,9 @@ export function DashboardUserGate({ children }: DashboardUserGateProps) {
 		setEnsuring(true);
 		setSetupError(null);
 
-		ensureCurrentUser({})
+		ensureCurrentUser({
+			preferredName: preferredNameFromClerkUser(user),
+		})
 			.catch((err) => {
 				ensureAttempted.current = false;
 				const message =
@@ -55,7 +74,7 @@ export function DashboardUserGate({ children }: DashboardUserGateProps) {
 			.finally(() => {
 				setEnsuring(false);
 			});
-	}, [convexUser, ensureCurrentUser, isLoading, isSignedIn]);
+	}, [convexUser, ensureCurrentUser, isLoading, isSignedIn, user]);
 
 	const retrySetup = () => {
 		ensureAttempted.current = false;
