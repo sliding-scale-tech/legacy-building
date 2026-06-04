@@ -36,6 +36,7 @@ export default defineSchema({
 		profilePictureId: v.optional(v.id("_storage")),
 		deviceInfo: v.optional(deviceInfoValidator),
 		agreedToTermsAt: v.optional(v.number()),
+		welcomeCompletedAt: v.optional(v.number()),
 		stripeCustomerId: v.optional(v.string()),
 		subscriptionStatus: v.optional(userSubscriptionStatusValidator),
 	})

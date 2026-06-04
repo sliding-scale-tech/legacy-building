@@ -20,7 +20,7 @@ export function LegalPageNavbar() {
 	const { isSignedIn, isLoaded } = useAuth();
 	const navigate = useNavigate();
 
-	const logoHref = isSignedIn ? ROUTES.dashboardDesk : ROUTES.home;
+	const logoHref = isSignedIn ? ROUTES.dashboardDesk : ROUTES.login;
 
 	const handleBack = () => {
 		if (typeof window !== "undefined" && window.history.length > 1) {
@@ -28,7 +28,7 @@ export function LegalPageNavbar() {
 			return;
 		}
 		void navigate({
-			to: isSignedIn ? ROUTES.dashboardDesk : ROUTES.home,
+			to: isSignedIn ? ROUTES.dashboardDesk : ROUTES.login,
 		});
 	};
 

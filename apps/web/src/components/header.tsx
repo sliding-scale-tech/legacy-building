@@ -8,10 +8,9 @@ import { ModeToggle } from "./mode-toggle";
 
 export default function Header() {
 	const { isSignedIn } = useAuth();
-	const links = [
-		{ to: "/", label: "Home" },
-		{ to: "/dashboard", label: "Dashboard" },
-	] as const;
+	const links = isSignedIn
+		? ([{ to: ROUTES.dashboard, label: "Dashboard" }] as const)
+		: ([{ to: ROUTES.login, label: "Sign in" }] as const);
 
 	return (
 		<div>
