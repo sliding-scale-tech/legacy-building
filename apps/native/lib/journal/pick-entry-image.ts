@@ -1,3 +1,4 @@
+import { File } from "expo-file-system";
 import * as ImagePicker from "expo-image-picker";
 
 const MAX_BYTES = 8 * 1024 * 1024;
@@ -28,6 +29,21 @@ function guessMimeFromUri(uri: string): string {
 	return "image/jpeg";
 }
 
+async function resolveImageSizeBytes(
+	uri: string,
+	reportedSize?: number,
+): Promise<number | null> {
+	if (reportedSize != null && reportedSize > 0) {
+		return reportedSize;
+	}
+
+	const file = new File(uri);
+	if (!file.exists || file.size <= 0) {
+		return null;
+	}
+	return file.size;
+}
+
 async function processResult(
 	result: ImagePicker.ImagePickerResult,
 ): Promise<PickEntryImageResult> {
@@ -42,15 +58,24 @@ async function processResult(
 			message: "Please pick a JPEG, PNG, WebP, or GIF image.",
 		};
 	}
-	if (asset.fileSize && asset.fileSize > MAX_BYTES) {
+
+	const sizeBytes = await resolveImageSizeBytes(asset.uri, asset.fileSize);
+	if (sizeBytes === null) {
+		return {
+			kind: "error",
+			message: "Could not determine image size. Please try another image.",
+		};
+	}
+	if (sizeBytes > MAX_BYTES) {
 		return { kind: "error", message: "Image must be 8 MB or smaller." };
 	}
+
 	return {
 		kind: "picked",
 		image: {
 			uri: asset.uri,
 			mimeType,
-			sizeBytes: asset.fileSize ?? 0,
+			sizeBytes,
 		},
 	};
 }

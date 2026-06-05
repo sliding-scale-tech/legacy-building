@@ -2,9 +2,6 @@ import { Pressable, Text, View } from "react-native";
 
 export type EntryMode = "writing" | "recording";
 
-const ALERT_COLOR = "#dca114";
-const ALERT_LIGHT = "#fff4db";
-
 type EntryModeTabsProps = {
 	value: EntryMode;
 	onChange: (next: EntryMode) => void;
@@ -14,7 +11,6 @@ type EntryModeTabsProps = {
  * Writing | Recording tab toggle.
  * - Writing (teal): solid teal when active, faded teal when inactive.
  * - Recording (amber): solid amber when active, light-amber when inactive.
- * Always shows white text when active. Inactive shows the muted variant.
  */
 export function EntryModeTabs({ value, onChange }: EntryModeTabsProps) {
 	const writingActive = value === "writing";
@@ -41,14 +37,16 @@ export function EntryModeTabs({ value, onChange }: EntryModeTabsProps) {
 				accessibilityRole="button"
 				accessibilityState={{ selected: recordingActive }}
 				accessibilityLabel="Recording journal"
-				className="flex-1 items-center justify-center rounded-2xl px-4 py-3 active:opacity-85"
-				style={{
-					backgroundColor: recordingActive ? ALERT_COLOR : ALERT_LIGHT,
-				}}
+				className={`flex-1 items-center justify-center rounded-2xl px-4 py-3 active:opacity-85 ${
+					recordingActive ? "bg-warning" : "bg-warning-soft"
+				}`}
 			>
 				<Text
-					className="font-semibold text-base"
-					style={{ color: recordingActive ? "#ffffff" : ALERT_COLOR }}
+					className={`font-semibold text-base ${
+						recordingActive
+							? "text-warning-foreground"
+							: "text-warning-soft-foreground"
+					}`}
 				>
 					Recording Journal
 				</Text>

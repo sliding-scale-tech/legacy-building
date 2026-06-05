@@ -35,9 +35,7 @@ import {
 	pickEntryImageFromLibrary,
 } from "@/lib/journal/pick-entry-image";
 import { uploadBinaryToConvex } from "@/lib/journal/upload-binary";
-
-const ALERT_COLOR = "#dca114";
-const ALERT_LIGHT = "#fff4db";
+import { useMutationToast } from "@/lib/mutation-toast";
 
 function messageFromError(err: unknown, fallback: string): string {
 	if (err instanceof ConvexError) {
@@ -59,8 +57,14 @@ export default function NewEntryScreen() {
 		api.journal.mutations.generateUploadUrl,
 	);
 
-	const accent = useThemeColor("accent");
-	const muted = useThemeColor("muted-foreground");
+	const mutationToast = useMutationToast();
+	const [accent, accentForeground, foreground, placeholderColor] =
+		useThemeColor([
+			"accent",
+			"accent-foreground",
+			"foreground",
+			"field-placeholder",
+		]);
 
 	const [mode, setMode] = useState<EntryMode>("writing");
 	const [title, setTitle] = useState("");
@@ -178,11 +182,11 @@ export default function NewEntryScreen() {
 				audioId,
 			});
 
+			mutationToast.success("Entry saved!");
 			router.back();
 		} catch (err) {
-			Alert.alert(
-				"Could not save entry",
-				messageFromError(err, "Please try again."),
+			mutationToast.error(
+				messageFromError(err, "Could not save entry. Please try again."),
 			);
 		} finally {
 			setSubmitting(false);
@@ -196,17 +200,16 @@ export default function NewEntryScreen() {
 		image,
 		journalId,
 		mode,
+		mutationToast,
 		title,
 	]);
 
 	const isRecordingMode = mode === "recording";
-	const backgroundClass = isRecordingMode ? "" : "bg-secondary/30";
-	const backgroundStyle = isRecordingMode
-		? { backgroundColor: ALERT_LIGHT }
-		: undefined;
 
 	return (
-		<View className={`flex-1 ${backgroundClass}`} style={backgroundStyle}>
+		<View
+			className={`flex-1 ${isRecordingMode ? "bg-warning-soft" : "bg-secondary/30"}`}
+		>
 			{/* Teal header */}
 			<View
 				className="bg-primary px-4 pb-4"
@@ -220,7 +223,7 @@ export default function NewEntryScreen() {
 						className="flex-row items-center gap-1 active:opacity-70"
 						hitSlop={8}
 					>
-						<Ionicons name="chevron-back" size={22} color="#ffffff" />
+						<Ionicons name="chevron-back" size={22} color={accentForeground} />
 						<Text className="font-medium text-base text-primary-foreground">
 							Cancel
 						</Text>
@@ -243,7 +246,7 @@ export default function NewEntryScreen() {
 						hitSlop={8}
 					>
 						{submitting ? (
-							<ActivityIndicator color="#ffffff" />
+							<ActivityIndicator color={accentForeground} />
 						) : (
 							<Text className="font-semibold text-base text-primary-foreground">
 								Create
@@ -274,7 +277,7 @@ export default function NewEntryScreen() {
 									value={title}
 									onChangeText={setTitle}
 									placeholder=""
-									placeholderTextColor={muted}
+									placeholderTextColor={placeholderColor}
 									className={`h-14 rounded-2xl border bg-background px-4 text-base text-foreground ${
 										showErrors && !title.trim()
 											? "border-destructive"
@@ -303,7 +306,7 @@ export default function NewEntryScreen() {
 									value={body}
 									onChangeText={setBody}
 									placeholder="Type here..."
-									placeholderTextColor={muted}
+									placeholderTextColor={placeholderColor}
 									multiline
 									numberOfLines={8}
 									textAlignVertical="top"
@@ -330,7 +333,11 @@ export default function NewEntryScreen() {
 											accessibilityLabel="Remove photo"
 											className="absolute top-2 right-2 size-9 items-center justify-center rounded-full bg-black/55 active:opacity-80"
 										>
-											<Ionicons name="close" size={20} color="#ffffff" />
+											<Ionicons
+												name="close"
+												size={20}
+												color={accentForeground}
+											/>
 										</Pressable>
 									</View>
 								) : (
@@ -344,7 +351,7 @@ export default function NewEntryScreen() {
 											<Ionicons
 												name="camera-outline"
 												size={26}
-												color="#333333"
+												color={foreground}
 											/>
 											<Text className="font-semibold text-base text-foreground">
 												Take Photo
@@ -360,7 +367,7 @@ export default function NewEntryScreen() {
 											<Ionicons
 												name="images-outline"
 												size={26}
-												color="#333333"
+												color={foreground}
 											/>
 											<Text className="font-semibold text-base text-foreground">
 												Choose from Library

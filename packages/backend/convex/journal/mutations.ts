@@ -49,6 +49,13 @@ export const create = mutation({
 	handler: async (ctx, args) => {
 		const userId = await requireClerkUserId(ctx);
 
+		if (args.endDateMs !== undefined && args.endDateMs < args.dateMs) {
+			throw new ConvexError({
+				code: "INVALID_ARGUMENT",
+				message: "End date must be on or after the start date.",
+			});
+		}
+
 		let coverImageUrl: string | undefined;
 		if (args.coverImageId) {
 			const resolved = await ctx.storage.getUrl(args.coverImageId);

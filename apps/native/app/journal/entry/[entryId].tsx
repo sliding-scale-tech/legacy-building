@@ -11,6 +11,7 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import { EntryAudioPlayer } from "@/components/library/entry-audio-player";
 import { formatDateLong } from "@/lib/journal/formatDate";
+import { useMutationToast } from "@/lib/mutation-toast";
 
 function messageFromError(err: unknown, fallback: string): string {
 	if (err instanceof ConvexError) {
@@ -28,6 +29,8 @@ export default function JournalEntryDetailScreen() {
 	const entryId = params.entryId as Id<"journalEntries"> | undefined;
 
 	const accent = useThemeColor("accent");
+	const accentForeground = useThemeColor("accent-foreground");
+	const mutationToast = useMutationToast();
 
 	const entry = useQuery(
 		api.journal.entries.queries.getById,
@@ -62,11 +65,11 @@ export default function JournalEntryDetailScreen() {
 		if (!entryId) return;
 		try {
 			await removeEntry({ id: entryId });
+			mutationToast.success("Entry deleted.");
 			router.back();
 		} catch (err) {
-			Alert.alert(
-				"Could not delete entry",
-				messageFromError(err, "Please try again."),
+			mutationToast.error(
+				messageFromError(err, "Could not delete entry. Please try again."),
 			);
 		}
 	};
@@ -88,7 +91,7 @@ export default function JournalEntryDetailScreen() {
 						className="size-11 items-center justify-center rounded-full bg-white/15 active:opacity-70"
 						hitSlop={6}
 					>
-						<Ionicons name="chevron-back" size={24} color="#ffffff" />
+						<Ionicons name="chevron-back" size={24} color={accentForeground} />
 					</Pressable>
 
 					<Pressable
@@ -98,7 +101,7 @@ export default function JournalEntryDetailScreen() {
 						className="size-11 items-center justify-center rounded-full bg-white/15 active:opacity-70"
 						hitSlop={6}
 					>
-						<Ionicons name="menu" size={24} color="#ffffff" />
+						<Ionicons name="menu" size={24} color={accentForeground} />
 					</Pressable>
 				</View>
 			</View>

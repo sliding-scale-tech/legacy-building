@@ -126,9 +126,10 @@ export function DateField({
 	};
 
 	const handleConfirm = () => {
-		if (pendingKey) {
-			onChange(calendarKeyToMonthDayYear(pendingKey));
-		}
+		if (!pendingKey) return;
+		const formatted = calendarKeyToMonthDayYear(pendingKey);
+		if (!formatted) return;
+		onChange(formatted);
 		setOpen(false);
 	};
 
@@ -165,14 +166,14 @@ export function DateField({
 				onRequestClose={handleCancel}
 			>
 				<Pressable
-					className="flex-1 items-center justify-center bg-black/50 px-6"
+					className="flex-1 items-center justify-center bg-overlay px-6"
 					onPress={handleCancel}
 				>
 					<Pressable
-						className="w-full max-w-[360px] overflow-hidden rounded-2xl bg-background"
+						className="w-full max-w-[360px] overflow-hidden rounded-2xl border border-border bg-background"
 						onPress={(e) => e.stopPropagation()}
 						style={{
-							shadowColor: "#000",
+							shadowColor: foreground,
 							shadowOpacity: 0.18,
 							shadowRadius: 16,
 							shadowOffset: { width: 0, height: 8 },

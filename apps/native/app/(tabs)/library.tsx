@@ -69,7 +69,11 @@ export default function LibraryScreen() {
 							<Spinner size="lg" />
 						</View>
 					) : journals.length === 0 ? (
-						<LibraryEmptyState storyLabel={storyLabel} />
+						<LibraryEmptyState
+							storyLabel={storyLabel}
+							ctaLabel="Create Journal"
+							onPressCta={goToCreate}
+						/>
 					) : (
 						journals.map((journal) => (
 							<JournalListItem

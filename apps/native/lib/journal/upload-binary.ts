@@ -23,7 +23,7 @@ export async function uploadBinaryToConvex(args: {
 	mimeType: string;
 	generateUploadUrl: () => Promise<string>;
 }): Promise<Id<"_storage">> {
-	const source = await ensureReadableFile(args.uri);
+	const { file: source, staged } = await ensureReadableFile(args.uri);
 
 	if (!source.exists) {
 		throw new ConvexError({
@@ -32,37 +32,53 @@ export async function uploadBinaryToConvex(args: {
 		});
 	}
 
-	const uploadUrl = await args.generateUploadUrl();
-
-	const result = await source.upload(uploadUrl, {
-		httpMethod: "POST",
-		uploadType: UploadType.BINARY_CONTENT,
-		headers: { "Content-Type": args.mimeType },
-	});
-
-	if (result.status < 200 || result.status >= 300) {
-		throw new ConvexError({
-			code: "UPLOAD_FAILED",
-			message: `Upload failed (status ${result.status}).`,
-		});
-	}
-
-	let parsed: { storageId?: Id<"_storage"> };
 	try {
-		parsed = JSON.parse(result.body) as { storageId?: Id<"_storage"> };
+		const uploadUrl = await args.generateUploadUrl();
+
+		const result = await source.upload(uploadUrl, {
+			httpMethod: "POST",
+			uploadType: UploadType.BINARY_CONTENT,
+			headers: { "Content-Type": args.mimeType },
+		});
+
+		if (result.status < 200 || result.status >= 300) {
+			throw new ConvexError({
+				code: "UPLOAD_FAILED",
+				message: `Upload failed (status ${result.status}).`,
+			});
+		}
+
+		let parsed: { storageId?: Id<"_storage"> };
+		try {
+			parsed = JSON.parse(result.body) as { storageId?: Id<"_storage"> };
+		} catch {
+			throw new ConvexError({
+				code: "UPLOAD_FAILED",
+				message: "Upload response was not valid JSON.",
+			});
+		}
+		if (!parsed.storageId) {
+			throw new ConvexError({
+				code: "UPLOAD_FAILED",
+				message: "Upload response did not include a storage id.",
+			});
+		}
+		return parsed.storageId;
+	} finally {
+		if (staged) {
+			cleanupStagedFile(source);
+		}
+	}
+}
+
+function cleanupStagedFile(file: File) {
+	try {
+		if (file.exists) {
+			file.delete();
+		}
 	} catch {
-		throw new ConvexError({
-			code: "UPLOAD_FAILED",
-			message: "Upload response was not valid JSON.",
-		});
+		// Best-effort cache cleanup — upload already succeeded or failed.
 	}
-	if (!parsed.storageId) {
-		throw new ConvexError({
-			code: "UPLOAD_FAILED",
-			message: "Upload response did not include a storage id.",
-		});
-	}
-	return parsed.storageId;
 }
 
 /**
@@ -74,7 +90,9 @@ export async function uploadBinaryToConvex(args: {
  *
  * If the copy fails for any reason we fall back to the original file.
  */
-async function ensureReadableFile(uri: string): Promise<File> {
+async function ensureReadableFile(
+	uri: string,
+): Promise<{ file: File; staged: boolean }> {
 	const original = new File(uri);
 	const extension = original.extension || ".bin";
 	const destination = new File(
@@ -85,10 +103,10 @@ async function ensureReadableFile(uri: string): Promise<File> {
 	try {
 		await original.copy(destination);
 		if (destination.exists) {
-			return destination;
+			return { file: destination, staged: true };
 		}
 	} catch {
 		// Copy failed (e.g. unusual URI scheme) — upload the original directly.
 	}
-	return original;
+	return { file: original, staged: false };
 }

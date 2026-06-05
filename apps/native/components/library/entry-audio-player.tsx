@@ -1,9 +1,7 @@
 import { Ionicons } from "@expo/vector-icons";
 import { useAudioPlayer, useAudioPlayerStatus } from "expo-audio";
+import { useThemeColor } from "heroui-native/hooks";
 import { Pressable, Text, View } from "react-native";
-
-const ALERT_COLOR = "#dca114";
-const ALERT_LIGHT = "#fff4db";
 
 function formatClock(seconds: number): string {
 	if (!Number.isFinite(seconds) || seconds < 0) return "0:00";
@@ -21,6 +19,7 @@ type EntryAudioPlayerProps = {
 export function EntryAudioPlayer({ uri }: EntryAudioPlayerProps) {
 	const player = useAudioPlayer({ uri });
 	const status = useAudioPlayerStatus(player);
+	const warningForeground = useThemeColor("warning-foreground");
 
 	const isPlaying = status.playing;
 	const duration = status.duration || 0;
@@ -42,33 +41,26 @@ export function EntryAudioPlayer({ uri }: EntryAudioPlayerProps) {
 	};
 
 	return (
-		<View
-			className="gap-3 rounded-2xl px-4 py-4"
-			style={{ backgroundColor: ALERT_LIGHT }}
-		>
+		<View className="gap-3 rounded-2xl bg-warning-soft px-4 py-4">
 			<View className="flex-row items-center gap-3">
 				<Pressable
 					onPress={handleToggle}
 					accessibilityRole="button"
 					accessibilityLabel={isPlaying ? "Pause" : "Play"}
-					className="size-12 items-center justify-center rounded-full active:opacity-85"
-					style={{ backgroundColor: ALERT_COLOR }}
+					className="size-12 items-center justify-center rounded-full bg-warning active:opacity-85"
 				>
 					<Ionicons
 						name={isPlaying ? "pause" : "play"}
 						size={22}
-						color="#ffffff"
+						color={warningForeground}
 					/>
 				</Pressable>
 
 				<View className="flex-1 gap-1.5">
 					<View className="h-1.5 overflow-hidden rounded-full bg-black/10">
 						<View
-							className="h-full rounded-full"
-							style={{
-								backgroundColor: ALERT_COLOR,
-								width: `${Math.round(progress * 100)}%`,
-							}}
+							className="h-full rounded-full bg-warning"
+							style={{ width: `${Math.round(progress * 100)}%` }}
 						/>
 					</View>
 					<View className="flex-row justify-between">

@@ -8,11 +8,9 @@ import {
 	useAudioRecorder,
 	useAudioRecorderState,
 } from "expo-audio";
+import { useThemeColor } from "heroui-native/hooks";
 import { useEffect, useState } from "react";
 import { Alert, Linking, Pressable, Text, View } from "react-native";
-
-const ALERT_COLOR = "#dca114";
-const ALERT_LIGHT = "#fff4db";
 
 function formatDuration(ms: number): string {
 	if (!Number.isFinite(ms) || ms < 0) return "0:00";
@@ -50,9 +48,13 @@ export function AudioRecorderField({
 	const player = useAudioPlayer(value ? { uri: value.uri } : null);
 	const playerStatus = useAudioPlayerStatus(player);
 
+	const [warningForeground, foreground] = useThemeColor([
+		"warning-foreground",
+		"foreground",
+	]);
+
 	const [preparing, setPreparing] = useState(false);
 
-	// Configure audio mode once.
 	useEffect(() => {
 		void setAudioModeAsync({
 			allowsRecording: true,
@@ -127,7 +129,6 @@ export function AudioRecorderField({
 		onChange(null);
 	};
 
-	// Idle / Recording state — show the big circle button.
 	if (!value) {
 		const showStop = isRecording;
 		return (
@@ -139,12 +140,9 @@ export function AudioRecorderField({
 					disabled={disabled || preparing}
 					accessibilityRole="button"
 					accessibilityLabel={showStop ? "Stop recording" : "Start recording"}
-					className="size-44 items-center justify-center rounded-full active:opacity-90"
+					className="size-44 items-center justify-center rounded-full border-[5px] border-warning bg-muted active:opacity-90"
 					style={{
-						backgroundColor: "#e0e0e0",
-						borderWidth: 5,
-						borderColor: ALERT_COLOR,
-						shadowColor: "#000",
+						shadowColor: foreground,
 						shadowOpacity: 0.12,
 						shadowRadius: 10,
 						shadowOffset: { width: 0, height: 4 },
@@ -154,11 +152,11 @@ export function AudioRecorderField({
 					<Ionicons
 						name={showStop ? "stop" : "mic"}
 						size={64}
-						color="#333333"
+						color={foreground}
 					/>
 				</Pressable>
 
-				<Text className="font-semibold text-xl" style={{ color: ALERT_COLOR }}>
+				<Text className="font-semibold text-warning text-xl">
 					{showStop
 						? formatDuration(recorderState.durationMillis ?? 0)
 						: "Record"}
@@ -170,25 +168,20 @@ export function AudioRecorderField({
 		);
 	}
 
-	// Recorded state — show playback row.
 	return (
 		<View className="gap-3 py-4">
-			<View
-				className="flex-row items-center gap-3 rounded-2xl px-4 py-4"
-				style={{ backgroundColor: ALERT_LIGHT }}
-			>
+			<View className="flex-row items-center gap-3 rounded-2xl bg-warning-soft px-4 py-4">
 				<Pressable
 					onPress={handleTogglePlay}
 					disabled={disabled}
 					accessibilityRole="button"
 					accessibilityLabel={isPlaying ? "Pause" : "Play"}
-					className="size-12 items-center justify-center rounded-full active:opacity-85"
-					style={{ backgroundColor: ALERT_COLOR }}
+					className="size-12 items-center justify-center rounded-full bg-warning active:opacity-85"
 				>
 					<Ionicons
 						name={isPlaying ? "pause" : "play"}
 						size={22}
-						color="#ffffff"
+						color={warningForeground}
 					/>
 				</Pressable>
 
@@ -208,12 +201,7 @@ export function AudioRecorderField({
 					accessibilityLabel="Re-record"
 					className="rounded-full px-3 py-2 active:opacity-70"
 				>
-					<Text
-						className="font-semibold text-sm"
-						style={{ color: ALERT_COLOR }}
-					>
-						Re-record
-					</Text>
+					<Text className="font-semibold text-sm text-warning">Re-record</Text>
 				</Pressable>
 			</View>
 		</View>

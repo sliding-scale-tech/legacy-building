@@ -14,7 +14,7 @@ type JournalEntryRowProps = {
 /**
  * Row used inside the journal detail list. White card with the entry title and
  * date on the left, and a teal half-circle on the right with a book (writing)
- * or microphone (recording) icon. Matches the screenshot.
+ * or microphone (recording) icon.
  */
 export function JournalEntryRow({
 	title,
@@ -22,16 +22,19 @@ export function JournalEntryRow({
 	mode = "writing",
 	onPress,
 }: JournalEntryRowProps) {
-	const accent = useThemeColor("accent");
+	const [accentForeground, foreground] = useThemeColor([
+		"accent-foreground",
+		"foreground",
+	]);
 
 	return (
 		<Pressable
 			onPress={onPress}
 			accessibilityRole="button"
 			accessibilityLabel={`Open entry ${title}`}
-			className="relative overflow-hidden rounded-2xl bg-background pl-4 active:opacity-90"
+			className="relative overflow-hidden rounded-2xl bg-background pl-4 active:scale-[0.98] active:opacity-90"
 			style={{
-				shadowColor: "#000",
+				shadowColor: foreground,
 				shadowOpacity: 0.06,
 				shadowRadius: 6,
 				shadowOffset: { width: 0, height: 1 },
@@ -52,9 +55,8 @@ export function JournalEntryRow({
 				</View>
 
 				<View
-					className="w-20 items-center justify-center"
+					className="w-20 items-center justify-center bg-accent"
 					style={{
-						backgroundColor: accent,
 						borderTopLeftRadius: 999,
 						borderBottomLeftRadius: 999,
 					}}
@@ -62,7 +64,7 @@ export function JournalEntryRow({
 					<Ionicons
 						name={mode === "recording" ? "mic" : "book"}
 						size={24}
-						color="#ffffff"
+						color={accentForeground}
 					/>
 				</View>
 			</View>

@@ -54,7 +54,25 @@ export function monthDayYearToCalendarKey(input: string): string | undefined {
 	return date ? dateToCalendarKey(date) : undefined;
 }
 
-export function calendarKeyToMonthDayYear(key: string): string {
-	const [year, month, day] = key.split("-").map(Number);
-	return formatMonthDayYearFromDate(new Date(year, month - 1, day));
+export function calendarKeyToMonthDayYear(key: string): string | null {
+	const match = key.match(/^(\d{4})-(\d{2})-(\d{2})$/);
+	if (!match) return null;
+
+	const year = Number(match[1]);
+	const month = Number(match[2]);
+	const day = Number(match[3]);
+
+	if (month < 1 || month > 12 || day < 1 || day > 31) return null;
+	if (year < 1900 || year > 2999) return null;
+
+	const date = new Date(year, month - 1, day);
+	if (
+		date.getFullYear() !== year ||
+		date.getMonth() !== month - 1 ||
+		date.getDate() !== day
+	) {
+		return null;
+	}
+
+	return formatMonthDayYearFromDate(date);
 }
