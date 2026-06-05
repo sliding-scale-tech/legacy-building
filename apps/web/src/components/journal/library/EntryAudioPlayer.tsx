@@ -88,8 +88,9 @@ export function EntryAudioPlayer({
 			audio.removeEventListener("loadedmetadata", onLoadedMetadata);
 			audio.removeEventListener("durationchange", onDurationChange);
 		};
-	}, [src]);
+	}, []);
 
+	// biome-ignore lint/correctness/useExhaustiveDependencies: reset playback when audio source changes
 	useEffect(() => {
 		setPlaying(false);
 		setCurrentTime(0);

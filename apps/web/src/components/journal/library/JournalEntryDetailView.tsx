@@ -60,6 +60,7 @@ export function JournalEntryDetailView({
 
 	const entry = useQuery(api.journal.entries.queries.getById, { id: entryId });
 
+	// biome-ignore lint/correctness/useExhaustiveDependencies: exit edit mode when viewing a different entry
 	useEffect(() => {
 		setEditing(false);
 	}, [entryId]);

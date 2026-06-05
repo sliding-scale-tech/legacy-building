@@ -17,6 +17,7 @@ export function ImageCarousel({
 }: ImageCarouselProps) {
 	const [activeIndex, setActiveIndex] = useState(0);
 	const count = imageUrls.length;
+	const imageListKey = imageUrls.join("\0");
 
 	const goTo = useCallback(
 		(index: number) => {
@@ -26,17 +27,19 @@ export function ImageCarousel({
 		[count],
 	);
 
+	// biome-ignore lint/correctness/useExhaustiveDependencies: reset slide when images change
 	useEffect(() => {
 		setActiveIndex(0);
-	}, [imageUrls]);
+	}, [imageListKey]);
 
+	// biome-ignore lint/correctness/useExhaustiveDependencies: restart autoplay when images change
 	useEffect(() => {
 		if (count <= 1) return;
 		const id = window.setInterval(() => {
 			setActiveIndex((prev) => (prev + 1) % count);
 		}, intervalMs);
 		return () => window.clearInterval(id);
-	}, [count, intervalMs, imageUrls]);
+	}, [count, intervalMs, imageListKey]);
 
 	if (count === 0) {
 		return (
