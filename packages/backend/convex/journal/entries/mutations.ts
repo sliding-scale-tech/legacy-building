@@ -11,19 +11,24 @@ export const create = mutation({
 		dateMs: v.number(),
 		body: v.optional(v.string()),
 		mode: v.union(v.literal("writing"), v.literal("recording")),
-		imageId: v.id("_storage"),
+		/** Image is now optional — native flow allows entries without a photo. */
+		imageId: v.optional(v.id("_storage")),
 		audioId: v.optional(v.id("_storage")),
 	},
 	handler: async (ctx, args) => {
 		const userId = await requireClerkUserId(ctx);
 		await getOwnedJournal(ctx, args.journalId, userId);
 
-		const imageUrl = await ctx.storage.getUrl(args.imageId);
-		if (!imageUrl) {
-			throw new ConvexError({
-				code: "INVALID_ARGUMENT",
-				message: "Entry image was not found in storage.",
-			});
+		let imageUrl: string | undefined;
+		if (args.imageId) {
+			const resolved = await ctx.storage.getUrl(args.imageId);
+			if (!resolved) {
+				throw new ConvexError({
+					code: "INVALID_ARGUMENT",
+					message: "Entry image was not found in storage.",
+				});
+			}
+			imageUrl = resolved;
 		}
 
 		if (args.mode === "writing") {
