@@ -1,17 +1,27 @@
-import { assets } from "@legacy-building/ui/lib/brand-journal";
-import { type Href, Link, useRouter } from "expo-router";
+import { useAuth } from "@clerk/expo";
+import { type Href, Link, Redirect, useRouter } from "expo-router";
 import { Image, Pressable, Text, View } from "react-native";
 import { AuthPrimaryButton } from "@/components/auth/auth-primary-button";
 import { AuthScreen } from "@/components/auth/auth-screen";
+import { nativeAssets } from "@/lib/assets";
 
 export default function AuthHomePage() {
 	const router = useRouter();
+	const { isLoaded, isSignedIn } = useAuth();
+
+	if (!isLoaded) {
+		return null;
+	}
+
+	if (isSignedIn) {
+		return <Redirect href="/(tabs)" />;
+	}
 
 	return (
 		<AuthScreen scroll={false}>
 			<View className="items-center gap-7">
 				<Image
-					source={{ uri: assets.whiteLogo }}
+					source={{ uri: nativeAssets.whiteLogo }}
 					className="h-[120px] w-[280px]"
 					resizeMode="contain"
 					accessibilityLabel="Legacy Building"

@@ -60,7 +60,6 @@ export default function SignUpPage() {
 			});
 			return;
 		}
-
 		router.push("/verify-email" as Href);
 	});
 

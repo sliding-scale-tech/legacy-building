@@ -8,7 +8,16 @@
 		},
 		"name": "legacy-building",
 		"slug": "legacy-building",
-		"plugins": ["expo-font"],
+		"plugins": [
+			"expo-font",
+			[
+				"expo-image-picker",
+				{
+					"photosPermission": "Legacy Building uses your photos so you can choose a profile picture.",
+					"cameraPermission": "Legacy Building uses your camera so you can take a profile picture."
+				}
+			]
+		],
 		"experiments": {
 			"typedRoutes": true,
 			"reactCompiler": true

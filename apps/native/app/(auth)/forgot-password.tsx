@@ -84,7 +84,7 @@ export default function ForgotPasswordPage() {
 			await signIn.finalize({
 				navigate: ({ session, decorateUrl }) => {
 					if (session?.currentTask) return;
-					pushDecoratedUrl(router, decorateUrl, "/(drawer)");
+					pushDecoratedUrl(router, decorateUrl, "/(tabs)");
 				},
 			});
 			return;

@@ -1,0 +1,51 @@
+---
+description: Native app styling — Uniwind tokens aligned with shared globals.css
+globs: apps/native/**/*.{tsx,ts,css}
+alwaysApply: false
+---
+
+# Native styling (Uniwind)
+
+## Default: Uniwind `className`, not custom styles
+
+- Style React Native views with **Uniwind/Tailwind `className`** utilities.
+- Do **not** add `StyleSheet.create`, inline `style={{ ... }}`, or hardcoded hex/`rgb()`/`oklch()` in components unless there is no token or utility equivalent.
+- Prefer **HeroUI Native** primitives (`Surface`, `Button`, `Card`, etc.) and extend via `className` — do not fork component internals.
+
+## Use shared design tokens
+
+Color and spacing must come from the theme defined in `apps/native/global.css`, which mirrors the shared palette in `packages/ui/src/styles/globals.css` (used by web and admin).
+
+**Prefer semantic tokens:**
+
+- `bg-background`, `text-foreground`
+- `bg-primary`, `text-primary-foreground`
+- `bg-secondary`, `text-secondary-foreground`
+- `text-muted-foreground`, `border-border`, `bg-destructive`
+
+**Avoid:**
+
+```tsx
+// ❌ BAD — one-off colors
+<View style={{ backgroundColor: "#008080" }} />
+<Text className="text-[#1a1a1a]" />
+
+// ✅ GOOD — theme tokens
+<View className="bg-primary" />
+<Text className="text-foreground" />
+```
+
+## Adding or changing tokens
+
+1. Update **shared** values in `packages/ui/src/styles/globals.css` when the color is used across web + native.
+2. Map the same values in `apps/native/global.css` under `@variant light` / `@variant dark` as `--color-*` (Uniwind syntax).
+3. Do not introduce native-only colors in TSX; add them to CSS first, then use `bg-*` / `text-*` classes.
+
+## Theme switching
+
+Use `Uniwind.setTheme("light" | "dark")` via `AppThemeProvider` — do not hand-roll dark-mode color overrides in components.
+
+## Exceptions (rare)
+
+- Third-party components that only accept `style` props: pass theme values via `useThemeColor` from `heroui-native` when a `className` is not supported.
+- Dynamic values (e.g. animated transforms): `style` is fine for the dynamic part only; keep colors/spacing in `className`.
