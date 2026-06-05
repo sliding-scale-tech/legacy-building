@@ -72,7 +72,6 @@ export function DateField({
 		"background",
 		"danger",
 	]);
-
 	const initialKey = useMemo(() => monthDayYearToCalendarKey(value), [value]);
 	const todayKey = useMemo(() => dateToCalendarKey(new Date()), []);
 
