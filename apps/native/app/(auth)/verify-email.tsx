@@ -39,7 +39,7 @@ export default function VerifyEmailPage() {
 			const { error: finalizeError } = await signUp.finalize({
 				navigate: ({ session, decorateUrl }) => {
 					if (session?.currentTask) return;
-					pushDecoratedUrl(router, decorateUrl, "/(drawer)");
+					pushDecoratedUrl(router, decorateUrl, "/(tabs)");
 				},
 			});
 			if (finalizeError) {

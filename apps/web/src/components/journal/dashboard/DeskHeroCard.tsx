@@ -12,8 +12,9 @@ export function DeskHeroCard({ children, className }: DeskHeroCardProps) {
 	return (
 		<div
 			className={cn(
-				"relative w-full overflow-hidden rounded-[20px]",
-				"min-h-[clamp(380px,55svh,500px)]",
+				"relative flex w-full flex-1 overflow-hidden rounded-[20px]",
+				/* Full viewport below the fixed dashboard header (mt-20 = 5rem) */
+				"min-h-[calc(100svh-5rem)]",
 				className,
 			)}
 		>
@@ -32,7 +33,7 @@ export function DeskHeroCard({ children, className }: DeskHeroCardProps) {
 
 			<div
 				className={cn(
-					"relative z-10 flex min-h-[clamp(380px,55svh,500px)] w-full",
+					"relative z-10 flex min-h-full w-full flex-1",
 					"flex-col items-center justify-center gap-4 px-4 py-8",
 					"sm:gap-6 sm:px-6 sm:py-10 md:px-10",
 				)}

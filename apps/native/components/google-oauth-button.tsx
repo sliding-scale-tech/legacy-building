@@ -27,7 +27,7 @@ export function GoogleOAuthButton() {
 		setPending(true);
 
 		try {
-			const redirectUrl = Linking.createURL("/");
+			const redirectUrl = Linking.createURL("/(tabs)");
 			const { createdSessionId, setActive } = await startSSOFlow({
 				strategy: "oauth_google",
 				redirectUrl,

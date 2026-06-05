@@ -1,0 +1,139 @@
+import { useUser } from "@clerk/expo";
+import { api } from "@legacy-building/backend/convex/_generated/api";
+import { assets } from "@legacy-building/ui/lib/brand-journal";
+import { useMutation } from "convex/react";
+import { ConvexError } from "convex/values";
+import { Spinner } from "heroui-native";
+import { useCallback, useEffect, useState } from "react";
+import {
+	Alert,
+	ImageBackground,
+	Linking,
+	ScrollView,
+	Text,
+	View,
+} from "react-native";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
+
+import { DeskProfileAvatar } from "@/components/desk/desk-profile-avatar";
+import { DeskRecentJournal } from "@/components/desk/desk-recent-journal";
+import { useNativeCurrentUser } from "@/hooks/use-native-current-user";
+import {
+	pickProfileImage,
+	uploadProfileImage,
+} from "@/lib/account/upload-profile-picture";
+
+export default function DeskScreen() {
+	const insets = useSafeAreaInsets();
+	const { user } = useUser();
+	const { convexUser, isLoading } = useNativeCurrentUser();
+	const ensureCurrentUser = useMutation(api.user.mutations.ensureCurrentUser);
+	const generateUploadUrl = useMutation(
+		api.user.mutations.generateProfilePictureUploadUrl,
+	);
+	const setProfilePicture = useMutation(api.user.mutations.setProfilePicture);
+
+	const [uploadingAvatar, setUploadingAvatar] = useState(false);
+
+	useEffect(() => {
+		if (isLoading || convexUser) return;
+		void ensureCurrentUser({}).catch(() => {
+			// Clerk webhook may still be syncing the Convex user row.
+		});
+	}, [convexUser, ensureCurrentUser, isLoading]);
+
+	const userName =
+		convexUser?.name ??
+		user?.fullName ??
+		user?.firstName ??
+		user?.username ??
+		"there";
+
+	const avatarUrl =
+		convexUser?.profilePictureUrl ?? user?.imageUrl ?? assets.defaultAvatar;
+
+	const handleAvatarPress = useCallback(async () => {
+		if (uploadingAvatar) return;
+
+		const picked = await pickProfileImage();
+		if (picked.kind === "canceled") return;
+		if (picked.kind === "permission-denied") {
+			Alert.alert(
+				"Photo access needed",
+				"Allow photo access in Settings to change your profile picture.",
+				[
+					{ text: "Cancel", style: "cancel" },
+					{ text: "Open Settings", onPress: () => void Linking.openSettings() },
+				],
+			);
+			return;
+		}
+		if (picked.kind === "error") {
+			Alert.alert("Could not pick photo", picked.message);
+			return;
+		}
+
+		setUploadingAvatar(true);
+		try {
+			const storageId = await uploadProfileImage(picked.image, () =>
+				generateUploadUrl(),
+			);
+			await setProfilePicture({ storageId });
+		} catch (err) {
+			const message =
+				err instanceof ConvexError
+					? typeof err.data === "object" &&
+						err.data !== null &&
+						"message" in err.data
+						? String((err.data as { message: unknown }).message)
+						: "Could not update your profile picture."
+					: err instanceof Error
+						? err.message
+						: "Could not update your profile picture.";
+			Alert.alert("Upload failed", message);
+		} finally {
+			setUploadingAvatar(false);
+		}
+	}, [generateUploadUrl, setProfilePicture, uploadingAvatar]);
+
+	return (
+		<View className="flex-1 bg-background">
+			<View
+				className="bg-primary px-4 pb-4"
+				style={{ paddingTop: insets.top + 12 }}
+			>
+				<Text className="text-center font-semibold text-lg text-primary-foreground">
+					{userName}&apos;s Desk
+				</Text>
+			</View>
+
+			<ImageBackground
+				source={{ uri: assets.deskHeroBackground }}
+				className="flex-1"
+				resizeMode="cover"
+			>
+				{isLoading ? (
+					<View className="flex-1 items-center justify-center">
+						<Spinner size="lg" />
+					</View>
+				) : (
+					<ScrollView
+						className="flex-1"
+						contentContainerClassName="grow items-center px-4 py-10"
+						showsVerticalScrollIndicator={false}
+					>
+						<View className="w-full max-w-sm items-center gap-8">
+							<DeskProfileAvatar
+								src={avatarUrl}
+								onPress={() => void handleAvatarPress()}
+								busy={uploadingAvatar}
+							/>
+
+							<DeskRecentJournal />
+						</View>
+					</ScrollView>
+				)}
+			</ImageBackground>
+		</View>
+	);
+}
