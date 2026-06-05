@@ -1,17 +1,16 @@
 import { useAuth } from "@clerk/expo";
-import { Redirect } from "expo-router";
+import { useRouter } from "expo-router";
+import { useEffect } from "react";
 
-/** Root entry — send users to Desk (signed in) or auth (signed out). */
+/** Root entry — route once after auth loads (no <Redirect> render loops). */
 export default function Index() {
 	const { isLoaded, isSignedIn } = useAuth();
+	const router = useRouter();
 
-	if (!isLoaded) {
-		return null;
-	}
+	useEffect(() => {
+		if (!isLoaded) return;
+		router.replace(isSignedIn ? "/(tabs)" : "/(auth)");
+	}, [isLoaded, isSignedIn, router]);
 
-	if (isSignedIn) {
-		return <Redirect href="/(tabs)" />;
-	}
-
-	return <Redirect href="/(auth)" />;
+	return null;
 }

@@ -2,12 +2,11 @@ import { useAuth } from "@clerk/expo";
 import { Ionicons } from "@expo/vector-icons";
 import { Tabs, useRouter } from "expo-router";
 import { useThemeColor } from "heroui-native/hooks";
-import { useEffect, useMemo, useRef } from "react";
+import { useEffect, useMemo } from "react";
 
 export default function TabLayout() {
 	const { isLoaded, isSignedIn } = useAuth();
 	const router = useRouter();
-	const didRedirect = useRef(false);
 	const [activeTint, inactiveTint, tabBackground, tabBorder] = useThemeColor([
 		"accent",
 		"accent",
@@ -16,12 +15,7 @@ export default function TabLayout() {
 	]);
 
 	useEffect(() => {
-		if (!isLoaded || isSignedIn) {
-			didRedirect.current = false;
-			return;
-		}
-		if (didRedirect.current) return;
-		didRedirect.current = true;
+		if (!isLoaded || isSignedIn) return;
 		router.replace("/(auth)");
 	}, [isLoaded, isSignedIn, router]);
 
