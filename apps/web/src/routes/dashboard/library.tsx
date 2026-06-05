@@ -1,6 +1,6 @@
+import { PageLoader } from "@legacy-building/ui/components/page-loader";
 import { createFileRoute } from "@tanstack/react-router";
 
-import { DashboardLibrarySkeleton } from "@/components/journal/library/DashboardLibrarySkeleton";
 import { DashboardLibraryPage } from "@/features/journal/DashboardLibraryPage";
 import { useSkeletonTransition } from "@/hooks/use-skeleton-transition";
 
@@ -12,7 +12,7 @@ function LibraryRoute() {
 	const showSkeleton = useSkeletonTransition();
 
 	if (showSkeleton) {
-		return <DashboardLibrarySkeleton />;
+		return <PageLoader />;
 	}
 
 	return <DashboardLibraryPage />;

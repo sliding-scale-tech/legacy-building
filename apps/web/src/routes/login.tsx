@@ -1,6 +1,8 @@
 import { useAuth } from "@clerk/react";
+import { PageLoader } from "@legacy-building/ui/components/page-loader";
 import { createFileRoute, Link, Navigate } from "@tanstack/react-router";
 import { useState } from "react";
+
 import { AuthLayout } from "@/components/auth/auth-layout";
 import { GoogleOAuthButton } from "@/components/auth/google-oauth-button";
 import { SignInForm } from "@/components/auth/sign-in-form";
@@ -20,19 +22,7 @@ function LoginPage() {
 	}
 
 	if (!isLoaded) {
-		return (
-			<div
-				className="flex min-h-svh flex-col items-center justify-center gap-4 bg-background"
-				aria-busy="true"
-				aria-live="polite"
-			>
-				<div
-					className="h-8 w-8 animate-spin rounded-full border-2 border-border border-t-primary"
-					aria-hidden
-				/>
-				<p className="text-muted-foreground text-sm">Loading sign in...</p>
-			</div>
-		);
+		return <PageLoader message="Loading sign in..." />;
 	}
 
 	return (

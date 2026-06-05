@@ -11,6 +11,7 @@ import {
 	FieldLabel,
 } from "@legacy-building/ui/components/field";
 import { Input } from "@legacy-building/ui/components/input";
+import { PageLoader } from "@legacy-building/ui/components/page-loader";
 import { firstClerkErrorMessage } from "@legacy-building/ui/lib/clerk-errors";
 import {
 	navigateAfterAuth,
@@ -91,19 +92,18 @@ function VerifyEmailPage() {
 
 	if (!signUp) {
 		return (
-			<div className="flex min-h-svh flex-col items-center justify-center gap-4 px-4">
-				<h1 className="font-semibold text-2xl">Loading verification...</h1>
-				<p className="text-center text-muted-foreground">
-					Please wait while we prepare email verification.
-				</p>
-				<Link
-					to={ROUTES.signup}
-					search={{ type: undefined }}
-					className="text-primary hover:underline"
-				>
-					Back to sign up
-				</Link>
-			</div>
+			<>
+				<PageLoader message="Please wait while we prepare email verification." />
+				<div className="fixed inset-x-0 bottom-10 z-[9999] flex justify-center px-4">
+					<Link
+						to={ROUTES.signup}
+						search={{ type: undefined }}
+						className="text-primary hover:underline"
+					>
+						Back to sign up
+					</Link>
+				</div>
+			</>
 		);
 	}
 

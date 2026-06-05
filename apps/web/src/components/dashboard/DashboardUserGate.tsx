@@ -1,9 +1,9 @@
 import { useUser } from "@clerk/react";
 import { api } from "@legacy-building/backend/convex/_generated/api";
 import { Button } from "@legacy-building/ui/components/button";
+import { PageLoader } from "@legacy-building/ui/components/page-loader";
 import { useCurrentUser } from "@legacy-building/ui/hooks/use-current-user";
 import { useMutation } from "convex/react";
-import { Loader2 } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 
 type DashboardUserGateProps = {
@@ -84,14 +84,14 @@ export function DashboardUserGate({ children }: DashboardUserGateProps) {
 
 	if (isLoading || ensuring) {
 		return (
-			<DashboardGateShell>
-				<Loader2 className="size-8 animate-spin text-[#008080]" aria-hidden />
-				<p className="mt-4 font-medium text-[#1a1a1a] text-sm">
-					{ensuring
+			<PageLoader
+				size={240}
+				message={
+					ensuring
 						? "Setting up your account…"
-						: "Connecting to your workspace…"}
-				</p>
-			</DashboardGateShell>
+						: "Connecting to your workspace…"
+				}
+			/>
 		);
 	}
 
@@ -137,12 +137,7 @@ export function DashboardUserGate({ children }: DashboardUserGateProps) {
 	}
 
 	if (isSignedIn && convexUser === null) {
-		return (
-			<DashboardGateShell>
-				<Loader2 className="size-8 animate-spin text-[#008080]" aria-hidden />
-				<p className="mt-4 text-[#525252] text-sm">Preparing your account…</p>
-			</DashboardGateShell>
-		);
+		return <PageLoader size={240} message="Preparing your account…" />;
 	}
 
 	return children;

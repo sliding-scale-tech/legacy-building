@@ -1,4 +1,5 @@
 import { useClerk, useSignIn, useSignUp } from "@clerk/react";
+import { PageLoader } from "@legacy-building/ui/components/page-loader";
 import {
 	navigateAfterAuth,
 	navigateTo,
@@ -151,13 +152,9 @@ function SsoCallbackPage() {
 	]);
 
 	return (
-		<div className="flex min-h-svh flex-col items-center justify-center gap-4 px-4">
-			<div
-				className="h-8 w-8 animate-spin rounded-full border-2 border-border border-t-primary"
-				aria-hidden
-			/>
-			<p className="text-muted-foreground text-sm">Finishing sign-in…</p>
-			<div id="clerk-captcha" />
-		</div>
+		<>
+			<PageLoader message="Finishing sign-in…" />
+			<div id="clerk-captcha" className="pointer-events-none fixed opacity-0" />
+		</>
 	);
 }

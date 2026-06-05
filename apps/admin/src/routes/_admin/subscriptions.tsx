@@ -2,7 +2,7 @@ import { api } from "@legacy-building/backend/convex/_generated/api";
 import type { Id } from "@legacy-building/backend/convex/_generated/dataModel";
 import { Button } from "@legacy-building/ui/components/button";
 import { Input } from "@legacy-building/ui/components/input";
-import { Skeleton } from "@legacy-building/ui/components/skeleton";
+import { PageLoader } from "@legacy-building/ui/components/page-loader";
 import { createFileRoute } from "@tanstack/react-router";
 import { usePaginatedQuery } from "convex/react";
 import { Search } from "lucide-react";
@@ -113,10 +113,8 @@ function SubscriptionsPage() {
 			</div>
 
 			{isLoadingFirstPage ? (
-				<div className={`${adminCardClass} space-y-3 p-4`}>
-					{["a", "b", "c", "d", "e"].map((id) => (
-						<Skeleton key={id} className="h-12 w-full rounded-lg" />
-					))}
+				<div className={adminCardClass}>
+					<PageLoader overlay={false} className="min-h-[50svh]" />
 				</div>
 			) : (
 				<PaginatedTableFrame

@@ -1,4 +1,5 @@
 import { api } from "@legacy-building/backend/convex/_generated/api";
+import { PageLoader } from "@legacy-building/ui/components/page-loader";
 import { brand } from "@legacy-building/ui/lib/brand-journal";
 import { cn } from "@legacy-building/ui/lib/utils";
 import { useAction, useQuery } from "convex/react";
@@ -215,17 +216,7 @@ export function DashboardBillingPage() {
 	};
 
 	if (isLoading) {
-		return (
-			<div className="relative flex min-h-svh w-full flex-col bg-white">
-				<div className="mt-20 flex flex-1 flex-col px-4 py-8 sm:px-6 md:px-10">
-					<div className="mx-auto w-full max-w-[920px] animate-pulse">
-						<div className="h-[200px] rounded-[20px] bg-[#f0f7f7]" />
-						<div className="mt-6 h-[280px] rounded-[20px] bg-[#f0f7f7]" />
-					</div>
-				</div>
-				<DashboardFooter />
-			</div>
-		);
+		return <PageLoader />;
 	}
 
 	const stateBg =

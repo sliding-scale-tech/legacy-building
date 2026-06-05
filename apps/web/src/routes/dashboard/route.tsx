@@ -1,4 +1,5 @@
 import { buttonVariants } from "@legacy-building/ui/components/button";
+import { PageLoader } from "@legacy-building/ui/components/page-loader";
 import { cn } from "@legacy-building/ui/lib/utils";
 import { createFileRoute, Link, Outlet } from "@tanstack/react-router";
 import { Authenticated, AuthLoading, Unauthenticated } from "convex/react";
@@ -43,9 +44,7 @@ function DashboardLayout() {
 				</div>
 			</Unauthenticated>
 			<AuthLoading>
-				<div className="container mx-auto max-w-3xl px-4 py-8">
-					<div className="h-8 w-48 animate-pulse rounded bg-muted" />
-				</div>
+				<PageLoader />
 			</AuthLoading>
 		</>
 	);

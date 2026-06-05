@@ -1,5 +1,5 @@
 import { api } from "@legacy-building/backend/convex/_generated/api";
-import { Skeleton } from "@legacy-building/ui/components/skeleton";
+import { PageLoader } from "@legacy-building/ui/components/page-loader";
 import { createFileRoute } from "@tanstack/react-router";
 import { useQuery } from "convex/react";
 import { BookOpen, CreditCard, FileText, Users, XCircle } from "lucide-react";
@@ -10,16 +10,6 @@ import { adminContainerClass } from "@/lib/admin-theme";
 export const Route = createFileRoute("/_admin/dashboard")({
 	component: DashboardPage,
 });
-
-function DashboardSkeleton() {
-	return (
-		<div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-			{["a", "b", "c", "d"].map((id) => (
-				<Skeleton key={id} className="h-28 rounded-2xl" />
-			))}
-		</div>
-	);
-}
 
 function DashboardPage() {
 	const insights = useQuery(api.admin.queries.platformInsights);
@@ -36,7 +26,7 @@ function DashboardPage() {
 			</header>
 
 			{insights === undefined ? (
-				<DashboardSkeleton />
+				<PageLoader overlay={false} className="min-h-[50svh]" />
 			) : (
 				<div className="space-y-8">
 					<section>

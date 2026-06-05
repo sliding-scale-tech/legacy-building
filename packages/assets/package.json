@@ -1,0 +1,17 @@
+{
+	"name": "@legacy-building/assets",
+	"version": "0.0.0",
+	"private": true,
+	"type": "module",
+	"exports": {
+		".": "./src/index.ts",
+		"./images/*": "./images/*"
+	},
+	"scripts": {
+		"check-types": "tsc --noEmit"
+	},
+	"devDependencies": {
+		"@legacy-building/config": "workspace:*",
+		"typescript": "catalog:"
+	}
+}

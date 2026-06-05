@@ -1,5 +1,5 @@
 import type { Id } from "@legacy-building/backend/convex/_generated/dataModel";
-import { Skeleton } from "@legacy-building/ui/components/skeleton";
+import { PageLoader } from "@legacy-building/ui/components/page-loader";
 import { cn } from "@legacy-building/ui/lib/utils";
 
 import {
@@ -44,12 +44,8 @@ export function UsersTable({
 }: UsersTableProps) {
 	if (isLoading) {
 		return (
-			<div className={cn(adminCardClass, "overflow-hidden p-4")}>
-				<div className="space-y-3">
-					{["a", "b", "c", "d", "e", "f"].map((id) => (
-						<Skeleton key={id} className="h-12 w-full rounded-lg" />
-					))}
-				</div>
+			<div className={cn(adminCardClass, "overflow-hidden")}>
+				<PageLoader overlay={false} className="min-h-[50svh]" />
 			</div>
 		);
 	}

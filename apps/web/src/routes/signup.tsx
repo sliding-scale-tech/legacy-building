@@ -1,5 +1,7 @@
 import { useAuth } from "@clerk/react";
+import { PageLoader } from "@legacy-building/ui/components/page-loader";
 import { createFileRoute, Link, Navigate } from "@tanstack/react-router";
+
 import { AuthLayout } from "@/components/auth/auth-layout";
 import { SignUpForm } from "@/components/auth/sign-up-form";
 import { ROUTES } from "@/lib/routes";
@@ -23,19 +25,7 @@ function SignUpPage() {
 	}
 
 	if (!isLoaded) {
-		return (
-			<div
-				className="flex min-h-svh flex-col items-center justify-center gap-4 bg-background"
-				aria-busy="true"
-				aria-live="polite"
-			>
-				<div
-					className="h-8 w-8 animate-spin rounded-full border-2 border-border border-t-primary"
-					aria-hidden
-				/>
-				<p className="text-muted-foreground text-sm">Loading sign up...</p>
-			</div>
-		);
+		return <PageLoader message="Loading sign up..." />;
 	}
 
 	return (

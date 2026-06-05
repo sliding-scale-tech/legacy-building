@@ -1,5 +1,6 @@
 import { useUser } from "@clerk/react";
 import { api } from "@legacy-building/backend/convex/_generated/api";
+import { PageLoader } from "@legacy-building/ui/components/page-loader";
 import { useCurrentUser } from "@legacy-building/ui/hooks/use-current-user";
 import { brand } from "@legacy-building/ui/lib/brand-journal";
 import { useMutation } from "convex/react";
@@ -92,16 +93,7 @@ export function DashboardAccountPage() {
 	};
 
 	if (!clerkLoaded || isLoading) {
-		return (
-			<div className="relative flex min-h-svh w-full flex-col bg-white">
-				<div className="mt-20 flex flex-1 flex-col px-4 py-8 sm:px-6 md:px-10">
-					<div className="mx-auto w-full max-w-[560px] animate-pulse">
-						<div className="h-[420px] rounded-[20px] bg-[#f0f7f7]" />
-					</div>
-				</div>
-				<DashboardFooter />
-			</div>
-		);
+		return <PageLoader />;
 	}
 
 	return (
