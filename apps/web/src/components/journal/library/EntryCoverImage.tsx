@@ -1,7 +1,7 @@
 import { api } from "@legacy-building/backend/convex/_generated/api";
 import type { Id } from "@legacy-building/backend/convex/_generated/dataModel";
 import { useQuery } from "convex/react";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 
 type EntryCoverImageProps = {
 	imageId?: Id<"_storage">;
@@ -14,7 +14,7 @@ export function EntryCoverImage({
 	imageUrl,
 	className,
 }: EntryCoverImageProps) {
-	const [loadError, setLoadError] = useState(false);
+	const [failedSrc, setFailedSrc] = useState<string | null>(null);
 
 	const storageUrl = useQuery(
 		api.journal.entries.queries.getEntryImageUrl,
@@ -22,10 +22,7 @@ export function EntryCoverImage({
 	);
 
 	const src = imageUrl ?? storageUrl ?? undefined;
-
-	useEffect(() => {
-		setLoadError(false);
-	}, [src]);
+	const loadError = failedSrc === src;
 
 	if (!src || loadError) {
 		return (
@@ -42,7 +39,7 @@ export function EntryCoverImage({
 			src={src}
 			alt=""
 			className={className}
-			onError={() => setLoadError(true)}
+			onError={() => setFailedSrc(src)}
 		/>
 	);
 }

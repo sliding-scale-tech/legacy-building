@@ -158,7 +158,7 @@ export const createPlanChangeCheckout = action({
 
 		const userId = identity.subject;
 		const subscription = await getActiveSubscriptionForUser(ctx, userId);
-		if (!subscription || subscription.status !== "trialing") {
+		if (subscription?.status !== "trialing") {
 			throw new ConvexError({
 				code: "NOT_ON_TRIAL",
 				message:

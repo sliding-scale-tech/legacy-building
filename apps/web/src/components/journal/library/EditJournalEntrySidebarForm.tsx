@@ -77,14 +77,7 @@ export function EditJournalEntrySidebarForm({
 		setError(null);
 		setShowErrors(false);
 		if (imageRef.current) imageRef.current.value = "";
-	}, [
-		entry._id,
-		entry.title,
-		entry.dateMs,
-		entry.body,
-		entry.imageUrl,
-		entry.audioId,
-	]);
+	}, [entry.title, entry.dateMs, entry.body, entry.imageUrl, entry.audioId]);
 
 	const titleInvalid = !title.trim();
 	const dateInvalid = date === undefined;

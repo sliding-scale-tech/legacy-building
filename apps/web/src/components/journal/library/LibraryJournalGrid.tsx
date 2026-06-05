@@ -94,14 +94,9 @@ export function LibraryJournalGrid({
 	const reorderJournals = useMutation(api.journal.mutations.reorder);
 	const [orderedIds, setOrderedIds] = useState<Id<"journals">[]>([]);
 
-	const serverOrderKey = useMemo(
-		() => journals.map((j) => j._id).join(","),
-		[journals],
-	);
-
 	useEffect(() => {
 		setOrderedIds(journals.map((j) => j._id));
-	}, [serverOrderKey, journals]);
+	}, [journals]);
 
 	const sortedJournals = useMemo(() => {
 		const byId = new Map(journals.map((j) => [j._id, j]));

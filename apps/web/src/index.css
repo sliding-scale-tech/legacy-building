@@ -1,16 +1,16 @@
 @import "@legacy-building/ui/globals.css";
 
 /* react-day-picker: layout via Tailwind in Calendar; prevent default CSS from collapsing weekday row */
-/* biome-ignore lint/complexity/noImportantStyles: overrides react-day-picker inline layout */
 .rdp-root .rdp-weekdays,
 .rdp-root .rdp-week {
+	/* biome-ignore lint/complexity/noImportantStyles: overrides react-day-picker inline layout */
 	display: grid !important;
 	grid-template-columns: repeat(7, minmax(2.25rem, 1fr));
 	width: 100%;
 }
 
-/* biome-ignore lint/complexity/noImportantStyles: overrides react-day-picker inline layout */
 .rdp-root .rdp-weekday {
+	/* biome-ignore lint/complexity/noImportantStyles: overrides react-day-picker inline layout */
 	display: flex !important;
 	align-items: center;
 	justify-content: center;
@@ -18,8 +18,8 @@
 	min-width: 2.25rem;
 }
 
-/* biome-ignore lint/complexity/noImportantStyles: overrides react-day-picker inline layout */
 .rdp-root .rdp-day {
+	/* biome-ignore lint/complexity/noImportantStyles: overrides react-day-picker inline layout */
 	display: flex !important;
 	align-items: center;
 	justify-content: center;

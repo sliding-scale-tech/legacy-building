@@ -140,6 +140,7 @@ export function JournalDetailSheet({
 		}
 	}, [open, exitExportMode]);
 
+	// biome-ignore lint/correctness/useExhaustiveDependencies: reset sheet when selected journal changes
 	useEffect(() => {
 		setSelectedEntryId(null);
 		setJournalEditing(false);
