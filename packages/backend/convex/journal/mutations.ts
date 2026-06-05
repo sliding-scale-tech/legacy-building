@@ -39,37 +39,18 @@ export const create = mutation({
 		dateMs: v.number(),
 		type: journalType,
 		dedication: v.optional(v.string()),
-		/** Cover image is now optional — native create flow allows text-only journals. */
-		coverImageId: v.optional(v.id("_storage")),
-		/** Optional period end date. */
-		endDateMs: v.optional(v.number()),
-		/** Optional inline entry log captured at creation time. */
-		entryLog: v.optional(v.string()),
+		coverImageId: v.id("_storage"),
 	},
 	handler: async (ctx, args) => {
 		const userId = await requireClerkUserId(ctx);
-
-		if (args.endDateMs !== undefined && args.endDateMs < args.dateMs) {
+		const coverImageUrl = await ctx.storage.getUrl(args.coverImageId);
+		if (!coverImageUrl) {
 			throw new ConvexError({
 				code: "INVALID_ARGUMENT",
-				message: "End date must be on or after the start date.",
+				message:
+					"Cover image was not found in storage. Please upload the image again.",
 			});
 		}
-
-		let coverImageUrl: string | undefined;
-		if (args.coverImageId) {
-			const resolved = await ctx.storage.getUrl(args.coverImageId);
-			if (!resolved) {
-				throw new ConvexError({
-					code: "INVALID_ARGUMENT",
-					message:
-						"Cover image was not found in storage. Please upload the image again.",
-				});
-			}
-			coverImageUrl = resolved;
-		}
-
-		const trimmedEntryLog = args.entryLog?.trim();
 
 		const now = Date.now();
 		const sortOrder = await nextSortOrderForType(ctx, userId, args.type);
@@ -81,8 +62,6 @@ export const create = mutation({
 			dedication: args.dedication,
 			coverImageId: args.coverImageId,
 			coverImageUrl,
-			endDateMs: args.endDateMs,
-			entryLog: trimmedEntryLog ? trimmedEntryLog : undefined,
 			updatedAtMs: now,
 			sortOrder,
 		});

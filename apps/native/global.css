@@ -27,11 +27,6 @@
 			--color-ring: oklch(0.723 0.014 214.4);
 			--focus: oklch(0.511 0.096 186.391);
 			--success: oklch(0.511 0.096 186.391);
-			--color-warning: #dca114;
-			--color-warning-foreground: #ffffff;
-			--color-warning-soft: #fff4db;
-			--color-warning-soft-foreground: #dca114;
-			--color-overlay: oklch(0.45 0 0 / 50%);
 		}
 
 		@variant dark {
@@ -55,11 +50,6 @@
 			--color-ring: oklch(0.56 0.021 213.5);
 			--focus: oklch(0.437 0.078 188.216);
 			--success: oklch(0.437 0.078 188.216);
-			--color-warning: #dca114;
-			--color-warning-foreground: #ffffff;
-			--color-warning-soft: oklch(0.35 0.06 86);
-			--color-warning-soft-foreground: #fff4db;
-			--color-overlay: oklch(0.1 0 0 / 60%);
 		}
 	}
 }

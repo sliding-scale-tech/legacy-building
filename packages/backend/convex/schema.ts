@@ -91,10 +91,6 @@ export default defineSchema({
 		updatedAtMs: v.optional(v.number()),
 		/** Manual library order within a story tab (lower = earlier). */
 		sortOrder: v.optional(v.number()),
-		/** Optional end date for the journal period (e.g. "Apr 16 – Jul 2, 2026"). */
-		endDateMs: v.optional(v.number()),
-		/** Optional inline entry log captured at journal creation. */
-		entryLog: v.optional(v.string()),
 	})
 		.index("by_userId", ["userId"])
 		.index("by_userId_and_type", ["userId", "type"]),

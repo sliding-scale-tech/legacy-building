@@ -16,13 +16,6 @@
 					"photosPermission": "Legacy Building uses your photos so you can choose a profile picture.",
 					"cameraPermission": "Legacy Building uses your camera so you can take a profile picture."
 				}
-			],
-			"@react-native-community/datetimepicker",
-			[
-				"expo-audio",
-				{
-					"microphonePermission": "Legacy Building uses your microphone to record journal entries."
-				}
 			]
 		],
 		"experiments": {
