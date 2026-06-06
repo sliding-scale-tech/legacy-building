@@ -141,7 +141,7 @@ export function ViewInvoicesModal({
 													className={cn(
 														"inline-flex rounded-full px-2.5 py-0.5 font-medium text-xs capitalize",
 														invoice.status === "paid"
-															? "bg-green-50 text-green-700 dark:bg-green-500/15 dark:text-green-300"
+															? "bg-primary/10 text-primary"
 															: "bg-muted text-muted-foreground",
 													)}
 												>

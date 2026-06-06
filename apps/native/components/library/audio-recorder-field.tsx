@@ -9,7 +9,7 @@ import {
 	useAudioRecorderState,
 } from "expo-audio";
 import { useThemeColor } from "heroui-native/hooks";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Alert, Linking, Pressable, Text, View } from "react-native";
 
 function formatDuration(ms: number): string {
@@ -45,7 +45,12 @@ export function AudioRecorderField({
 	const recorder = useAudioRecorder(RecordingPresets.HIGH_QUALITY);
 	const recorderState = useAudioRecorderState(recorder);
 
-	const player = useAudioPlayer(value ? { uri: value.uri } : null);
+	const audioUri = value?.uri;
+	const playerSource = useMemo(
+		() => (audioUri ? { uri: audioUri } : null),
+		[audioUri],
+	);
+	const player = useAudioPlayer(playerSource);
 	const playerStatus = useAudioPlayerStatus(player);
 
 	const [warningForeground, foreground] = useThemeColor([
@@ -59,7 +64,9 @@ export function AudioRecorderField({
 		void setAudioModeAsync({
 			allowsRecording: true,
 			playsInSilentMode: true,
-		}).catch(() => {});
+		}).catch((err) => {
+			console.warn("[AudioRecorderField] setAudioModeAsync failed:", err);
+		});
 	}, []);
 
 	const isRecording = recorderState.isRecording;

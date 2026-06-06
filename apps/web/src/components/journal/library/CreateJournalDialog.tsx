@@ -160,7 +160,7 @@ export function CreateJournalDialog({
 		<Dialog open={open} onOpenChange={handleClose}>
 			<DialogContentWithOverlay
 				showCloseButton={false}
-				overlayClassName="z-[2001] bg-[rgba(82,82,82,0.6)]"
+				overlayClassName="z-[2001] bg-foreground/60"
 				className={cn(
 					"fixed top-[100px] right-0 left-0 z-[2002] mx-auto flex w-[calc(100%-20px)] flex-col",
 					"min-h-[296px] min-w-[296px] max-w-[600px]",

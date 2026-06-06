@@ -1,15 +1,27 @@
 import { Ionicons } from "@expo/vector-icons";
 import { api } from "@legacy-building/backend/convex/_generated/api";
 import type { Id } from "@legacy-building/backend/convex/_generated/dataModel";
-import { useQuery } from "convex/react";
+import { useMutation, useQuery } from "convex/react";
+import { ConvexError } from "convex/values";
 import { router, useLocalSearchParams } from "expo-router";
 import { Spinner } from "heroui-native";
 import { useThemeColor } from "heroui-native/hooks";
-import { Pressable, ScrollView, Text, View } from "react-native";
+import { Alert, Pressable, ScrollView, Text, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import { JournalEntryRow } from "@/components/library/journal-entry-row";
 import { formatDateLong } from "@/lib/journal/formatDate";
+import { useMutationToast } from "@/lib/mutation-toast";
+
+function messageFromError(err: unknown, fallback: string): string {
+	if (err instanceof ConvexError) {
+		const data = err.data as { message?: string } | string | undefined;
+		if (typeof data === "string") return data;
+		if (data?.message) return data.message;
+	}
+	if (err instanceof Error) return err.message;
+	return fallback;
+}
 
 export default function JournalDetailScreen() {
 	const insets = useSafeAreaInsets();
@@ -18,6 +30,7 @@ export default function JournalDetailScreen() {
 
 	const accent = useThemeColor("accent");
 	const accentForeground = useThemeColor("accent-foreground");
+	const mutationToast = useMutationToast();
 
 	const journal = useQuery(
 		api.journal.queries.getById,
@@ -27,8 +40,49 @@ export default function JournalDetailScreen() {
 		api.journal.entries.queries.listByJournal,
 		journalId ? { journalId } : "skip",
 	);
+	const removeJournal = useMutation(api.journal.mutations.remove);
 
 	const isLoading = journal === undefined || entries === undefined;
+
+	const handleMenu = () => {
+		if (!journal) return;
+		Alert.alert(journal.title, undefined, [
+			{
+				text: "Delete journal",
+				style: "destructive",
+				onPress: () => confirmDelete(),
+			},
+			{ text: "Cancel", style: "cancel" },
+		]);
+	};
+
+	const confirmDelete = () => {
+		Alert.alert(
+			"Delete journal?",
+			"This will permanently delete the journal and all its entries.",
+			[
+				{ text: "Cancel", style: "cancel" },
+				{
+					text: "Delete",
+					style: "destructive",
+					onPress: () => void doDelete(),
+				},
+			],
+		);
+	};
+
+	const doDelete = async () => {
+		if (!journalId) return;
+		try {
+			await removeJournal({ id: journalId });
+			mutationToast.success("Journal deleted.");
+			router.back();
+		} catch (err) {
+			mutationToast.error(
+				messageFromError(err, "Could not delete journal. Please try again."),
+			);
+		}
+	};
 
 	const goToCreateEntry = () => {
 		if (!journalId) return;
@@ -60,6 +114,8 @@ export default function JournalDetailScreen() {
 					</Pressable>
 
 					<Pressable
+						onPress={handleMenu}
+						disabled={journal === null || journal === undefined}
 						accessibilityRole="button"
 						accessibilityLabel="More options"
 						className="size-9 items-center justify-center rounded-full active:opacity-70"

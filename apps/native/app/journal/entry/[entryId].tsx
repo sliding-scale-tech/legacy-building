@@ -96,9 +96,11 @@ export default function JournalEntryDetailScreen() {
 
 					<Pressable
 						onPress={handleMenu}
+						disabled={!entry}
 						accessibilityRole="button"
 						accessibilityLabel="Entry options"
-						className="size-11 items-center justify-center rounded-full bg-white/15 active:opacity-70"
+						accessibilityState={{ disabled: !entry }}
+						className="size-11 items-center justify-center rounded-full bg-white/15 active:opacity-70 disabled:opacity-40"
 						hitSlop={6}
 					>
 						<Ionicons name="menu" size={24} color={accentForeground} />

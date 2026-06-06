@@ -322,7 +322,7 @@ export function BillingActivePage({ showWelcome }: BillingActivePageProps) {
 												)}
 											</span>
 											{latestInvoice.status === "paid" ? (
-												<span className="rounded-full bg-green-50 px-2 py-0.5 font-medium text-[10px] text-green-700 dark:bg-green-500/15 dark:text-green-300">
+												<span className="rounded-full bg-primary/10 px-2 py-0.5 font-medium text-[10px] text-primary">
 													Paid
 												</span>
 											) : null}

@@ -22,10 +22,10 @@ export function EntryAudioPlayer({ uri }: EntryAudioPlayerProps) {
 	const warningForeground = useThemeColor("warning-foreground");
 
 	const isPlaying = status.playing;
-	const duration = status.duration || 0;
+	const duration = status.duration ?? 0;
 	const current = Math.min(
-		status.currentTime || 0,
-		duration || Number.POSITIVE_INFINITY,
+		status.currentTime ?? 0,
+		duration > 0 ? duration : Number.POSITIVE_INFINITY,
 	);
 	const progress = duration > 0 ? Math.min(current / duration, 1) : 0;
 
