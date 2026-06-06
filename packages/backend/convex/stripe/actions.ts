@@ -629,15 +629,38 @@ export const finalizeEmbeddedTrialSetup = action({
 		const paymentMethodId =
 			typeof paymentMethod === "string" ? paymentMethod : paymentMethod.id;
 
+		const customer = await ctx.runQuery(
+			components.stripe.public.getCustomerByUserId,
+			{ userId: identity.subject },
+		);
+		if (!customer) {
+			throw new ConvexError({
+				code: "NO_STRIPE_CUSTOMER",
+				message: "No billing account found for your user.",
+			});
+		}
+
 		const subscription = await stripe.subscriptions.retrieve(
 			args.subscriptionId,
 		);
+
+		const subscriptionCustomerId =
+			typeof subscription.customer === "string"
+				? subscription.customer
+				: subscription.customer.id;
+
+		if (subscriptionCustomerId !== customer.stripeCustomerId) {
+			throw new ConvexError({
+				code: "FORBIDDEN",
+				message: "This subscription does not belong to your account.",
+			});
+		}
 
 		await stripe.subscriptions.update(args.subscriptionId, {
 			default_payment_method: paymentMethodId,
 		});
 
-		await stripe.customers.update(subscription.customer as string, {
+		await stripe.customers.update(customer.stripeCustomerId, {
 			invoice_settings: { default_payment_method: paymentMethodId },
 		});
 

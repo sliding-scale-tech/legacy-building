@@ -67,7 +67,8 @@ export function CheckoutPage({ plan: initialPlan, flow }: CheckoutPageProps) {
 	// Upgrade checkout cancels the trial sub server-side; keep the user on checkout
 	// even after Convex reports no live subscription.
 	const checkoutSessionActiveRef = useRef(isUpgrade);
-	const initStartedRef = useRef(false);
+	const checkoutInitKeyRef = useRef<string | null>(null);
+	const checkoutInitKey = `${flow}:${plan}`;
 
 	const monthlyProduct = products?.find((p) => p.interval === "monthly");
 	const annualProduct = products?.find((p) => p.interval === "annual");
@@ -90,8 +91,8 @@ export function CheckoutPage({ plan: initialPlan, flow }: CheckoutPageProps) {
 	}, [subscription, navigate, isUpgrade]);
 
 	useEffect(() => {
-		if (initStartedRef.current) return;
-		initStartedRef.current = true;
+		if (checkoutInitKeyRef.current === checkoutInitKey) return;
+		checkoutInitKeyRef.current = checkoutInitKey;
 
 		let cancelled = false;
 
@@ -137,7 +138,7 @@ export function CheckoutPage({ plan: initialPlan, flow }: CheckoutPageProps) {
 				if (!cancelled) {
 					toast.error(messageFromError(error));
 					checkoutSessionActiveRef.current = false;
-					initStartedRef.current = false;
+					checkoutInitKeyRef.current = null;
 					void navigate({
 						to: isUpgrade
 							? ROUTES.dashboardBillingCompare
@@ -154,6 +155,7 @@ export function CheckoutPage({ plan: initialPlan, flow }: CheckoutPageProps) {
 			cancelled = true;
 		};
 	}, [
+		checkoutInitKey,
 		createEmbeddedCheckout,
 		createEmbeddedUpgradeCheckout,
 		isUpgrade,
