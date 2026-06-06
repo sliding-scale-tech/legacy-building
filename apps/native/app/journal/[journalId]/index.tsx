@@ -2,7 +2,6 @@ import { Ionicons } from "@expo/vector-icons";
 import { api } from "@legacy-building/backend/convex/_generated/api";
 import type { Id } from "@legacy-building/backend/convex/_generated/dataModel";
 import { useMutation, useQuery } from "convex/react";
-import { ConvexError } from "convex/values";
 import { router, useLocalSearchParams } from "expo-router";
 import { Spinner } from "heroui-native";
 import { useThemeColor } from "heroui-native/hooks";
@@ -13,16 +12,6 @@ import { JournalEntryRow } from "@/components/library/journal-entry-row";
 import { formatDateLong } from "@/lib/journal/formatDate";
 import { useMutationToast } from "@/lib/mutation-toast";
 
-function messageFromError(err: unknown, fallback: string): string {
-	if (err instanceof ConvexError) {
-		const data = err.data as { message?: string } | string | undefined;
-		if (typeof data === "string") return data;
-		if (data?.message) return data.message;
-	}
-	if (err instanceof Error) return err.message;
-	return fallback;
-}
-
 export default function JournalDetailScreen() {
 	const insets = useSafeAreaInsets();
 	const params = useLocalSearchParams<{ journalId?: string }>();
@@ -30,6 +19,7 @@ export default function JournalDetailScreen() {
 
 	const accent = useThemeColor("accent");
 	const accentForeground = useThemeColor("accent-foreground");
+	const mutedForeground = useThemeColor("muted-foreground");
 	const mutationToast = useMutationToast();
 
 	const journal = useQuery(
@@ -43,6 +33,8 @@ export default function JournalDetailScreen() {
 	const removeJournal = useMutation(api.journal.mutations.remove);
 
 	const isLoading = journal === undefined || entries === undefined;
+	const isMenuDisabled = journal == null;
+	const isCreateEntryDisabled = !journalId || journal === null;
 
 	const handleMenu = () => {
 		if (!journal) return;
@@ -78,9 +70,7 @@ export default function JournalDetailScreen() {
 			mutationToast.success("Journal deleted.");
 			router.back();
 		} catch (err) {
-			mutationToast.error(
-				messageFromError(err, "Could not delete journal. Please try again."),
-			);
+			mutationToast.error(err, "Could not delete journal. Please try again.");
 		}
 	};
 
@@ -115,16 +105,17 @@ export default function JournalDetailScreen() {
 
 					<Pressable
 						onPress={handleMenu}
-						disabled={journal === null || journal === undefined}
+						disabled={isMenuDisabled}
 						accessibilityRole="button"
 						accessibilityLabel="More options"
-						className="size-9 items-center justify-center rounded-full active:opacity-70"
+						accessibilityState={{ disabled: isMenuDisabled }}
+						className="size-9 items-center justify-center rounded-full active:opacity-70 disabled:opacity-40"
 						hitSlop={8}
 					>
 						<Ionicons
 							name="ellipsis-horizontal"
 							size={22}
-							color={accentForeground}
+							color={isMenuDisabled ? mutedForeground : accentForeground}
 						/>
 					</Pressable>
 				</View>
@@ -205,10 +196,11 @@ export default function JournalDetailScreen() {
 			>
 				<Pressable
 					onPress={goToCreateEntry}
-					disabled={!journalId || journal === null}
+					disabled={isCreateEntryDisabled}
 					accessibilityRole="button"
 					accessibilityLabel="Create journal entry"
-					className="h-14 w-full max-w-sm flex-row items-center justify-center gap-2 rounded-full bg-primary active:opacity-90"
+					accessibilityState={{ disabled: isCreateEntryDisabled }}
+					className="h-14 w-full max-w-sm flex-row items-center justify-center gap-2 rounded-full bg-primary active:opacity-90 disabled:opacity-50"
 					style={{
 						shadowColor: "#000",
 						shadowOpacity: 0.15,

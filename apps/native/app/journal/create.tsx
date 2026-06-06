@@ -1,7 +1,6 @@
 import { Ionicons } from "@expo/vector-icons";
 import { api } from "@legacy-building/backend/convex/_generated/api";
 import { useMutation } from "convex/react";
-import { ConvexError } from "convex/values";
 import { router, useLocalSearchParams } from "expo-router";
 import { useThemeColor } from "heroui-native/hooks";
 import { useCallback, useMemo, useState } from "react";
@@ -21,6 +20,7 @@ import {
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import { DateField } from "@/components/library/date-field";
+import { messageFromError } from "@/lib/error-utils";
 import {
 	monthDayYearToDate,
 	parseMonthDayYear,
@@ -35,16 +35,6 @@ import {
 	pickCoverImage,
 	uploadCoverImage,
 } from "@/lib/journal/upload-cover-image";
-
-function messageFromError(err: unknown, fallback: string): string {
-	if (err instanceof ConvexError) {
-		const data = err.data as { message?: string } | string | undefined;
-		if (typeof data === "string") return data;
-		if (data?.message) return data.message;
-	}
-	if (err instanceof Error) return err.message;
-	return fallback;
-}
 
 export default function CreateJournalScreen() {
 	const insets = useSafeAreaInsets();

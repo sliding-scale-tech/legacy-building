@@ -2,7 +2,6 @@ import { Ionicons } from "@expo/vector-icons";
 import { api } from "@legacy-building/backend/convex/_generated/api";
 import type { Id } from "@legacy-building/backend/convex/_generated/dataModel";
 import { useMutation, useQuery } from "convex/react";
-import { ConvexError } from "convex/values";
 import { router, useLocalSearchParams } from "expo-router";
 import { Spinner } from "heroui-native";
 import { useThemeColor } from "heroui-native/hooks";
@@ -12,16 +11,6 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { EntryAudioPlayer } from "@/components/library/entry-audio-player";
 import { formatDateLong } from "@/lib/journal/formatDate";
 import { useMutationToast } from "@/lib/mutation-toast";
-
-function messageFromError(err: unknown, fallback: string): string {
-	if (err instanceof ConvexError) {
-		const data = err.data as { message?: string } | string | undefined;
-		if (typeof data === "string") return data;
-		if (data?.message) return data.message;
-	}
-	if (err instanceof Error) return err.message;
-	return fallback;
-}
 
 export default function JournalEntryDetailScreen() {
 	const insets = useSafeAreaInsets();
@@ -68,9 +57,7 @@ export default function JournalEntryDetailScreen() {
 			mutationToast.success("Entry deleted.");
 			router.back();
 		} catch (err) {
-			mutationToast.error(
-				messageFromError(err, "Could not delete entry. Please try again."),
-			);
+			mutationToast.error(err, "Could not delete entry. Please try again.");
 		}
 	};
 

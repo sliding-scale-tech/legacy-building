@@ -2,7 +2,6 @@ import { Ionicons } from "@expo/vector-icons";
 import { api } from "@legacy-building/backend/convex/_generated/api";
 import type { Id } from "@legacy-building/backend/convex/_generated/dataModel";
 import { useMutation } from "convex/react";
-import { ConvexError } from "convex/values";
 import { router, useLocalSearchParams } from "expo-router";
 import { useThemeColor } from "heroui-native/hooks";
 import { useCallback, useMemo, useState } from "react";
@@ -36,16 +35,6 @@ import {
 } from "@/lib/journal/pick-entry-image";
 import { uploadBinaryToConvex } from "@/lib/journal/upload-binary";
 import { useMutationToast } from "@/lib/mutation-toast";
-
-function messageFromError(err: unknown, fallback: string): string {
-	if (err instanceof ConvexError) {
-		const data = err.data as { message?: string } | string | undefined;
-		if (typeof data === "string") return data;
-		if (data?.message) return data.message;
-	}
-	if (err instanceof Error) return err.message;
-	return fallback;
-}
 
 export default function NewEntryScreen() {
 	const insets = useSafeAreaInsets();
@@ -185,9 +174,7 @@ export default function NewEntryScreen() {
 			mutationToast.success("Entry saved!");
 			router.back();
 		} catch (err) {
-			mutationToast.error(
-				messageFromError(err, "Could not save entry. Please try again."),
-			);
+			mutationToast.error(err, "Could not save entry. Please try again.");
 		} finally {
 			setSubmitting(false);
 		}
