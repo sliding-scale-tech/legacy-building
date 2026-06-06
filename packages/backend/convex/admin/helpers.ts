@@ -3,8 +3,17 @@ import { ConvexError } from "convex/values";
 
 import type { Doc } from "../_generated/dataModel";
 import type { MutationCtx, QueryCtx } from "../_generated/server";
+import { mirroredPaidJournalAccess } from "./billing";
 
 export type AccountStatus = "active" | "suspended";
+
+export type SubscriptionStatusFilter =
+	| "active"
+	| "trialing"
+	| "grace_period"
+	| "canceled"
+	| "none"
+	| "unset";
 
 export type AdminUserSummary = ReturnType<typeof toAdminUserSummary>;
 
@@ -47,6 +56,7 @@ export function toAdminUserSummary(user: Doc<"users">) {
 		role: user.role,
 		accountStatus: effectiveAccountStatus(user),
 		subscriptionStatus: user.subscriptionStatus ?? null,
+		hasPaidJournalAccess: mirroredPaidJournalAccess(user),
 		welcomeCompletedAt: user.welcomeCompletedAt ?? null,
 		agreedToTermsAt: user.agreedToTermsAt ?? null,
 	};
@@ -71,6 +81,7 @@ export function buildUserListPredicate(args: {
 	search?: string;
 	accountStatus?: AccountStatus;
 	role?: "admin" | "user";
+	subscriptionStatus?: SubscriptionStatusFilter;
 }) {
 	return (user: Doc<"users">) => {
 		if (args.search && !userMatchesSearch(user, args.search)) return false;
@@ -81,17 +92,25 @@ export function buildUserListPredicate(args: {
 			return false;
 		}
 		if (args.role && user.role !== args.role) return false;
+		if (args.subscriptionStatus) {
+			const sub = user.subscriptionStatus;
+			if (args.subscriptionStatus === "unset") {
+				if (sub !== undefined) return false;
+			} else if (sub !== args.subscriptionStatus) {
+				return false;
+			}
+		}
 		return true;
 	};
 }
 
 export function buildSubscriberPredicate(args: {
 	search?: string;
-	status?: "active" | "canceled";
+	status?: Exclude<SubscriptionStatusFilter, "unset" | "none">;
 }) {
 	return (user: Doc<"users">) => {
 		const sub = user.subscriptionStatus;
-		if (sub !== "active" && sub !== "canceled") return false;
+		if (!sub || sub === "none") return false;
 		if (args.status && sub !== args.status) return false;
 		if (args.search && !userMatchesSearch(user, args.search)) return false;
 		return true;

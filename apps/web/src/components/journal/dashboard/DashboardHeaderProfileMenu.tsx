@@ -8,9 +8,8 @@ import {
 import { dashboardLayout } from "@legacy-building/ui/lib/brand-journal";
 import { cn } from "@legacy-building/ui/lib/utils";
 import { useNavigate } from "@tanstack/react-router";
-import { CreditCard, LogOut, Tag } from "lucide-react";
+import { CreditCard, LogOut } from "lucide-react";
 
-import { usePricing } from "@/components/billing/PricingProvider";
 import { ROUTES } from "@/lib/routes";
 
 type DashboardHeaderProfileMenuProps = {
@@ -22,7 +21,6 @@ export function DashboardHeaderProfileMenu({
 }: DashboardHeaderProfileMenuProps) {
 	const { signOut } = useClerk();
 	const navigate = useNavigate();
-	const { openPricing } = usePricing();
 	const size = dashboardLayout.headerAvatarSize;
 
 	const handleSignOut = () => {
@@ -67,10 +65,6 @@ export function DashboardHeaderProfileMenu({
 				>
 					<CreditCard className="size-4 shrink-0 text-[#525252]" aria-hidden />
 					Billing
-				</MenuPrimitive.Item>
-				<MenuPrimitive.Item className={itemClass} onClick={openPricing}>
-					<Tag className="size-4 shrink-0 text-[#525252]" aria-hidden />
-					Pricing
 				</MenuPrimitive.Item>
 				<div className="my-1 h-px bg-[#e6e6e6]" aria-hidden />
 				<MenuPrimitive.Item className={itemClass} onClick={handleSignOut}>

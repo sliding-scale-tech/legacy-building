@@ -2,7 +2,7 @@ import { ConvexError, v } from "convex/values";
 
 import { type MutationCtx, mutation } from "../_generated/server";
 import { journalType } from "../schema";
-import { getOwnedJournal, requireClerkUserId } from "./auth";
+import { getOwnedJournal, requirePaidJournalAccess } from "./auth";
 import { journalLibrarySortKey } from "./sort";
 import { deleteEntryStorageFiles, deleteJournalCoverStorage } from "./storage";
 
@@ -28,7 +28,7 @@ async function nextSortOrderForType(
 export const generateUploadUrl = mutation({
 	args: {},
 	handler: async (ctx) => {
-		await requireClerkUserId(ctx);
+		await requirePaidJournalAccess(ctx);
 		return await ctx.storage.generateUploadUrl();
 	},
 });
@@ -39,7 +39,7 @@ export const create = mutation({
 		dateMs: v.number(),
 		type: journalType,
 		dedication: v.optional(v.string()),
-		/** Cover image is now optional — native create flow allows text-only journals. */
+		/** Cover image is optional — native create flow allows text-only journals. */
 		coverImageId: v.optional(v.id("_storage")),
 		/** Optional period end date. */
 		endDateMs: v.optional(v.number()),
@@ -47,14 +47,7 @@ export const create = mutation({
 		entryLog: v.optional(v.string()),
 	},
 	handler: async (ctx, args) => {
-		const userId = await requireClerkUserId(ctx);
-
-		if (args.endDateMs !== undefined && args.endDateMs < args.dateMs) {
-			throw new ConvexError({
-				code: "INVALID_ARGUMENT",
-				message: "End date must be on or after the start date.",
-			});
-		}
+		const userId = await requirePaidJournalAccess(ctx);
 
 		let coverImageUrl: string | undefined;
 		if (args.coverImageId) {
@@ -96,7 +89,7 @@ export const reorder = mutation({
 		orderedIds: v.array(v.id("journals")),
 	},
 	handler: async (ctx, args) => {
-		const userId = await requireClerkUserId(ctx);
+		const userId = await requirePaidJournalAccess(ctx);
 		const journals = await ctx.db
 			.query("journals")
 			.withIndex("by_userId_and_type", (q) =>
@@ -144,7 +137,7 @@ export const update = mutation({
 		coverImageId: v.optional(v.id("_storage")),
 	},
 	handler: async (ctx, args) => {
-		const userId = await requireClerkUserId(ctx);
+		const userId = await requirePaidJournalAccess(ctx);
 		const journal = await getOwnedJournal(ctx, args.id, userId);
 
 		let coverImageId = journal.coverImageId;
@@ -180,7 +173,7 @@ export const update = mutation({
 export const remove = mutation({
 	args: { id: v.id("journals") },
 	handler: async (ctx, args) => {
-		const userId = await requireClerkUserId(ctx);
+		const userId = await requirePaidJournalAccess(ctx);
 		const journal = await getOwnedJournal(ctx, args.id, userId);
 
 		const entries = await ctx.db

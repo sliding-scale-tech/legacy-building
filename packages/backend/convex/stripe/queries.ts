@@ -1,5 +1,8 @@
+import { v } from "convex/values";
+
 import { components } from "../_generated/api";
 import { query } from "../_generated/server";
+import { userHasPaidFeatureAccess } from "./access";
 
 type ComponentSubscription = {
 	stripeSubscriptionId: string;
@@ -11,6 +14,14 @@ type ComponentSubscription = {
 	cancelAtPeriodEnd: boolean;
 	cancelAt?: number;
 };
+
+/** Statuses we treat as an active subscription in the UI. */
+const LIVE_SUBSCRIPTION_STATUSES = new Set([
+	"active",
+	"trialing",
+	"past_due",
+	"unpaid",
+]);
 
 /** Lower is more relevant when picking the subscription to surface in the UI. */
 function statusRank(status: string): number {
@@ -48,7 +59,12 @@ export const getMySubscription = query({
 		);
 		if (subscriptions.length === 0) return null;
 
-		const [subscription] = [...subscriptions].sort(
+		const liveSubscriptions = subscriptions.filter((sub) =>
+			LIVE_SUBSCRIPTION_STATUSES.has(sub.status),
+		);
+		if (liveSubscriptions.length === 0) return null;
+
+		const [subscription] = [...liveSubscriptions].sort(
 			(a, b) =>
 				statusRank(a.status) - statusRank(b.status) ||
 				b.currentPeriodEnd - a.currentPeriodEnd,
@@ -94,6 +110,26 @@ export const getMySubscription = query({
 				: null,
 			pendingPlanChange,
 		};
+	},
+});
+
+/** True when the user has completed payment and can use plan features. */
+export const hasPaidFeatureAccess = query({
+	args: {},
+	returns: v.boolean(),
+	handler: async (ctx) => {
+		const identity = await ctx.auth.getUserIdentity();
+		if (!identity) return false;
+		return userHasPaidFeatureAccess(ctx, identity.subject);
+	},
+});
+
+/** Publishable key for Stripe Elements (safe to expose to signed-in clients). */
+export const getStripePublishableKey = query({
+	args: {},
+	returns: v.union(v.string(), v.null()),
+	handler: async () => {
+		return process.env.STRIPE_PUBLISHABLE_KEY ?? null;
 	},
 });
 

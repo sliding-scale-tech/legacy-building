@@ -1,6 +1,5 @@
 import { useAuth } from "@clerk/expo";
-import { type Href, Link, useRouter } from "expo-router";
-import { useEffect } from "react";
+import { type Href, Link, Redirect, useRouter } from "expo-router";
 import { Image, Pressable, Text, View } from "react-native";
 import { AuthPrimaryButton } from "@/components/auth/auth-primary-button";
 import { AuthScreen } from "@/components/auth/auth-screen";
@@ -10,13 +9,12 @@ export default function AuthHomePage() {
 	const router = useRouter();
 	const { isLoaded, isSignedIn } = useAuth();
 
-	useEffect(() => {
-		if (!isLoaded || !isSignedIn) return;
-		router.replace("/(tabs)");
-	}, [isLoaded, isSignedIn, router]);
-
-	if (!isLoaded || isSignedIn) {
+	if (!isLoaded) {
 		return null;
+	}
+
+	if (isSignedIn) {
+		return <Redirect href="/(tabs)" />;
 	}
 
 	return (

@@ -13,9 +13,9 @@ export function AccountPasswordSection() {
 	const [editing, setEditing] = useState(false);
 
 	return (
-		<div className="flex flex-col gap-1">
-			<div className="flex items-center gap-2">
-				<span className={accountLabelClass}>Password</span>
+		<div className="flex flex-col gap-2">
+			<div className="flex items-center justify-between gap-2">
+				<span className={accountLabelClass}>Password Update</span>
 				<button
 					type="button"
 					onClick={() => setEditing((v) => !v)}
@@ -28,13 +28,11 @@ export function AccountPasswordSection() {
 			</div>
 
 			{editing ? (
-				<div className="pt-1">
-					<PasswordChangeForm
-						appearance="light"
-						compact
-						onSuccess={() => setEditing(false)}
-					/>
-				</div>
+				<PasswordChangeForm
+					appearance="light"
+					compact
+					onSuccess={() => setEditing(false)}
+				/>
 			) : (
 				<Input
 					type="password"

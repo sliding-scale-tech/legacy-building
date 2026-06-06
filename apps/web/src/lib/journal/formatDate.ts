@@ -7,3 +7,12 @@ export function formatDate(ms: number): string {
 	const d = new Date(ms);
 	return `${d.getMonth() + 1}/${String(d.getDate()).padStart(2, "0")}/${d.getFullYear()}`;
 }
+
+/** Long-form date for PDF export (e.g. June 5, 2026). */
+export function formatPdfLongDate(ms: number): string {
+	return new Date(ms).toLocaleDateString("en-US", {
+		month: "long",
+		day: "numeric",
+		year: "numeric",
+	});
+}

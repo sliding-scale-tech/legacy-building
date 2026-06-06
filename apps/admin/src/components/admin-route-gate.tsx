@@ -1,4 +1,4 @@
-import { Skeleton } from "@legacy-building/ui/components/skeleton";
+import { PageLoader } from "@legacy-building/ui/components/page-loader";
 import { useCurrentUser } from "@legacy-building/ui/hooks/use-current-user";
 import { Navigate, useRouterState } from "@tanstack/react-router";
 import type { ReactNode } from "react";
@@ -17,18 +17,6 @@ function isAuthRoute(pathname: string) {
 	);
 }
 
-function GateSkeleton() {
-	return (
-		<div
-			className="flex min-h-[calc(100svh-4rem)] flex-col items-center justify-center gap-4 px-6"
-			aria-busy="true"
-		>
-			<Skeleton className="h-8 w-48 rounded-md" />
-			<Skeleton className="h-4 w-64 rounded-md" />
-		</div>
-	);
-}
-
 /** Blocks non-admin signed-in users from protected admin routes (403 UI). */
 export function AdminRouteGate({ children }: Props) {
 	const pathname = useRouterState({ select: (s) => s.location.pathname });
@@ -40,7 +28,7 @@ export function AdminRouteGate({ children }: Props) {
 	}
 
 	if (isLoading) {
-		return <GateSkeleton />;
+		return <PageLoader />;
 	}
 
 	if (!isSignedIn) {

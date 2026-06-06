@@ -1,6 +1,6 @@
+import { PageLoader } from "@legacy-building/ui/components/page-loader";
 import { createFileRoute } from "@tanstack/react-router";
 
-import { DashboardDeskSkeleton } from "@/components/journal/dashboard/DashboardDeskSkeleton";
 import { DashboardDeskPage } from "@/features/journal/DashboardDeskPage";
 import { useSkeletonTransition } from "@/hooks/use-skeleton-transition";
 
@@ -12,7 +12,7 @@ function DeskRoute() {
 	const showSkeleton = useSkeletonTransition();
 
 	if (showSkeleton) {
-		return <DashboardDeskSkeleton />;
+		return <PageLoader />;
 	}
 
 	return <DashboardDeskPage />;

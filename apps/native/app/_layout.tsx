@@ -30,22 +30,6 @@ function StackLayout() {
 			<Stack.Screen name="(tabs)" />
 			<Stack.Screen name="(auth)" />
 			<Stack.Screen
-				name="journal/create"
-				options={{ presentation: "modal", headerShown: false }}
-			/>
-			<Stack.Screen
-				name="journal/[journalId]/index"
-				options={{ headerShown: false }}
-			/>
-			<Stack.Screen
-				name="journal/[journalId]/new-entry"
-				options={{ presentation: "modal", headerShown: false }}
-			/>
-			<Stack.Screen
-				name="journal/entry/[entryId]"
-				options={{ headerShown: false }}
-			/>
-			<Stack.Screen
 				name="modal"
 				options={{ title: "Modal", presentation: "modal", headerShown: true }}
 			/>

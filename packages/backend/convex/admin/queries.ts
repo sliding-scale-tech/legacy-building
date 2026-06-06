@@ -3,6 +3,10 @@ import { v } from "convex/values";
 
 import { query } from "../_generated/server";
 import {
+	getAdminUserBillingDetail,
+	mirroredPaidJournalAccess,
+} from "./billing";
+import {
 	buildSubscriberPredicate,
 	buildUserListPredicate,
 	effectiveAccountStatus,
@@ -13,6 +17,22 @@ import {
 	userMatchesSearch,
 } from "./helpers";
 
+const subscriptionStatusFilterValidator = v.union(
+	v.literal("active"),
+	v.literal("trialing"),
+	v.literal("grace_period"),
+	v.literal("canceled"),
+	v.literal("none"),
+	v.literal("unset"),
+);
+
+const subscriberStatusFilterValidator = v.union(
+	v.literal("active"),
+	v.literal("trialing"),
+	v.literal("grace_period"),
+	v.literal("canceled"),
+);
+
 /** Paginated user list for admin (use with `usePaginatedQuery`). */
 export const listUsers = query({
 	args: {
@@ -22,13 +42,17 @@ export const listUsers = query({
 			v.union(v.literal("active"), v.literal("suspended")),
 		),
 		role: v.optional(v.union(v.literal("admin"), v.literal("user"))),
+		subscriptionStatus: v.optional(subscriptionStatusFilterValidator),
 	},
 	handler: async (ctx, args) => {
 		await requireAdmin(ctx);
 
 		const search = args.search?.trim() ?? "";
 		const hasFilters =
-			Boolean(search) || Boolean(args.accountStatus) || Boolean(args.role);
+			Boolean(search) ||
+			Boolean(args.accountStatus) ||
+			Boolean(args.role) ||
+			Boolean(args.subscriptionStatus);
 
 		if (!hasFilters) {
 			const result = await ctx.db
@@ -48,6 +72,7 @@ export const listUsers = query({
 				search: search || undefined,
 				accountStatus: args.accountStatus,
 				role: args.role,
+				subscriptionStatus: args.subscriptionStatus,
 			}),
 		);
 	},
@@ -114,10 +139,14 @@ export const getUser = query({
 				.collect()
 		).length;
 
+		const billing = await getAdminUserBillingDetail(ctx, user);
+
 		return {
 			...toAdminUserSummary(user),
 			journalCount,
 			entryCount,
+			stripeCustomerId: billing.stripeCustomerId,
+			billing,
 		};
 	},
 });
@@ -146,6 +175,8 @@ export const platformInsights = query({
 			unset: 0,
 		};
 
+		let subscriptionPaidAccess = 0;
+
 		for (const user of users) {
 			if (user.role === "admin") adminCount += 1;
 			if (effectiveAccountStatus(user) === "suspended") {
@@ -155,6 +186,7 @@ export const platformInsights = query({
 			}
 			if (user.welcomeCompletedAt) welcomeCompleted += 1;
 			if (user.agreedToTermsAt) termsAgreed += 1;
+			if (mirroredPaidJournalAccess(user)) subscriptionPaidAccess += 1;
 
 			const sub = user.subscriptionStatus;
 			if (!sub) {
@@ -174,17 +206,22 @@ export const platformInsights = query({
 			totalJournals: journals.length,
 			totalEntries: entries.length,
 			subscriptionActive: subscriptionBreakdown.active,
+			subscriptionTrialing: subscriptionBreakdown.trialing,
+			subscriptionGracePeriod: subscriptionBreakdown.grace_period,
 			subscriptionCanceled: subscriptionBreakdown.canceled,
+			subscriptionNone: subscriptionBreakdown.none,
+			subscriptionUnset: subscriptionBreakdown.unset,
+			subscriptionPaidAccess,
 		};
 	},
 });
 
-/** Paginated subscribers (active/canceled only; use with `usePaginatedQuery`). */
+/** Paginated users with billing history (excludes none/unset). */
 export const listSubscribers = query({
 	args: {
 		paginationOpts: paginationOptsValidator,
 		search: v.optional(v.string()),
-		status: v.optional(v.union(v.literal("active"), v.literal("canceled"))),
+		status: v.optional(subscriberStatusFilterValidator),
 	},
 	handler: async (ctx, args) => {
 		await requireAdmin(ctx);

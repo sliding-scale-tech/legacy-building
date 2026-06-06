@@ -87,3 +87,33 @@ export function RoleBadge({ role }: { role: "admin" | "user" }) {
 		</span>
 	);
 }
+
+export function PaidAccessBadge({ hasAccess }: { hasAccess: boolean }) {
+	return (
+		<span
+			className={cn(
+				"inline-flex rounded-full px-2.5 py-0.5 font-medium text-xs",
+				hasAccess
+					? "bg-[#dcfce7] text-[#166534] dark:bg-green-500/15 dark:text-green-300"
+					: "bg-[#f2f2f2] text-[#525252] dark:bg-muted dark:text-muted-foreground",
+			)}
+		>
+			{hasAccess ? "Yes" : "No"}
+		</span>
+	);
+}
+
+export function StripeStatusBadge({ status }: { status: string | null }) {
+	if (!status) {
+		return (
+			<span className="inline-flex rounded-full bg-muted px-2.5 py-0.5 font-medium text-muted-foreground text-xs">
+				No Stripe sub
+			</span>
+		);
+	}
+	return (
+		<span className="inline-flex rounded-full bg-[#f2f2f2] px-2.5 py-0.5 font-medium text-[#525252] text-xs capitalize dark:bg-muted dark:text-muted-foreground">
+			{status.replace(/_/g, " ")}
+		</span>
+	);
+}

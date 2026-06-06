@@ -8,7 +8,7 @@ import { brand, dashboardLayout } from "@legacy-building/ui/lib/brand-journal";
 import { useNavigate, useRouterState } from "@tanstack/react-router";
 import { useQuery } from "convex/react";
 import { useCallback, useEffect, useState } from "react";
-
+import { useJournalPaywall } from "@/components/billing/JournalPaywallProvider";
 import { DashboardFooter } from "@/components/journal/dashboard/DashboardFooter";
 import { AddJournalEntryPanel } from "@/components/journal/library/AddJournalEntryPanel";
 import { CreateJournalDialog } from "@/components/journal/library/CreateJournalDialog";
@@ -21,6 +21,7 @@ import { readLibraryLocationState } from "@/lib/journal/libraryNavigation";
 
 export function DashboardLibraryPage() {
 	const navigate = useNavigate();
+	const { guardJournalAction } = useJournalPaywall();
 	const locationState = useRouterState({
 		select: (s) => s.location.state,
 	});
@@ -46,11 +47,15 @@ export function DashboardLibraryPage() {
 
 		if (nav.journalId) {
 			if (nav.openAddEntry) {
-				setSelectedJournalId(null);
-				setEntryPanelJournalId(nav.journalId);
-				setEntryPanelOpen(true);
+				guardJournalAction(() => {
+					setSelectedJournalId(null);
+					setEntryPanelJournalId(nav.journalId);
+					setEntryPanelOpen(true);
+				});
 			} else {
-				setSelectedJournalId(nav.journalId);
+				guardJournalAction(() => {
+					setSelectedJournalId(nav.journalId);
+				});
 			}
 		}
 
@@ -58,7 +63,7 @@ export function DashboardLibraryPage() {
 			replace: true,
 			state: {},
 		});
-	}, [locationState, navigate]);
+	}, [locationState, navigate, guardJournalAction]);
 
 	const resetOverlays = useCallback(() => {
 		setSelectedJournalId(null);
@@ -91,17 +96,28 @@ export function DashboardLibraryPage() {
 		}
 	}, [journals, entryPanelJournalId]);
 
-	const openCreate = useCallback(() => setCreateOpen(true), []);
+	const openCreate = useCallback(
+		() => guardJournalAction(() => setCreateOpen(true)),
+		[guardJournalAction],
+	);
 
-	const handleOpenJournal = useCallback((journal: Doc<"journals">) => {
-		setSelectedJournalId(journal._id);
-	}, []);
+	const handleOpenJournal = useCallback(
+		(journal: Doc<"journals">) => {
+			guardJournalAction(() => setSelectedJournalId(journal._id));
+		},
+		[guardJournalAction],
+	);
 
-	const handleAddEntry = useCallback((journal: Doc<"journals">) => {
-		setSelectedJournalId(null);
-		setEntryPanelJournalId(journal._id);
-		setEntryPanelOpen(true);
-	}, []);
+	const handleAddEntry = useCallback(
+		(journal: Doc<"journals">) => {
+			guardJournalAction(() => {
+				setSelectedJournalId(null);
+				setEntryPanelJournalId(journal._id);
+				setEntryPanelOpen(true);
+			});
+		},
+		[guardJournalAction],
+	);
 
 	const handleEntryPanelOpenChange = useCallback((next: boolean) => {
 		setEntryPanelOpen(next);
