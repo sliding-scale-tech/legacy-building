@@ -9,7 +9,9 @@ import { useEffect, useState } from "react";
 
 import { AccountPasswordSection } from "@/components/account/account-password-section";
 import {
-	ACCOUNT_PAGE_BG,
+	accountBillingBannerClass,
+	accountBillingBannerDismissClass,
+	accountBillingBannerLinkClass,
 	accountCardClass,
 	accountDangerButtonClass,
 	accountDangerZoneBodyClass,
@@ -146,14 +148,11 @@ export function DashboardAccountPage() {
 	);
 
 	return (
-		<div
-			className="relative flex min-h-svh w-full flex-col"
-			style={{ backgroundColor: ACCOUNT_PAGE_BG }}
-		>
+		<div className="relative flex min-h-svh w-full flex-col bg-secondary">
 			<div className="mt-20 flex flex-1 flex-col px-4 py-8 sm:px-6 md:px-10 md:py-10">
 				<div className={accountPageClass}>
 					<header className="flex flex-col gap-2">
-						<h1 className="font-semibold text-3xl text-[#1a1a1a]">
+						<h1 className="font-semibold text-3xl text-foreground">
 							Account Settings
 						</h1>
 						<p className={accountSectionSubtitleClass}>
@@ -163,18 +162,18 @@ export function DashboardAccountPage() {
 					</header>
 
 					{showBillingBanner ? (
-						<div className="flex items-start gap-3 rounded-xl border border-[#b8e0e0] bg-[#ebf6f6] px-4 py-3 sm:px-5 sm:py-4">
+						<div className={accountBillingBannerClass}>
 							<Info
-								className="mt-0.5 size-5 shrink-0 text-[#008080]"
+								className="mt-0.5 size-5 shrink-0 text-primary"
 								aria-hidden
 							/>
-							<div className="min-w-0 flex-1 text-[#1a1a1a] text-sm leading-relaxed">
+							<div className="min-w-0 flex-1 text-foreground text-sm leading-relaxed">
 								<span className="font-medium">Next Billing date on </span>
 								{formatBillingBannerDate(subscription.currentPeriodEnd)}. Ensure
 								timely subscription renewal to keep enjoying {currentPlanName}.
 								<Link
 									to={ROUTES.dashboardBilling}
-									className="ml-1 font-medium text-[#008080] hover:underline"
+									className={accountBillingBannerLinkClass}
 								>
 									View Details
 								</Link>
@@ -182,7 +181,7 @@ export function DashboardAccountPage() {
 							<button
 								type="button"
 								onClick={() => setBannerDismissed(true)}
-								className="inline-flex size-8 shrink-0 items-center justify-center rounded-lg text-[#525252] hover:bg-white/70"
+								className={accountBillingBannerDismissClass}
 								aria-label="Dismiss billing reminder"
 							>
 								<X className="size-4" aria-hidden />
@@ -274,16 +273,16 @@ export function DashboardAccountPage() {
 									<div className="flex flex-col gap-3">
 										<div className="flex items-center gap-2">
 											<span
-												className="size-2.5 rounded-full bg-[#22c55e]"
+												className="size-2.5 rounded-full bg-green-500"
 												aria-hidden
 											/>
-											<span className="font-semibold text-[#1a1a1a] text-lg">
+											<span className="font-semibold text-foreground text-lg">
 												{currentPlanName}
 											</span>
 										</div>
 										{activeSinceMs ? (
-											<p className="text-[#525252] text-sm">
-												<span className="font-medium text-[#1a1a1a]">
+											<p className="text-muted-foreground text-sm">
+												<span className="font-medium text-foreground">
 													Active Since:{" "}
 												</span>
 												{formatShortDate(activeSinceMs)}
@@ -300,8 +299,11 @@ export function DashboardAccountPage() {
 							) : (
 								<div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
 									<div className="flex items-center gap-2">
-										<User className="size-5 text-[#525252]" aria-hidden />
-										<p className="text-[#525252] text-sm">
+										<User
+											className="size-5 text-muted-foreground"
+											aria-hidden
+										/>
+										<p className="text-muted-foreground text-sm">
 											You don&apos;t have an active subscription.
 										</p>
 									</div>
@@ -318,20 +320,20 @@ export function DashboardAccountPage() {
 
 					<section className="flex flex-col gap-0 overflow-hidden rounded-2xl shadow-sm">
 						<div className={accountDangerZoneHeaderClass}>
-							<h2 className="font-semibold text-[#b91c1c] text-lg">
+							<h2 className="font-semibold text-destructive text-lg">
 								Danger Zone
 							</h2>
-							<p className="text-[#7f1d1d] text-sm">
+							<p className="text-destructive/80 text-sm">
 								Irreversible and destructive actions.
 							</p>
 						</div>
 						<div className={accountDangerZoneBodyClass}>
 							<div className="flex flex-col gap-4">
 								<div>
-									<h3 className="font-semibold text-[#1a1a1a] text-base">
+									<h3 className="font-semibold text-base text-foreground">
 										Delete Account
 									</h3>
-									<p className="mt-1 max-w-2xl text-[#525252] text-sm leading-relaxed">
+									<p className="mt-1 max-w-2xl text-muted-foreground text-sm leading-relaxed">
 										Once you delete your account, there is no going back. All
 										your data, journals, and entries will be permanently
 										deleted.

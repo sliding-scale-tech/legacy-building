@@ -1,4 +1,3 @@
-import { brand } from "@legacy-building/ui/lib/brand-journal";
 import { cn } from "@legacy-building/ui/lib/utils";
 import { Check } from "lucide-react";
 
@@ -24,6 +23,9 @@ type CheckoutOrderSummaryProps = {
 
 const SUMMARY_FEATURES = BILLING_FEATURES.slice(0, 5);
 
+const segmentButtonClass =
+	"rounded-full px-4 py-1.5 font-medium text-sm transition-[color,background-color,transform] active:scale-[0.98] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/50 focus-visible:ring-offset-2";
+
 export function CheckoutOrderSummary({
 	plan,
 	onPlanChange,
@@ -47,26 +49,23 @@ export function CheckoutOrderSummary({
 
 	return (
 		<div className="flex flex-col gap-6">
-			<h2 className="font-semibold text-[#1a1a1a] text-xl">Order Summary</h2>
+			<h2 className="font-semibold text-foreground text-xl">Order Summary</h2>
 
-			<div className="rounded-2xl border border-[#e6e6e6] bg-white p-5 shadow-sm">
+			<div className="rounded-2xl border border-border bg-card p-5 shadow-sm">
 				<div className="mb-4 flex items-center gap-2">
-					<h3 className="font-semibold text-[#1a1a1a] text-lg">
+					<h3 className="font-semibold text-foreground text-lg">
 						{isAnnual ? "Annual Plan" : "Monthly Plan"}
 					</h3>
 					{isTrial ? (
-						<span
-							className="rounded-full px-2.5 py-0.5 font-medium text-white text-xs"
-							style={{ backgroundColor: brand.primary }}
-						>
+						<span className="rounded-full bg-primary px-2.5 py-0.5 font-medium text-primary-foreground text-xs">
 							Recommended
 						</span>
 					) : null}
 				</div>
 
-				<p className="mb-4 font-semibold text-3xl text-[#1a1a1a]">
+				<p className="mb-4 font-semibold text-3xl text-foreground">
 					{displayPrice}
-					<span className="font-normal text-[#8a8a8a] text-base">
+					<span className="font-normal text-base text-muted-foreground">
 						{intervalSuffix}
 					</span>
 				</p>
@@ -75,11 +74,10 @@ export function CheckoutOrderSummary({
 					{SUMMARY_FEATURES.map((feature) => (
 						<li
 							key={feature.title}
-							className="flex items-start gap-2 text-[#1a1a1a] text-sm"
+							className="flex items-start gap-2 text-foreground text-sm"
 						>
 							<Check
-								className="mt-0.5 size-4 shrink-0"
-								style={{ color: brand.primary }}
+								className="mt-0.5 size-4 shrink-0 text-primary"
 								aria-hidden
 							/>
 							<span>{feature.title}</span>
@@ -87,17 +85,23 @@ export function CheckoutOrderSummary({
 					))}
 				</ul>
 
-				<div className="inline-flex rounded-full border border-[#e6e6e6] bg-[#f7f7f7] p-1">
+				<div className="inline-flex rounded-full border border-border bg-muted p-1">
 					<button
 						type="button"
 						onClick={() =>
-							onPlanChange(plan === "monthly" ? "monthly" : "trial")
+							onPlanChange(
+								hideTrial
+									? "monthly"
+									: plan === "monthly"
+										? "monthly"
+										: "trial",
+							)
 						}
 						className={cn(
-							"rounded-full px-4 py-1.5 font-medium text-sm transition-colors",
+							segmentButtonClass,
 							!isAnnual
-								? "bg-white text-[#1a1a1a] shadow-sm"
-								: "text-[#8a8a8a]",
+								? "bg-card text-foreground shadow-sm"
+								: "text-muted-foreground hover:bg-card/60 hover:text-foreground",
 						)}
 					>
 						Monthly
@@ -106,12 +110,15 @@ export function CheckoutOrderSummary({
 						type="button"
 						onClick={() => onPlanChange("annual")}
 						className={cn(
-							"inline-flex items-center gap-1.5 rounded-full px-4 py-1.5 font-medium text-sm transition-colors",
-							isAnnual ? "bg-white text-[#1a1a1a] shadow-sm" : "text-[#8a8a8a]",
+							segmentButtonClass,
+							"inline-flex items-center gap-1.5",
+							isAnnual
+								? "bg-card text-foreground shadow-sm"
+								: "text-muted-foreground hover:bg-card/60 hover:text-foreground",
 						)}
 					>
 						Yearly
-						<span className="rounded-full bg-[#22c55e] px-1.5 py-0.5 font-semibold text-[10px] text-white">
+						<span className="rounded-full bg-green-500 px-1.5 py-0.5 font-semibold text-[10px] text-white">
 							Save 37%
 						</span>
 					</button>
@@ -119,15 +126,15 @@ export function CheckoutOrderSummary({
 			</div>
 
 			<div className="flex flex-col gap-2 text-sm">
-				<div className="flex items-center justify-between text-[#525252]">
+				<div className="flex items-center justify-between text-muted-foreground">
 					<span>Subtotal</span>
 					<span>{displayPrice}</span>
 				</div>
-				<div className="flex items-center justify-between text-[#8a8a8a]">
+				<div className="flex items-center justify-between text-muted-foreground">
 					<span>Taxes</span>
 					<span>Calculated accordingly</span>
 				</div>
-				<div className="mt-1 flex items-center justify-between font-semibold text-[#1a1a1a]">
+				<div className="mt-1 flex items-center justify-between font-semibold text-foreground">
 					<span>Total Due Today</span>
 					<span>{dueToday}</span>
 				</div>

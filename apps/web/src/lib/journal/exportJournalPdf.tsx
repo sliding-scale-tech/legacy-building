@@ -36,7 +36,10 @@ function downloadPdfBlob(blob: Blob, filename: string) {
 	anchor.href = url;
 	anchor.download = filename;
 	anchor.click();
-	URL.revokeObjectURL(url);
+	setTimeout(() => {
+		URL.revokeObjectURL(url);
+		anchor.remove();
+	}, 1000);
 }
 
 async function mapEntriesToMyStory(

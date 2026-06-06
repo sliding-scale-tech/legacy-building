@@ -39,14 +39,15 @@ export function DashboardBillingPage() {
 		subscription !== null &&
 		(subscription.status === "active" ||
 			subscription.status === "trialing" ||
-			subscription.status === "past_due");
+			subscription.status === "past_due" ||
+			subscription.status === "unpaid");
 
 	if (hasActivePlan) {
 		return <BillingActivePage showWelcome={showWelcome} />;
 	}
 
 	return (
-		<div className="relative flex min-h-svh w-full flex-col bg-[#1a4540]">
+		<div className="relative flex min-h-svh w-full flex-col bg-billing-subscribe">
 			<div className="mt-20 flex flex-1 flex-col gap-10 px-4 py-10 sm:px-6 md:px-10 md:py-12">
 				<BillingSubscribePanel />
 			</div>

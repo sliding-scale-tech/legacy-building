@@ -123,7 +123,8 @@ export function BillingManagementSection() {
 		subscription !== undefined &&
 		(subscription.status === "active" ||
 			subscription.status === "trialing" ||
-			subscription.status === "past_due");
+			subscription.status === "past_due" ||
+			subscription.status === "unpaid");
 
 	if (!hasActivePlan || !subscription) return null;
 

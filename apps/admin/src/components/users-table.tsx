@@ -1,5 +1,5 @@
 import type { Id } from "@legacy-building/backend/convex/_generated/dataModel";
-import { PageLoader } from "@legacy-building/ui/components/page-loader";
+import { Skeleton } from "@legacy-building/ui/components/skeleton";
 import { cn } from "@legacy-building/ui/lib/utils";
 
 import {
@@ -39,6 +39,14 @@ type UsersTableProps = {
 	onSelectUser: (userId: Id<"users">) => void;
 };
 
+const USERS_TABLE_SKELETON_ROWS = [
+	"skeleton-row-a",
+	"skeleton-row-b",
+	"skeleton-row-c",
+	"skeleton-row-d",
+	"skeleton-row-e",
+] as const;
+
 export function UsersTable({
 	users,
 	isLoading,
@@ -46,8 +54,53 @@ export function UsersTable({
 }: UsersTableProps) {
 	if (isLoading) {
 		return (
-			<div className={cn(adminCardClass, "overflow-hidden")}>
-				<PageLoader overlay={false} className="min-h-[50svh]" />
+			<div
+				className={cn(adminCardClass, "overflow-hidden")}
+				role="status"
+				aria-busy="true"
+				aria-label="Loading users"
+			>
+				<div className="overflow-x-auto">
+					<table className="w-full min-w-[760px] text-left text-sm">
+						<thead>
+							<tr className={adminTableHeadRowClass}>
+								<th className={adminTableHeadCellClass}>Name</th>
+								<th className={adminTableHeadCellClass}>Email</th>
+								<th className={adminTableHeadCellClass}>Role</th>
+								<th className={adminTableHeadCellClass}>Account</th>
+								<th className={adminTableHeadCellClass}>Subscription</th>
+								<th className={adminTableHeadCellClass}>Journal access</th>
+							</tr>
+						</thead>
+						<tbody>
+							{USERS_TABLE_SKELETON_ROWS.map((rowKey) => (
+								<tr
+									key={rowKey}
+									className="border-border border-b last:border-0"
+								>
+									<td className="px-4 py-3">
+										<Skeleton className="h-4 w-32" />
+									</td>
+									<td className="px-4 py-3">
+										<Skeleton className="h-4 w-48" />
+									</td>
+									<td className="px-4 py-3">
+										<Skeleton className="h-5 w-16 rounded-full" />
+									</td>
+									<td className="px-4 py-3">
+										<Skeleton className="h-5 w-20 rounded-full" />
+									</td>
+									<td className="px-4 py-3">
+										<Skeleton className="h-5 w-24 rounded-full" />
+									</td>
+									<td className="px-4 py-3">
+										<Skeleton className="h-5 w-12 rounded-full" />
+									</td>
+								</tr>
+							))}
+						</tbody>
+					</table>
+				</div>
 			</div>
 		);
 	}

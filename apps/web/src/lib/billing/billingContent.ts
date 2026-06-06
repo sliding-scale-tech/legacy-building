@@ -6,8 +6,6 @@ export type BillingPlanChoice = "trial" | "monthly" | "annual";
 /** Light background for the subscribed-user billing management page. */
 export const BILLING_MANAGE_BG = "#f5f5f5";
 
-export const BILLING_PAGE_BG = "#1a4540";
-
 /** Feature bullets on the active-plan card (matches billing management mockup). */
 export const MANAGE_PLAN_FEATURES = [
 	"Unlimited Journal Entries",
@@ -54,20 +52,22 @@ export const BILLING_FEATURES: {
 	},
 ];
 
-export const TRIAL_STEPS = [
-	{
-		label: "Today",
-		description: "Start writing. No charge.",
-		done: true,
-	},
-	{
-		label: "Day 5",
-		description: "Reminder sent. Review anytime.",
-		done: false,
-	},
-	{
-		label: "Day 7",
-		description: "$3.99/month billed monthly",
-		done: false,
-	},
-] as const;
+export function buildTrialSteps(monthlyPriceLabel: string) {
+	return [
+		{
+			label: "Today",
+			description: "Start writing. No charge.",
+			done: true,
+		},
+		{
+			label: "Day 5",
+			description: "Reminder sent. Review anytime.",
+			done: false,
+		},
+		{
+			label: "Day 7",
+			description: `${monthlyPriceLabel}/month billed monthly`,
+			done: false,
+		},
+	] as const;
+}

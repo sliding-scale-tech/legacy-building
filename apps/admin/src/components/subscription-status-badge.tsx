@@ -94,8 +94,8 @@ export function PaidAccessBadge({ hasAccess }: { hasAccess: boolean }) {
 			className={cn(
 				"inline-flex rounded-full px-2.5 py-0.5 font-medium text-xs",
 				hasAccess
-					? "bg-[#dcfce7] text-[#166534] dark:bg-green-500/15 dark:text-green-300"
-					: "bg-[#f2f2f2] text-[#525252] dark:bg-muted dark:text-muted-foreground",
+					? "bg-green-50 text-green-700 dark:bg-green-500/15 dark:text-green-300"
+					: "bg-muted text-muted-foreground",
 			)}
 		>
 			{hasAccess ? "Yes" : "No"}
@@ -112,7 +112,7 @@ export function StripeStatusBadge({ status }: { status: string | null }) {
 		);
 	}
 	return (
-		<span className="inline-flex rounded-full bg-[#f2f2f2] px-2.5 py-0.5 font-medium text-[#525252] text-xs capitalize dark:bg-muted dark:text-muted-foreground">
+		<span className="inline-flex rounded-full bg-muted px-2.5 py-0.5 font-medium text-muted-foreground text-xs capitalize">
 			{status.replace(/_/g, " ")}
 		</span>
 	);

@@ -4,12 +4,12 @@ import { Lock } from "lucide-react";
 
 import {
 	Dialog,
-	DialogContent,
 	DialogDescription,
 	DialogFooter,
 	DialogHeader,
 	DialogTitle,
 } from "@/components/journal/ui/dialog";
+import { DialogContentWithOverlay } from "@/components/journal/ui/dialog-content-with-overlay";
 import { ROUTES } from "@/lib/routes";
 
 type JournalPaywallDialogProps = {
@@ -30,7 +30,7 @@ export function JournalPaywallDialog({
 
 	return (
 		<Dialog open={open} onOpenChange={onOpenChange}>
-			<DialogContent
+			<DialogContentWithOverlay
 				showCloseButton
 				overlayBlur={false}
 				overlayClassName="bg-transparent"
@@ -65,7 +65,7 @@ export function JournalPaywallDialog({
 						Not now
 					</Button>
 				</DialogFooter>
-			</DialogContent>
+			</DialogContentWithOverlay>
 		</Dialog>
 	);
 }

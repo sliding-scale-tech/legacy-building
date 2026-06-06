@@ -7,11 +7,8 @@ import { useCallback, useEffect, useId, useRef, useState } from "react";
 import { DateField } from "@/components/journal/library/DateField";
 import { JournalTypePicker } from "@/components/journal/library/JournalTypePicker";
 import { Button } from "@/components/journal/ui/button";
-import {
-	Dialog,
-	DialogContent,
-	DialogTitle,
-} from "@/components/journal/ui/dialog";
+import { Dialog, DialogTitle } from "@/components/journal/ui/dialog";
+import { DialogContentWithOverlay } from "@/components/journal/ui/dialog-content-with-overlay";
 import { Input } from "@/components/journal/ui/input";
 import type { StoryTab } from "@/lib/journal/journalTypes";
 import {
@@ -161,9 +158,9 @@ export function CreateJournalDialog({
 
 	return (
 		<Dialog open={open} onOpenChange={handleClose}>
-			<DialogContent
+			<DialogContentWithOverlay
 				showCloseButton={false}
-				overlayClassName="z-[2001] bg-[rgba(82,82,82,0.6)]"
+				overlayClassName="z-[2001] bg-foreground/60"
 				className={cn(
 					"fixed top-[100px] right-0 left-0 z-[2002] mx-auto flex w-[calc(100%-20px)] flex-col",
 					"min-h-[296px] min-w-[296px] max-w-[600px]",
@@ -324,7 +321,7 @@ export function CreateJournalDialog({
 						</Button>
 					</div>
 				</form>
-			</DialogContent>
+			</DialogContentWithOverlay>
 		</Dialog>
 	);
 }
