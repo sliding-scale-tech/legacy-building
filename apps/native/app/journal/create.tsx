@@ -3,7 +3,7 @@ import { api } from "@legacy-building/backend/convex/_generated/api";
 import { useMutation } from "convex/react";
 import { router, useLocalSearchParams } from "expo-router";
 import { useThemeColor } from "heroui-native/hooks";
-import { useCallback, useMemo, useState } from "react";
+import { useCallback, useMemo, useRef, useState } from "react";
 import {
 	ActivityIndicator,
 	Alert,
@@ -60,8 +60,10 @@ export default function CreateJournalScreen() {
 	const [coverSize, setCoverSize] = useState<number>(0);
 	const [showErrors, setShowErrors] = useState(false);
 	const [submitting, setSubmitting] = useState(false);
+	const isSubmittingRef = useRef(false);
 
 	const primary = useThemeColor("accent");
+	const primaryForeground = useThemeColor("primary-foreground");
 	const placeholderColor = useThemeColor("field-placeholder");
 
 	const startMs = useMemo(() => parseMonthDayYear(startDate), [startDate]);
@@ -108,9 +110,11 @@ export default function CreateJournalScreen() {
 	}, [submitting]);
 
 	const handleSubmit = useCallback(async () => {
+		if (isSubmittingRef.current) return;
 		setShowErrors(true);
 		if (formInvalid || startMs === null) return;
 
+		isSubmittingRef.current = true;
 		setSubmitting(true);
 		try {
 			let coverImageId:
@@ -138,10 +142,12 @@ export default function CreateJournalScreen() {
 				entryLog: entryLog.trim() ? entryLog.trim() : undefined,
 			});
 
+			mutationToast.success("Journal created.");
 			router.back();
 		} catch (err) {
 			mutationToast.error(err, "Could not create journal. Please try again.");
 		} finally {
+			isSubmittingRef.current = false;
 			setSubmitting(false);
 		}
 	}, [
@@ -373,7 +379,9 @@ export default function CreateJournalScreen() {
 							submitting ? "opacity-70" : ""
 						}`}
 					>
-						{submitting ? <ActivityIndicator color="#ffffff" /> : null}
+						{submitting ? (
+							<ActivityIndicator color={primaryForeground} />
+						) : null}
 						<Text className="font-semibold text-base text-primary-foreground">
 							{submitting ? "Creating…" : "Create Journal"}
 						</Text>
