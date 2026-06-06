@@ -1,7 +1,11 @@
 import { ConvexError, v } from "convex/values";
 
 import { mutation } from "../../_generated/server";
-import { assertEntryOwner, getOwnedJournal, requireClerkUserId } from "../auth";
+import {
+	assertEntryOwner,
+	getOwnedJournal,
+	requirePaidJournalAccess,
+} from "../auth";
 import { deleteEntryStorageFiles, deleteStorageFile } from "../storage";
 
 export const create = mutation({
@@ -15,7 +19,7 @@ export const create = mutation({
 		audioId: v.optional(v.id("_storage")),
 	},
 	handler: async (ctx, args) => {
-		const userId = await requireClerkUserId(ctx);
+		const userId = await requirePaidJournalAccess(ctx);
 		await getOwnedJournal(ctx, args.journalId, userId);
 
 		const imageUrl = await ctx.storage.getUrl(args.imageId);
@@ -79,7 +83,7 @@ export const update = mutation({
 		audioId: v.optional(v.id("_storage")),
 	},
 	handler: async (ctx, args) => {
-		const userId = await requireClerkUserId(ctx);
+		const userId = await requirePaidJournalAccess(ctx);
 		const entry = await ctx.db.get(args.id);
 		if (!entry) {
 			throw new ConvexError({
@@ -152,7 +156,7 @@ export const update = mutation({
 export const remove = mutation({
 	args: { id: v.id("journalEntries") },
 	handler: async (ctx, args) => {
-		const userId = await requireClerkUserId(ctx);
+		const userId = await requirePaidJournalAccess(ctx);
 		const entry = await ctx.db.get(args.id);
 		if (!entry) return;
 

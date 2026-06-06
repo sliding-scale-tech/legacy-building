@@ -1,6 +1,7 @@
 import authPanelBackground from "../images/auth-panel-background.png";
 import defaultAvatar from "../images/default-avatar.png";
 import deskHeroBackground from "../images/desk-hero-background.jpeg";
+import digLogo from "../images/dig-logo.png";
 import favicon from "../images/favicon.png";
 import headerBackground from "../images/header-background.png";
 import heroBackground from "../images/hero-background.png";
@@ -19,6 +20,7 @@ export const imageAssets = {
 	authPanelBackground,
 	loaderLottie,
 	whiteLogo,
+	digLogo,
 	headerBackground,
 	deskHeroBackground,
 	defaultAvatar,

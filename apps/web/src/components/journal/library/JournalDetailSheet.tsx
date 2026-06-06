@@ -187,6 +187,7 @@ export function JournalDetailSheet({
 				journal: {
 					title: journal.title,
 					dateMs: journal.dateMs,
+					type: journal.type,
 					dedication: journal.dedication,
 					coverImageUrl: journal.coverImageUrl,
 				},

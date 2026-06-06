@@ -23,6 +23,7 @@ import type * as journal_mutations from "../journal/mutations.js";
 import type * as journal_queries from "../journal/queries.js";
 import type * as journal_sort from "../journal/sort.js";
 import type * as journal_storage from "../journal/storage.js";
+import type * as stripe_access from "../stripe/access.js";
 import type * as stripe_actions from "../stripe/actions.js";
 import type * as stripe_config from "../stripe/config.js";
 import type * as stripe_helpers from "../stripe/helpers.js";
@@ -56,6 +57,7 @@ declare const fullApi: ApiFromModules<{
   "journal/queries": typeof journal_queries;
   "journal/sort": typeof journal_sort;
   "journal/storage": typeof journal_storage;
+  "stripe/access": typeof stripe_access;
   "stripe/actions": typeof stripe_actions;
   "stripe/config": typeof stripe_config;
   "stripe/helpers": typeof stripe_helpers;

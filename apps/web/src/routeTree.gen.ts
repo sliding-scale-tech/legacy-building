@@ -15,6 +15,7 @@ import { Route as TermsRouteImport } from './routes/terms'
 import { Route as SsoCallbackRouteImport } from './routes/sso-callback'
 import { Route as SignupRouteImport } from './routes/signup'
 import { Route as PrivacyRouteImport } from './routes/privacy'
+import { Route as MyStoryPdfRouteImport } from './routes/my-story-pdf'
 import { Route as LoginRouteImport } from './routes/login'
 import { Route as DashboardRouteRouteImport } from './routes/dashboard/route'
 import { Route as IndexRouteImport } from './routes/index'
@@ -24,6 +25,10 @@ import { Route as DashboardLibraryRouteImport } from './routes/dashboard/library
 import { Route as DashboardDeskRouteImport } from './routes/dashboard/desk'
 import { Route as DashboardBillingRouteImport } from './routes/dashboard/billing'
 import { Route as DashboardAccountRouteImport } from './routes/dashboard/account'
+import { Route as DashboardBillingIndexRouteImport } from './routes/dashboard/billing/index'
+import { Route as DashboardBillingSuccessRouteImport } from './routes/dashboard/billing.success'
+import { Route as DashboardBillingCompareRouteImport } from './routes/dashboard/billing.compare'
+import { Route as DashboardBillingCheckoutRouteImport } from './routes/dashboard/billing.checkout'
 
 const WelcomeRoute = WelcomeRouteImport.update({
   id: '/welcome',
@@ -53,6 +58,11 @@ const SignupRoute = SignupRouteImport.update({
 const PrivacyRoute = PrivacyRouteImport.update({
   id: '/privacy',
   path: '/privacy',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const MyStoryPdfRoute = MyStoryPdfRouteImport.update({
+  id: '/my-story-pdf',
+  path: '/my-story-pdf',
   getParentRoute: () => rootRouteImport,
 } as any)
 const LoginRoute = LoginRouteImport.update({
@@ -100,11 +110,33 @@ const DashboardAccountRoute = DashboardAccountRouteImport.update({
   path: '/account',
   getParentRoute: () => DashboardRouteRoute,
 } as any)
+const DashboardBillingIndexRoute = DashboardBillingIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => DashboardBillingRoute,
+} as any)
+const DashboardBillingSuccessRoute = DashboardBillingSuccessRouteImport.update({
+  id: '/success',
+  path: '/success',
+  getParentRoute: () => DashboardBillingRoute,
+} as any)
+const DashboardBillingCompareRoute = DashboardBillingCompareRouteImport.update({
+  id: '/compare',
+  path: '/compare',
+  getParentRoute: () => DashboardBillingRoute,
+} as any)
+const DashboardBillingCheckoutRoute =
+  DashboardBillingCheckoutRouteImport.update({
+    id: '/checkout',
+    path: '/checkout',
+    getParentRoute: () => DashboardBillingRoute,
+  } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/dashboard': typeof DashboardRouteRouteWithChildren
   '/login': typeof LoginRouteWithChildren
+  '/my-story-pdf': typeof MyStoryPdfRoute
   '/privacy': typeof PrivacyRoute
   '/signup': typeof SignupRoute
   '/sso-callback': typeof SsoCallbackRoute
@@ -112,15 +144,20 @@ export interface FileRoutesByFullPath {
   '/verify-email': typeof VerifyEmailRoute
   '/welcome': typeof WelcomeRoute
   '/dashboard/account': typeof DashboardAccountRoute
-  '/dashboard/billing': typeof DashboardBillingRoute
+  '/dashboard/billing': typeof DashboardBillingRouteWithChildren
   '/dashboard/desk': typeof DashboardDeskRoute
   '/dashboard/library': typeof DashboardLibraryRoute
   '/login/continue': typeof LoginContinueRoute
   '/dashboard/': typeof DashboardIndexRoute
+  '/dashboard/billing/checkout': typeof DashboardBillingCheckoutRoute
+  '/dashboard/billing/compare': typeof DashboardBillingCompareRoute
+  '/dashboard/billing/success': typeof DashboardBillingSuccessRoute
+  '/dashboard/billing/': typeof DashboardBillingIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/login': typeof LoginRouteWithChildren
+  '/my-story-pdf': typeof MyStoryPdfRoute
   '/privacy': typeof PrivacyRoute
   '/signup': typeof SignupRoute
   '/sso-callback': typeof SsoCallbackRoute
@@ -128,17 +165,21 @@ export interface FileRoutesByTo {
   '/verify-email': typeof VerifyEmailRoute
   '/welcome': typeof WelcomeRoute
   '/dashboard/account': typeof DashboardAccountRoute
-  '/dashboard/billing': typeof DashboardBillingRoute
   '/dashboard/desk': typeof DashboardDeskRoute
   '/dashboard/library': typeof DashboardLibraryRoute
   '/login/continue': typeof LoginContinueRoute
   '/dashboard': typeof DashboardIndexRoute
+  '/dashboard/billing/checkout': typeof DashboardBillingCheckoutRoute
+  '/dashboard/billing/compare': typeof DashboardBillingCompareRoute
+  '/dashboard/billing/success': typeof DashboardBillingSuccessRoute
+  '/dashboard/billing': typeof DashboardBillingIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/dashboard': typeof DashboardRouteRouteWithChildren
   '/login': typeof LoginRouteWithChildren
+  '/my-story-pdf': typeof MyStoryPdfRoute
   '/privacy': typeof PrivacyRoute
   '/signup': typeof SignupRoute
   '/sso-callback': typeof SsoCallbackRoute
@@ -146,11 +187,15 @@ export interface FileRoutesById {
   '/verify-email': typeof VerifyEmailRoute
   '/welcome': typeof WelcomeRoute
   '/dashboard/account': typeof DashboardAccountRoute
-  '/dashboard/billing': typeof DashboardBillingRoute
+  '/dashboard/billing': typeof DashboardBillingRouteWithChildren
   '/dashboard/desk': typeof DashboardDeskRoute
   '/dashboard/library': typeof DashboardLibraryRoute
   '/login/continue': typeof LoginContinueRoute
   '/dashboard/': typeof DashboardIndexRoute
+  '/dashboard/billing/checkout': typeof DashboardBillingCheckoutRoute
+  '/dashboard/billing/compare': typeof DashboardBillingCompareRoute
+  '/dashboard/billing/success': typeof DashboardBillingSuccessRoute
+  '/dashboard/billing/': typeof DashboardBillingIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -158,6 +203,7 @@ export interface FileRouteTypes {
     | '/'
     | '/dashboard'
     | '/login'
+    | '/my-story-pdf'
     | '/privacy'
     | '/signup'
     | '/sso-callback'
@@ -170,10 +216,15 @@ export interface FileRouteTypes {
     | '/dashboard/library'
     | '/login/continue'
     | '/dashboard/'
+    | '/dashboard/billing/checkout'
+    | '/dashboard/billing/compare'
+    | '/dashboard/billing/success'
+    | '/dashboard/billing/'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
     | '/login'
+    | '/my-story-pdf'
     | '/privacy'
     | '/signup'
     | '/sso-callback'
@@ -181,16 +232,20 @@ export interface FileRouteTypes {
     | '/verify-email'
     | '/welcome'
     | '/dashboard/account'
-    | '/dashboard/billing'
     | '/dashboard/desk'
     | '/dashboard/library'
     | '/login/continue'
     | '/dashboard'
+    | '/dashboard/billing/checkout'
+    | '/dashboard/billing/compare'
+    | '/dashboard/billing/success'
+    | '/dashboard/billing'
   id:
     | '__root__'
     | '/'
     | '/dashboard'
     | '/login'
+    | '/my-story-pdf'
     | '/privacy'
     | '/signup'
     | '/sso-callback'
@@ -203,12 +258,17 @@ export interface FileRouteTypes {
     | '/dashboard/library'
     | '/login/continue'
     | '/dashboard/'
+    | '/dashboard/billing/checkout'
+    | '/dashboard/billing/compare'
+    | '/dashboard/billing/success'
+    | '/dashboard/billing/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   DashboardRouteRoute: typeof DashboardRouteRouteWithChildren
   LoginRoute: typeof LoginRouteWithChildren
+  MyStoryPdfRoute: typeof MyStoryPdfRoute
   PrivacyRoute: typeof PrivacyRoute
   SignupRoute: typeof SignupRoute
   SsoCallbackRoute: typeof SsoCallbackRoute
@@ -259,6 +319,13 @@ declare module '@tanstack/react-router' {
       path: '/privacy'
       fullPath: '/privacy'
       preLoaderRoute: typeof PrivacyRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/my-story-pdf': {
+      id: '/my-story-pdf'
+      path: '/my-story-pdf'
+      fullPath: '/my-story-pdf'
+      preLoaderRoute: typeof MyStoryPdfRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/login': {
@@ -324,12 +391,57 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof DashboardAccountRouteImport
       parentRoute: typeof DashboardRouteRoute
     }
+    '/dashboard/billing/': {
+      id: '/dashboard/billing/'
+      path: '/'
+      fullPath: '/dashboard/billing/'
+      preLoaderRoute: typeof DashboardBillingIndexRouteImport
+      parentRoute: typeof DashboardBillingRoute
+    }
+    '/dashboard/billing/success': {
+      id: '/dashboard/billing/success'
+      path: '/success'
+      fullPath: '/dashboard/billing/success'
+      preLoaderRoute: typeof DashboardBillingSuccessRouteImport
+      parentRoute: typeof DashboardBillingRoute
+    }
+    '/dashboard/billing/compare': {
+      id: '/dashboard/billing/compare'
+      path: '/compare'
+      fullPath: '/dashboard/billing/compare'
+      preLoaderRoute: typeof DashboardBillingCompareRouteImport
+      parentRoute: typeof DashboardBillingRoute
+    }
+    '/dashboard/billing/checkout': {
+      id: '/dashboard/billing/checkout'
+      path: '/checkout'
+      fullPath: '/dashboard/billing/checkout'
+      preLoaderRoute: typeof DashboardBillingCheckoutRouteImport
+      parentRoute: typeof DashboardBillingRoute
+    }
   }
 }
 
+interface DashboardBillingRouteChildren {
+  DashboardBillingCheckoutRoute: typeof DashboardBillingCheckoutRoute
+  DashboardBillingCompareRoute: typeof DashboardBillingCompareRoute
+  DashboardBillingSuccessRoute: typeof DashboardBillingSuccessRoute
+  DashboardBillingIndexRoute: typeof DashboardBillingIndexRoute
+}
+
+const DashboardBillingRouteChildren: DashboardBillingRouteChildren = {
+  DashboardBillingCheckoutRoute: DashboardBillingCheckoutRoute,
+  DashboardBillingCompareRoute: DashboardBillingCompareRoute,
+  DashboardBillingSuccessRoute: DashboardBillingSuccessRoute,
+  DashboardBillingIndexRoute: DashboardBillingIndexRoute,
+}
+
+const DashboardBillingRouteWithChildren =
+  DashboardBillingRoute._addFileChildren(DashboardBillingRouteChildren)
+
 interface DashboardRouteRouteChildren {
   DashboardAccountRoute: typeof DashboardAccountRoute
-  DashboardBillingRoute: typeof DashboardBillingRoute
+  DashboardBillingRoute: typeof DashboardBillingRouteWithChildren
   DashboardDeskRoute: typeof DashboardDeskRoute
   DashboardLibraryRoute: typeof DashboardLibraryRoute
   DashboardIndexRoute: typeof DashboardIndexRoute
@@ -337,7 +449,7 @@ interface DashboardRouteRouteChildren {
 
 const DashboardRouteRouteChildren: DashboardRouteRouteChildren = {
   DashboardAccountRoute: DashboardAccountRoute,
-  DashboardBillingRoute: DashboardBillingRoute,
+  DashboardBillingRoute: DashboardBillingRouteWithChildren,
   DashboardDeskRoute: DashboardDeskRoute,
   DashboardLibraryRoute: DashboardLibraryRoute,
   DashboardIndexRoute: DashboardIndexRoute,
@@ -361,6 +473,7 @@ const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   DashboardRouteRoute: DashboardRouteRouteWithChildren,
   LoginRoute: LoginRouteWithChildren,
+  MyStoryPdfRoute: MyStoryPdfRoute,
   PrivacyRoute: PrivacyRoute,
   SignupRoute: SignupRoute,
   SsoCallbackRoute: SsoCallbackRoute,

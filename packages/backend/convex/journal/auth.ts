@@ -2,6 +2,7 @@ import { ConvexError } from "convex/values";
 
 import type { Doc, Id } from "../_generated/dataModel";
 import type { MutationCtx, QueryCtx } from "../_generated/server";
+import { requirePaidFeatureAccess } from "../stripe/access";
 
 type AuthCtx = Pick<QueryCtx, "auth"> | Pick<MutationCtx, "auth">;
 
@@ -14,6 +15,15 @@ export async function requireClerkUserId(ctx: AuthCtx): Promise<string> {
 		});
 	}
 	return identity.subject;
+}
+
+/** Require sign-in plus an active paid subscription for journal mutations. */
+export async function requirePaidJournalAccess(
+	ctx: MutationCtx,
+): Promise<string> {
+	const userId = await requireClerkUserId(ctx);
+	await requirePaidFeatureAccess(ctx, userId);
+	return userId;
 }
 
 export function assertJournalOwner(
