@@ -20,7 +20,6 @@ import {
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import { DateField } from "@/components/library/date-field";
-import { messageFromError } from "@/lib/error-utils";
 import {
 	monthDayYearToDate,
 	parseMonthDayYear,
@@ -35,6 +34,7 @@ import {
 	pickCoverImage,
 	uploadCoverImage,
 } from "@/lib/journal/upload-cover-image";
+import { useMutationToast } from "@/lib/mutation-toast";
 
 export default function CreateJournalScreen() {
 	const insets = useSafeAreaInsets();
@@ -47,6 +47,7 @@ export default function CreateJournalScreen() {
 	const generateUploadUrl = useMutation(
 		api.journal.mutations.generateUploadUrl,
 	);
+	const mutationToast = useMutationToast();
 
 	const [title, setTitle] = useState("");
 	const [dedication, setDedication] = useState("");
@@ -139,10 +140,7 @@ export default function CreateJournalScreen() {
 
 			router.back();
 		} catch (err) {
-			Alert.alert(
-				"Could not create journal",
-				messageFromError(err, "Please try again."),
-			);
+			mutationToast.error(err, "Could not create journal. Please try again.");
 		} finally {
 			setSubmitting(false);
 		}
@@ -156,6 +154,7 @@ export default function CreateJournalScreen() {
 		entryLog,
 		formInvalid,
 		generateUploadUrl,
+		mutationToast,
 		startMs,
 		storyType,
 		title,
