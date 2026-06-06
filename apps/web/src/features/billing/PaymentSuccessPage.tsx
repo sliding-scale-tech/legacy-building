@@ -52,6 +52,7 @@ export function PaymentSuccessPage() {
 
 	const [summary, setSummary] = useState<SuccessSummary | null>(null);
 	const [loading, setLoading] = useState(true);
+	const [summaryError, setSummaryError] = useState<string | null>(null);
 	const [secondsLeft, setSecondsLeft] = useState(REDIRECT_SECONDS);
 	const [portalPending, setPortalPending] = useState(false);
 
@@ -62,39 +63,38 @@ export function PaymentSuccessPage() {
 		});
 	}, [navigate]);
 
-	useEffect(() => {
-		let cancelled = false;
+	const loadSummary = useCallback(async () => {
+		setLoading(true);
+		setSummaryError(null);
 		let attempts = 0;
 
-		async function loadSummary() {
-			while (!cancelled && attempts < 12) {
-				try {
-					const result = await getSummary({});
-					if (result) {
-						if (!cancelled) {
-							setSummary(result);
-							setLoading(false);
-						}
-						return;
-					}
-				} catch {
-					if (!cancelled) setLoading(false);
+		while (attempts < 12) {
+			try {
+				const result = await getSummary({});
+				if (result) {
+					setSummary(result);
+					setLoading(false);
 					return;
 				}
-				attempts += 1;
-				await new Promise((resolve) => setTimeout(resolve, 1000));
+			} catch {
+				setSummaryError("We couldn't confirm your payment yet. Please retry.");
+				setLoading(false);
+				return;
 			}
-			if (!cancelled) setLoading(false);
+			attempts += 1;
+			await new Promise((resolve) => setTimeout(resolve, 1000));
 		}
 
-		void loadSummary();
-		return () => {
-			cancelled = true;
-		};
+		setSummaryError("Payment confirmation is taking longer than expected.");
+		setLoading(false);
 	}, [getSummary]);
 
 	useEffect(() => {
-		if (loading) return;
+		void loadSummary();
+	}, [loadSummary]);
+
+	useEffect(() => {
+		if (loading || summaryError || !summary) return;
 		const timer = window.setInterval(() => {
 			setSecondsLeft((current) => {
 				if (current <= 1) {
@@ -106,7 +106,7 @@ export function PaymentSuccessPage() {
 			});
 		}, 1000);
 		return () => window.clearInterval(timer);
-	}, [loading, goToBilling]);
+	}, [loading, summaryError, summary, goToBilling]);
 
 	const handleViewInvoice = async () => {
 		if (portalPending) return;
@@ -138,8 +138,13 @@ export function PaymentSuccessPage() {
 							Payment Successful
 						</h1>
 						<p className="max-w-md text-[#525252] text-sm sm:text-base">
-							Your plan is now active. Redirecting you to billing
-							{secondsLeft > 0 ? ` in ${secondsLeft}s` : "…"}
+							{summaryError
+								? "We're still confirming your subscription details."
+								: summary
+									? `Your plan is now active. Redirecting you to billing${
+											secondsLeft > 0 ? ` in ${secondsLeft}s` : "…"
+										}`
+									: "Confirming your payment…"}
 						</p>
 					</div>
 
@@ -147,7 +152,21 @@ export function PaymentSuccessPage() {
 						<div className="flex min-h-[220px] w-full items-center justify-center rounded-2xl border border-[#e6e6e6] bg-white">
 							<PageLoader overlay={false} />
 						</div>
-					) : (
+					) : summaryError ? (
+						<div className="flex w-full flex-col items-center gap-4 rounded-2xl border border-[#e6e6e6] bg-white px-6 py-8 text-center shadow-sm">
+							<p className="max-w-md text-[#525252] text-sm leading-relaxed">
+								{summaryError}
+							</p>
+							<button
+								type="button"
+								onClick={() => void loadSummary()}
+								className="inline-flex h-11 items-center justify-center rounded-xl px-6 font-semibold text-sm text-white hover:opacity-95"
+								style={{ backgroundColor: brand.primary }}
+							>
+								Retry
+							</button>
+						</div>
+					) : summary ? (
 						<div className="w-full overflow-hidden rounded-2xl border border-[#e6e6e6] bg-white shadow-sm">
 							<div className="bg-[#ebf6f6] px-5 py-4 text-center sm:px-6">
 								<p
@@ -188,7 +207,7 @@ export function PaymentSuccessPage() {
 								</SummaryField>
 							</div>
 						</div>
-					)}
+					) : null}
 
 					<div className="flex w-full flex-col items-center gap-3 pt-2">
 						<button

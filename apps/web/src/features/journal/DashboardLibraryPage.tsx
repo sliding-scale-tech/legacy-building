@@ -21,7 +21,7 @@ import { readLibraryLocationState } from "@/lib/journal/libraryNavigation";
 
 export function DashboardLibraryPage() {
 	const navigate = useNavigate();
-	const { guardJournalAction } = useJournalPaywall();
+	const { guardJournalAction, hasPaidAccess } = useJournalPaywall();
 	const locationState = useRouterState({
 		select: (s) => s.location.state,
 	});
@@ -39,7 +39,7 @@ export function DashboardLibraryPage() {
 
 	useEffect(() => {
 		const nav = readLibraryLocationState(locationState);
-		if (!nav) return;
+		if (!nav || hasPaidAccess === undefined) return;
 
 		if (nav.storyTab) {
 			setStoryTab(nav.storyTab);
@@ -49,21 +49,24 @@ export function DashboardLibraryPage() {
 			if (nav.openAddEntry) {
 				guardJournalAction(() => {
 					setSelectedJournalId(null);
-					setEntryPanelJournalId(nav.journalId);
+					setEntryPanelJournalId(nav.journalId ?? null);
 					setEntryPanelOpen(true);
+					void navigate({ replace: true, state: {} });
 				});
 			} else {
 				guardJournalAction(() => {
-					setSelectedJournalId(nav.journalId);
+					setSelectedJournalId(nav.journalId ?? null);
+					void navigate({ replace: true, state: {} });
 				});
 			}
+			return;
 		}
 
 		void navigate({
 			replace: true,
 			state: {},
 		});
-	}, [locationState, navigate, guardJournalAction]);
+	}, [locationState, navigate, guardJournalAction, hasPaidAccess]);
 
 	const resetOverlays = useCallback(() => {
 		setSelectedJournalId(null);

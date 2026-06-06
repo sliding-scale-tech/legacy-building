@@ -4,7 +4,10 @@ import { Link } from "@tanstack/react-router";
 import { Check, Circle, Loader2 } from "lucide-react";
 
 import { useBillingCheckout } from "@/hooks/useBillingCheckout";
-import { BILLING_FEATURES, TRIAL_STEPS } from "@/lib/billing/billingContent";
+import {
+	BILLING_FEATURES,
+	buildTrialSteps,
+} from "@/lib/billing/billingContent";
 import { formatAmount } from "@/lib/billing/plans";
 import { ROUTES } from "@/lib/routes";
 
@@ -98,6 +101,7 @@ export function BillingSubscribePanel() {
 					annualProduct.currency,
 				)
 			: "$2.51";
+	const trialSteps = buildTrialSteps(monthlyPrice);
 
 	return (
 		<div className="mx-auto flex w-full max-w-[960px] flex-col items-center gap-8">
@@ -210,7 +214,7 @@ export function BillingSubscribePanel() {
 						className="absolute top-[11px] right-[8%] left-[8%] h-px bg-white/25"
 						aria-hidden
 					/>
-					{TRIAL_STEPS.map((step) => (
+					{trialSteps.map((step) => (
 						<div
 							key={step.label}
 							className="relative z-10 flex flex-1 flex-col items-center gap-2 text-center"

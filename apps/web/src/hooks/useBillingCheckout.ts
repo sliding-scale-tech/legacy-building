@@ -151,6 +151,6 @@ export function useBillingCheckout() {
 		isCurrentChoice,
 		checkout,
 		ctaLabel,
-		isLoading: products === undefined,
+		isLoading: products === undefined || subscription === undefined,
 	};
 }

@@ -1,4 +1,5 @@
 import { useUser } from "@clerk/react";
+import { zodResolver } from "@hookform/resolvers/zod";
 import { brand } from "@legacy-building/ui/lib/brand-journal";
 import { cn } from "@legacy-building/ui/lib/utils";
 import {
@@ -8,10 +9,17 @@ import {
 } from "@stripe/react-stripe-js";
 import { Link } from "@tanstack/react-router";
 import { Loader2, Lock } from "lucide-react";
-import { useState } from "react";
+import { useForm } from "react-hook-form";
 import { toast } from "sonner";
+import { z } from "zod";
 
 import { ROUTES } from "@/lib/routes";
+
+const checkoutPaymentFormSchema = z.object({
+	fullName: z.string().trim().min(1, "Enter your full name."),
+});
+
+type CheckoutPaymentFormValues = z.infer<typeof checkoutPaymentFormSchema>;
 
 type CheckoutPaymentFormProps = {
 	intentType: "setup" | "payment";
@@ -34,17 +42,25 @@ export function CheckoutPaymentForm({
 	const stripe = useStripe();
 	const elements = useElements();
 	const { user } = useUser();
-	const [pending, setPending] = useState(false);
-	const [fullName, setFullName] = useState(
-		user?.fullName ?? user?.firstName ?? "",
-	);
 	const email = user?.primaryEmailAddress?.emailAddress ?? "";
 
-	const handleSubmit = async (event: React.FormEvent) => {
-		event.preventDefault();
+	const {
+		register,
+		handleSubmit,
+		watch,
+		formState: { errors, isSubmitting },
+	} = useForm<CheckoutPaymentFormValues>({
+		resolver: zodResolver(checkoutPaymentFormSchema),
+		defaultValues: {
+			fullName: user?.fullName ?? user?.firstName ?? "",
+		},
+	});
+
+	const fullName = watch("fullName");
+
+	const onSubmit = handleSubmit(async (values) => {
 		if (!stripe || !elements) return;
 
-		setPending(true);
 		const returnUrl = `${window.location.origin}${ROUTES.dashboardBillingSuccess}`;
 
 		try {
@@ -52,7 +68,7 @@ export function CheckoutPaymentForm({
 				return_url: returnUrl,
 				payment_method_data: {
 					billing_details: {
-						name: fullName.trim() || undefined,
+						name: values.fullName.trim() || undefined,
 						email: email.trim() || undefined,
 					},
 				},
@@ -75,14 +91,16 @@ export function CheckoutPaymentForm({
 				toast.error(
 					result.error.message ?? "Payment failed. Please try again.",
 				);
-				setPending(false);
 				return;
 			}
 
+			const paymentIntent = (result as { paymentIntent?: { status: string } })
+				.paymentIntent;
+			const setupIntent = (
+				result as { setupIntent?: { id: string; status: string } }
+			).setupIntent;
+
 			if (intentType === "setup" && usesFallbackSetup && subscriptionId) {
-				const setupIntent = (
-					result as { setupIntent?: { id: string; status: string } }
-				).setupIntent;
 				if (setupIntent?.status === "succeeded" && setupIntent.id) {
 					await onFinalizeTrialSetup({
 						subscriptionId,
@@ -91,19 +109,20 @@ export function CheckoutPaymentForm({
 				}
 			}
 
-			if (
-				(result as { paymentIntent?: { status: string } }).paymentIntent
-					?.status === "succeeded" ||
-				(result as { setupIntent?: { status: string } }).setupIntent?.status ===
-					"succeeded"
-			) {
+			const succeeded =
+				paymentIntent?.status === "succeeded" ||
+				setupIntent?.status === "succeeded";
+
+			if (succeeded) {
 				window.location.href = `${window.location.origin}${ROUTES.dashboardBillingSuccess}?next=billing`;
+				return;
 			}
+
+			toast.error("Payment failed. Please try again.");
 		} catch {
 			toast.error("Payment failed. Please try again.");
-			setPending(false);
 		}
-	};
+	});
 
 	const inputClass =
 		"h-11 w-full rounded-xl border border-[#e6e6e6] bg-white px-3 text-[#1a1a1a] text-sm outline-none focus-visible:ring-2 focus-visible:ring-[#008080]/30";
@@ -111,10 +130,7 @@ export function CheckoutPaymentForm({
 		"h-11 w-full cursor-not-allowed rounded-xl border border-[#e6e6e6] bg-[#f5f5f5] px-3 text-[#525252] text-sm outline-none";
 
 	return (
-		<form
-			onSubmit={(e) => void handleSubmit(e)}
-			className="flex flex-col gap-6"
-		>
+		<form onSubmit={onSubmit} className="flex flex-col gap-6">
 			<h2 className="font-semibold text-[#1a1a1a] text-xl">
 				Payment Information
 			</h2>
@@ -127,12 +143,27 @@ export function CheckoutPaymentForm({
 					<span className="text-[#525252] text-xs">Full Name</span>
 					<input
 						type="text"
-						value={fullName}
-						onChange={(e) => setFullName(e.target.value)}
+						{...register("fullName")}
 						placeholder="John Doe"
-						className={inputClass}
+						className={cn(
+							inputClass,
+							errors.fullName &&
+								"border-destructive focus-visible:ring-destructive/30",
+						)}
 						autoComplete="name"
+						aria-invalid={Boolean(errors.fullName)}
+						aria-describedby={
+							errors.fullName ? "checkout-full-name-error" : undefined
+						}
 					/>
+					{errors.fullName ? (
+						<p
+							id="checkout-full-name-error"
+							className="text-destructive text-xs"
+						>
+							{errors.fullName.message}
+						</p>
+					) : null}
 				</label>
 				<label className="flex flex-col gap-1.5">
 					<span className="text-[#525252] text-xs">Email Address</span>
@@ -172,14 +203,14 @@ export function CheckoutPaymentForm({
 
 			<button
 				type="submit"
-				disabled={!stripe || !elements || pending}
+				disabled={!stripe || !elements || isSubmitting}
 				className={cn(
 					"flex h-12 w-full items-center justify-center gap-2 rounded-xl font-semibold text-sm text-white",
 					"transition-colors hover:opacity-95 disabled:cursor-not-allowed disabled:opacity-60",
 				)}
 				style={{ backgroundColor: brand.primary }}
 			>
-				{pending ? (
+				{isSubmitting ? (
 					<>
 						<Loader2 className="size-4 animate-spin" aria-hidden />
 						Processing…

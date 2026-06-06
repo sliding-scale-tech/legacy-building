@@ -1,5 +1,4 @@
 import { api } from "@legacy-building/backend/convex/_generated/api";
-import { brand } from "@legacy-building/ui/lib/brand-journal";
 import { cn } from "@legacy-building/ui/lib/utils";
 import { Link } from "@tanstack/react-router";
 import { useAction, useQuery } from "convex/react";
@@ -11,10 +10,7 @@ import {
 	type BillingInvoice,
 	ViewInvoicesModal,
 } from "@/components/billing/ViewInvoicesModal";
-import {
-	BILLING_MANAGE_BG,
-	MANAGE_PLAN_FEATURES,
-} from "@/lib/billing/billingContent";
+import { MANAGE_PLAN_FEATURES } from "@/lib/billing/billingContent";
 import { formatAmount, intervalSuffix } from "@/lib/billing/plans";
 import { ROUTES } from "@/lib/routes";
 
@@ -42,6 +38,27 @@ function messageFromError(error: unknown): string {
 	}
 	return "Something went wrong. Please try again.";
 }
+
+const billingOutlineButtonClass =
+	"inline-flex items-center justify-center rounded-xl border border-primary/30 bg-card font-medium text-primary text-sm transition-[color,background-color,transform] hover:bg-muted active:scale-[0.98] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2";
+
+const billingPrimaryButtonClass =
+	"inline-flex items-center justify-center rounded-xl bg-primary font-medium text-primary-foreground text-sm transition-[opacity,transform] hover:opacity-95 active:scale-[0.98] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2";
+
+const billingTextLinkClass =
+	"font-medium text-primary text-sm transition-colors hover:underline active:scale-[0.98] active:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 disabled:opacity-60";
+
+const billingDestructiveTextLinkClass =
+	"font-medium text-destructive text-sm transition-colors hover:underline active:scale-[0.98] active:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-destructive focus-visible:ring-offset-2 disabled:opacity-60";
+
+const billingMutedTextLinkClass =
+	"font-medium text-muted-foreground text-sm transition-colors hover:underline active:scale-[0.98] active:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2";
+
+const billingIconButtonClass =
+	"inline-flex items-center justify-center rounded-lg border border-border text-muted-foreground transition-[color,background-color,transform] hover:bg-card active:scale-[0.98] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 disabled:opacity-40";
+
+const billingCardActionButtonClass =
+	"flex w-full items-center justify-center gap-2 rounded-xl border border-border bg-muted text-muted-foreground text-sm transition-[color,background-color,transform] hover:bg-card active:scale-[0.98] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 disabled:opacity-60";
 
 type BillingActivePageProps = {
 	showWelcome?: boolean;
@@ -165,22 +182,19 @@ export function BillingActivePage({ showWelcome }: BillingActivePageProps) {
 	};
 
 	return (
-		<div
-			className="relative flex min-h-svh w-full flex-col"
-			style={{ backgroundColor: BILLING_MANAGE_BG }}
-		>
+		<div className="relative flex min-h-svh w-full flex-col bg-secondary">
 			<div className="mt-20 flex flex-1 flex-col px-4 py-8 sm:px-6 md:px-10 md:py-10">
 				<div className="mx-auto flex w-full max-w-[1100px] flex-col gap-8">
 					<header className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
 						<div className="flex flex-col gap-1">
-							<h1 className="font-semibold text-3xl text-[#1a1a1a]">
+							<h1 className="font-semibold text-3xl text-foreground">
 								Billing and Plans
 							</h1>
-							<p className="text-[#525252] text-sm sm:text-base">
+							<p className="text-muted-foreground text-sm sm:text-base">
 								Manage your subscription, review usage, and access invoices.
 							</p>
 							{subscription.status === "trialing" ? (
-								<p className="mt-1 font-medium text-[#008080] text-sm">
+								<p className="mt-1 font-medium text-primary text-sm">
 									Journal features unlock after your first payment.
 								</p>
 							) : null}
@@ -188,14 +202,13 @@ export function BillingActivePage({ showWelcome }: BillingActivePageProps) {
 						<div className="flex flex-wrap gap-3">
 							<a
 								href="mailto:support@legacybuilding.com"
-								className="inline-flex h-10 items-center justify-center rounded-xl border border-[#008080]/30 bg-white px-4 font-medium text-[#008080] text-sm hover:bg-[#ebf6f6]"
+								className={cn(billingOutlineButtonClass, "h-10 px-4")}
 							>
 								Contact Support
 							</a>
 							<Link
 								to={ROUTES.dashboardBillingCompare}
-								className="inline-flex h-10 items-center justify-center rounded-xl px-4 font-medium text-sm text-white hover:opacity-95"
-								style={{ backgroundColor: brand.primary }}
+								className={cn(billingPrimaryButtonClass, "h-10 px-4")}
 							>
 								Compare Plans
 							</Link>
@@ -203,40 +216,36 @@ export function BillingActivePage({ showWelcome }: BillingActivePageProps) {
 					</header>
 
 					<div className="grid gap-6 lg:grid-cols-[minmax(0,1.4fr)_minmax(0,1fr)]">
-						<div className="rounded-2xl border border-[#e6e6e6] bg-white p-6 shadow-sm sm:p-8">
+						<div className="rounded-2xl border border-border bg-card p-6 shadow-sm sm:p-8">
 							<div className="mb-6 flex flex-wrap items-center gap-3">
-								<h2 className="font-semibold text-[#1a1a1a] text-xl">
+								<h2 className="font-semibold text-foreground text-xl">
 									{planName}
 								</h2>
-								<span
-									className="rounded-full px-3 py-1 font-medium text-white text-xs"
-									style={{ backgroundColor: brand.primary }}
-								>
+								<span className="rounded-full bg-primary px-3 py-1 font-medium text-primary-foreground text-xs">
 									Current Plan
 								</span>
 							</div>
 
-							<p className="mb-6 font-semibold text-[#1a1a1a] text-lg">
+							<p className="mb-6 font-semibold text-foreground text-lg">
 								{priceLabel}
-								<span className="font-normal text-[#525252] text-base">
+								<span className="font-normal text-base text-muted-foreground">
 									{" "}
 									— {renewLabel} {renewDate}
 								</span>
 							</p>
 
 							<div className="mb-8">
-								<p className="mb-3 font-medium text-[#525252] text-sm">
+								<p className="mb-3 font-medium text-muted-foreground text-sm">
 									Your plan includes
 								</p>
 								<ul className="flex flex-col gap-2.5">
 									{MANAGE_PLAN_FEATURES.map((feature) => (
 										<li
 											key={feature}
-											className="flex items-center gap-2.5 text-[#1a1a1a] text-sm"
+											className="flex items-center gap-2.5 text-foreground text-sm"
 										>
 											<Check
-												className="size-4 shrink-0"
-												style={{ color: brand.primary }}
+												className="size-4 shrink-0 text-primary"
 												aria-hidden
 											/>
 											{feature}
@@ -245,11 +254,13 @@ export function BillingActivePage({ showWelcome }: BillingActivePageProps) {
 								</ul>
 							</div>
 
-							<div className="flex flex-wrap items-center gap-4 border-[#e6e6e6] border-t pt-6">
+							<div className="flex flex-wrap items-center gap-4 border-border border-t pt-6">
 								<Link
 									to={ROUTES.dashboardBillingCompare}
-									className="inline-flex h-11 items-center justify-center rounded-xl px-6 font-semibold text-sm text-white hover:opacity-95"
-									style={{ backgroundColor: brand.primary }}
+									className={cn(
+										billingPrimaryButtonClass,
+										"h-11 px-6 font-semibold",
+									)}
 								>
 									Upgrade Subscription
 								</Link>
@@ -259,14 +270,14 @@ export function BillingActivePage({ showWelcome }: BillingActivePageProps) {
 											type="button"
 											onClick={() => void handleCancel()}
 											disabled={cancelPending}
-											className="font-medium text-[#c2410c] text-sm hover:underline disabled:opacity-60"
+											className={billingDestructiveTextLinkClass}
 										>
 											Confirm cancel
 										</button>
 										<button
 											type="button"
 											onClick={() => setConfirmCancel(false)}
-											className="font-medium text-[#525252] text-sm hover:underline"
+											className={billingMutedTextLinkClass}
 										>
 											Keep plan
 										</button>
@@ -275,7 +286,7 @@ export function BillingActivePage({ showWelcome }: BillingActivePageProps) {
 									<button
 										type="button"
 										onClick={() => setConfirmCancel(true)}
-										className="font-medium text-[#c2410c] text-sm hover:underline"
+										className={billingDestructiveTextLinkClass}
 									>
 										Cancel Plan
 									</button>
@@ -284,26 +295,26 @@ export function BillingActivePage({ showWelcome }: BillingActivePageProps) {
 						</div>
 
 						<div className="flex flex-col gap-6">
-							<div className="rounded-2xl border border-[#e6e6e6] bg-white p-5 shadow-sm sm:p-6">
-								<h3 className="mb-4 font-semibold text-[#1a1a1a] text-lg">
+							<div className="rounded-2xl border border-border bg-card p-5 shadow-sm sm:p-6">
+								<h3 className="mb-4 font-semibold text-foreground text-lg">
 									Billing History
 								</h3>
 								{invoicesLoading ? (
-									<p className="mb-4 text-[#8a8a8a] text-sm">
+									<p className="mb-4 text-muted-foreground text-sm">
 										Loading invoices…
 									</p>
 								) : latestInvoice ? (
-									<div className="mb-4 flex items-center justify-between gap-3 rounded-xl border border-[#e6e6e6] bg-[#fafafa] px-4 py-3">
+									<div className="mb-4 flex items-center justify-between gap-3 rounded-xl border border-border bg-muted px-4 py-3">
 										<div className="min-w-0">
-											<p className="truncate font-medium text-[#1a1a1a] text-sm">
+											<p className="truncate font-medium text-foreground text-sm">
 												Invoice #{latestInvoice.stripeInvoiceId.slice(-7)}
 											</p>
-											<p className="text-[#8a8a8a] text-xs">
+											<p className="text-muted-foreground text-xs">
 												{formatDate(latestInvoice.created)}
 											</p>
 										</div>
 										<div className="flex shrink-0 items-center gap-2">
-											<span className="font-semibold text-[#1a1a1a] text-sm">
+											<span className="font-semibold text-foreground text-sm">
 												{formatMoney(
 													latestInvoice.status === "paid"
 														? latestInvoice.amountPaid
@@ -311,7 +322,7 @@ export function BillingActivePage({ showWelcome }: BillingActivePageProps) {
 												)}
 											</span>
 											{latestInvoice.status === "paid" ? (
-												<span className="rounded-full bg-[#dcfce7] px-2 py-0.5 font-medium text-[#166534] text-[10px]">
+												<span className="rounded-full bg-green-50 px-2 py-0.5 font-medium text-[10px] text-green-700 dark:bg-green-500/15 dark:text-green-300">
 													Paid
 												</span>
 											) : null}
@@ -319,7 +330,7 @@ export function BillingActivePage({ showWelcome }: BillingActivePageProps) {
 												type="button"
 												onClick={() => openInvoice(latestInvoice)}
 												disabled={!latestInvoice.hostedInvoiceUrl}
-												className="inline-flex size-8 items-center justify-center rounded-lg border border-[#e6e6e6] text-[#525252] hover:bg-white disabled:opacity-40"
+												className={cn(billingIconButtonClass, "size-8")}
 												aria-label="Download invoice"
 											>
 												<Download className="size-4" aria-hidden />
@@ -327,7 +338,7 @@ export function BillingActivePage({ showWelcome }: BillingActivePageProps) {
 										</div>
 									</div>
 								) : (
-									<p className="mb-4 text-[#8a8a8a] text-sm">
+									<p className="mb-4 text-muted-foreground text-sm">
 										No invoices yet — trial plans may not show a charge until
 										billing starts.
 									</p>
@@ -335,34 +346,34 @@ export function BillingActivePage({ showWelcome }: BillingActivePageProps) {
 								<button
 									type="button"
 									onClick={() => setInvoicesModalOpen(true)}
-									className="font-medium text-[#008080] text-sm hover:underline"
+									className={billingTextLinkClass}
 								>
 									View Invoices
 								</button>
 							</div>
 
-							<div className="rounded-2xl border border-[#e6e6e6] bg-white p-5 shadow-sm sm:p-6">
+							<div className="rounded-2xl border border-border bg-card p-5 shadow-sm sm:p-6">
 								<div className="mb-4 flex items-center justify-between gap-3">
-									<h3 className="font-semibold text-[#1a1a1a] text-lg">
+									<h3 className="font-semibold text-foreground text-lg">
 										Payment Methods
 									</h3>
 									<button
 										type="button"
 										onClick={() => void openPortal()}
 										disabled={portalPending}
-										className="font-medium text-[#008080] text-sm hover:underline disabled:opacity-60"
+										className={billingTextLinkClass}
 									>
 										Add Method
 									</button>
 								</div>
 								{paymentMethod ? (
-									<div className="flex items-center justify-between gap-3 rounded-xl border border-[#e6e6e6] bg-[#fafafa] px-4 py-3">
+									<div className="flex items-center justify-between gap-3 rounded-xl border border-border bg-muted px-4 py-3">
 										<div>
-											<p className="font-medium text-[#1a1a1a] text-sm">
+											<p className="font-medium text-foreground text-sm">
 												{formatCardBrand(paymentMethod.brand)} ••••{" "}
 												{paymentMethod.last4}
 											</p>
-											<p className="text-[#8a8a8a] text-xs">
+											<p className="text-muted-foreground text-xs">
 												{String(paymentMethod.expMonth).padStart(2, "0")}/
 												{paymentMethod.expYear}
 											</p>
@@ -371,7 +382,7 @@ export function BillingActivePage({ showWelcome }: BillingActivePageProps) {
 											type="button"
 											onClick={() => void openPortal()}
 											disabled={portalPending}
-											className="font-medium text-[#008080] text-sm hover:underline disabled:opacity-60"
+											className={billingTextLinkClass}
 										>
 											Edit
 										</button>
@@ -381,10 +392,7 @@ export function BillingActivePage({ showWelcome }: BillingActivePageProps) {
 										type="button"
 										onClick={() => void openPortal()}
 										disabled={portalPending}
-										className={cn(
-											"flex w-full items-center justify-center gap-2 rounded-xl border border-[#e6e6e6] bg-[#fafafa] px-4 py-6",
-											"text-[#525252] text-sm hover:bg-white disabled:opacity-60",
-										)}
+										className={cn(billingCardActionButtonClass, "px-4 py-6")}
 									>
 										{portalPending ? (
 											<Loader2 className="size-4 animate-spin" aria-hidden />

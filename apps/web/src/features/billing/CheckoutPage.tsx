@@ -1,6 +1,7 @@
 import { api } from "@legacy-building/backend/convex/_generated/api";
 import { Button } from "@legacy-building/ui/components/button";
 import { PageLoader } from "@legacy-building/ui/components/page-loader";
+import { brand } from "@legacy-building/ui/lib/brand-journal";
 import { Elements } from "@stripe/react-stripe-js";
 import { loadStripe } from "@stripe/stripe-js";
 import { Link, useNavigate } from "@tanstack/react-router";
@@ -34,7 +35,7 @@ type CheckoutPageProps = {
 };
 
 const checkoutBackLinkClass =
-	"w-fit rounded-sm text-[#008080] text-sm transition-colors hover:underline active:scale-[0.98] active:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#008080] focus-visible:ring-offset-2";
+	"w-fit rounded-sm text-primary text-sm transition-colors hover:underline active:scale-[0.98] active:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2";
 
 export function CheckoutPage({ plan: initialPlan, flow }: CheckoutPageProps) {
 	const navigate = useNavigate();
@@ -109,6 +110,7 @@ export function CheckoutPage({ plan: initialPlan, flow }: CheckoutPageProps) {
 	}, [subscription, navigate, isUpgrade]);
 
 	useEffect(() => {
+		if (!publishableKey) return;
 		if (checkoutInitKeyRef.current === checkoutInitKey) return;
 		checkoutInitKeyRef.current = checkoutInitKey;
 
@@ -179,6 +181,7 @@ export function CheckoutPage({ plan: initialPlan, flow }: CheckoutPageProps) {
 		isUpgrade,
 		navigate,
 		plan,
+		publishableKey,
 	]);
 
 	const activeProduct = plan === "annual" ? annualProduct : monthlyProduct;
@@ -228,23 +231,23 @@ export function CheckoutPage({ plan: initialPlan, flow }: CheckoutPageProps) {
 
 	if (!publishableKey) {
 		return (
-			<div className="relative flex min-h-svh w-full flex-col bg-[#f5f5f5]">
+			<div className="relative flex min-h-svh w-full flex-col bg-secondary">
 				<div className="mt-20 flex flex-1 flex-col items-center justify-center px-4 py-16">
-					<div className="mx-auto flex w-full max-w-md flex-col items-center gap-4 rounded-2xl border border-[#e6e6e6] bg-white p-8 text-center shadow-sm">
-						<h1 className="font-semibold text-[#1a1a1a] text-xl">
+					<div className="mx-auto flex w-full max-w-md flex-col items-center gap-4 rounded-2xl border border-border bg-card p-8 text-center shadow-sm">
+						<h1 className="font-semibold text-foreground text-xl">
 							Billing unavailable
 						</h1>
-						<p className="text-[#525252] text-sm leading-relaxed">
+						<p className="text-muted-foreground text-sm leading-relaxed">
 							We couldn&apos;t load payment settings right now. You can retry or
 							return to billing to choose a plan later.
 						</p>
 						{billingConfigError ? (
-							<p className="text-[#b0200c] text-sm">{billingConfigError}</p>
+							<p className="text-destructive text-sm">{billingConfigError}</p>
 						) : null}
 						<div className="flex w-full flex-col gap-2 sm:flex-row sm:justify-center">
 							<Button
 								type="button"
-								className="h-11 rounded-xl bg-[#008080] text-white hover:bg-[#006b6b]"
+								className="h-11 rounded-xl bg-primary text-primary-foreground hover:bg-primary/90"
 								disabled={keyRetrying}
 								onClick={() => void retryPublishableKey()}
 							>
@@ -266,17 +269,17 @@ export function CheckoutPage({ plan: initialPlan, flow }: CheckoutPageProps) {
 	}
 
 	return (
-		<div className="relative flex min-h-svh w-full flex-col bg-[#f5f5f5]">
+		<div className="relative flex min-h-svh w-full flex-col bg-secondary">
 			<div className="mt-20 flex flex-1 flex-col px-4 py-8 sm:px-6 md:px-10">
 				<div className="mx-auto flex w-full max-w-[1040px] flex-col gap-8">
 					<header className="flex flex-col gap-2">
 						<Link to={backHref} className={checkoutBackLinkClass}>
 							{backLabel}
 						</Link>
-						<h1 className="font-semibold text-3xl text-[#1a1a1a]">
+						<h1 className="font-semibold text-3xl text-foreground">
 							{isUpgrade ? "Upgrade checkout" : "Checkout"}
 						</h1>
-						<p className="text-[#525252] text-sm">
+						<p className="text-muted-foreground text-sm">
 							{isUpgrade
 								? "Confirm your new plan and complete payment."
 								: "Securely complete your subscription to Legacy Building."}
@@ -284,7 +287,7 @@ export function CheckoutPage({ plan: initialPlan, flow }: CheckoutPageProps) {
 					</header>
 
 					{initializing || !clientSecret || !stripePromise ? (
-						<div className="flex min-h-[360px] items-center justify-center rounded-2xl border border-[#e6e6e6] bg-white">
+						<div className="flex min-h-[360px] items-center justify-center rounded-2xl border border-border bg-card">
 							<PageLoader overlay={false} />
 						</div>
 					) : (
@@ -297,7 +300,7 @@ export function CheckoutPage({ plan: initialPlan, flow }: CheckoutPageProps) {
 								hideTrial={isUpgrade}
 							/>
 
-							<div className="rounded-2xl border border-[#e6e6e6] bg-white p-6 shadow-sm sm:p-8">
+							<div className="rounded-2xl border border-border bg-card p-6 shadow-sm sm:p-8">
 								<Elements
 									key={clientSecret}
 									stripe={stripePromise}
@@ -306,7 +309,7 @@ export function CheckoutPage({ plan: initialPlan, flow }: CheckoutPageProps) {
 										appearance: {
 											theme: "stripe",
 											variables: {
-												colorPrimary: "#008080",
+												colorPrimary: brand.primary,
 												borderRadius: "12px",
 											},
 										},
