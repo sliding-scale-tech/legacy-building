@@ -17,9 +17,9 @@ export async function requireClerkUserId(ctx: AuthCtx): Promise<string> {
 	return identity.subject;
 }
 
-/** Require sign-in plus an active paid subscription for journal mutations. */
+/** Require sign-in plus a live paid Stripe subscription for journal access. */
 export async function requirePaidJournalAccess(
-	ctx: MutationCtx,
+	ctx: QueryCtx | MutationCtx,
 ): Promise<string> {
 	const userId = await requireClerkUserId(ctx);
 	await requirePaidFeatureAccess(ctx, userId);

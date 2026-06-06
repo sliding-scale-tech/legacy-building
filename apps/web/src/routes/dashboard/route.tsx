@@ -5,7 +5,7 @@ import { createFileRoute, Link, Outlet } from "@tanstack/react-router";
 import { Authenticated, AuthLoading, Unauthenticated } from "convex/react";
 
 import { SuspendedGuard } from "@/components/account/SuspendedGuard";
-import { SubscriptionGuard } from "@/components/billing/SubscriptionGuard";
+import { JournalPaywallProvider } from "@/components/billing/JournalPaywallProvider";
 import { DashboardUserGate } from "@/components/dashboard/DashboardUserGate";
 import { DashboardHeader } from "@/components/journal/dashboard/DashboardHeader";
 import { WelcomeGuard } from "@/components/welcome/WelcomeGuard";
@@ -22,12 +22,12 @@ function DashboardLayout() {
 				<DashboardUserGate>
 					<SuspendedGuard>
 						<WelcomeGuard>
-							<SubscriptionGuard>
+							<JournalPaywallProvider>
 								<div className="relative flex min-h-svh w-full flex-col bg-white">
 									<DashboardHeader />
 									<Outlet />
 								</div>
-							</SubscriptionGuard>
+							</JournalPaywallProvider>
 						</WelcomeGuard>
 					</SuspendedGuard>
 				</DashboardUserGate>

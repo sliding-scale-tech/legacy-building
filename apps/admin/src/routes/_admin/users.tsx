@@ -25,6 +25,9 @@ function UsersPage() {
 	const [statusFilter, setStatusFilter] = useState<"" | "active" | "suspended">(
 		"",
 	);
+	const [subscriptionFilter, setSubscriptionFilter] = useState<
+		"" | "active" | "trialing" | "grace_period" | "canceled" | "none" | "unset"
+	>("");
 	const [selectedUserId, setSelectedUserId] = useState<Id<"users"> | null>(
 		null,
 	);
@@ -35,6 +38,7 @@ function UsersPage() {
 			search: search || undefined,
 			role: roleFilter || undefined,
 			accountStatus: statusFilter || undefined,
+			subscriptionStatus: subscriptionFilter || undefined,
 		},
 		{ initialNumItems: ADMIN_PAGE_SIZE },
 	);
@@ -107,6 +111,32 @@ function UsersPage() {
 					<option value="">All statuses</option>
 					<option value="active">Active</option>
 					<option value="suspended">Suspended</option>
+				</select>
+				<select
+					value={subscriptionFilter}
+					onChange={(e) => {
+						setSubscriptionFilter(
+							e.target.value as
+								| ""
+								| "active"
+								| "trialing"
+								| "grace_period"
+								| "canceled"
+								| "none"
+								| "unset",
+						);
+						resetPage();
+					}}
+					className="h-11 rounded-xl border border-border bg-card px-3 text-sm"
+					aria-label="Filter by subscription status"
+				>
+					<option value="">All subscriptions</option>
+					<option value="active">Active (paid)</option>
+					<option value="trialing">Trialing</option>
+					<option value="grace_period">Grace period</option>
+					<option value="canceled">Canceled</option>
+					<option value="none">None</option>
+					<option value="unset">Not set</option>
 				</select>
 			</div>
 

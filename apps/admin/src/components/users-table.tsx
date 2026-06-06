@@ -4,6 +4,7 @@ import { cn } from "@legacy-building/ui/lib/utils";
 
 import {
 	AccountStatusBadge,
+	PaidAccessBadge,
 	RoleBadge,
 	SubscriptionStatusBadge,
 } from "@/components/subscription-status-badge";
@@ -29,6 +30,7 @@ export type AdminUserRow = {
 		| "canceled"
 		| "none"
 		| null;
+	hasPaidJournalAccess: boolean;
 };
 
 type UsersTableProps = {
@@ -66,14 +68,15 @@ export function UsersTable({
 	return (
 		<div className={cn(adminCardClass, "overflow-hidden")}>
 			<div className="overflow-x-auto">
-				<table className="w-full min-w-[640px] text-left text-sm">
+				<table className="w-full min-w-[760px] text-left text-sm">
 					<thead>
 						<tr className={adminTableHeadRowClass}>
 							<th className={adminTableHeadCellClass}>Name</th>
 							<th className={adminTableHeadCellClass}>Email</th>
 							<th className={adminTableHeadCellClass}>Role</th>
-							<th className={adminTableHeadCellClass}>Status</th>
+							<th className={adminTableHeadCellClass}>Account</th>
 							<th className={adminTableHeadCellClass}>Subscription</th>
+							<th className={adminTableHeadCellClass}>Journal access</th>
 						</tr>
 					</thead>
 					<tbody>
@@ -102,6 +105,9 @@ export function UsersTable({
 								</td>
 								<td className="px-4 py-3">
 									<SubscriptionStatusBadge status={user.subscriptionStatus} />
+								</td>
+								<td className="px-4 py-3">
+									<PaidAccessBadge hasAccess={user.hasPaidJournalAccess} />
 								</td>
 							</tr>
 						))}

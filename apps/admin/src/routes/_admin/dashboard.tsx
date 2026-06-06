@@ -2,7 +2,14 @@ import { api } from "@legacy-building/backend/convex/_generated/api";
 import { PageLoader } from "@legacy-building/ui/components/page-loader";
 import { createFileRoute } from "@tanstack/react-router";
 import { useQuery } from "convex/react";
-import { BookOpen, CreditCard, FileText, Users, XCircle } from "lucide-react";
+import {
+	BookOpen,
+	CreditCard,
+	FileText,
+	LockOpen,
+	Users,
+	XCircle,
+} from "lucide-react";
 
 import { AdminStatCard } from "@/components/admin-stat-card";
 import { adminContainerClass } from "@/lib/admin-theme";
@@ -79,16 +86,37 @@ function DashboardPage() {
 						<h2 className="mb-3 font-heading font-medium text-sm">
 							Subscriptions
 						</h2>
-						<div className="grid gap-4 sm:grid-cols-2">
+						<div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
 							<AdminStatCard
-								label="Active"
+								label="Paid journal access"
+								value={insights.subscriptionPaidAccess}
+								icon={LockOpen}
+							/>
+							<AdminStatCard
+								label="Active (paid)"
 								value={insights.subscriptionActive}
 								icon={CreditCard}
+							/>
+							<AdminStatCard
+								label="Trialing"
+								value={insights.subscriptionTrialing}
+							/>
+							<AdminStatCard
+								label="Grace period"
+								value={insights.subscriptionGracePeriod}
 							/>
 							<AdminStatCard
 								label="Canceled"
 								value={insights.subscriptionCanceled}
 								icon={XCircle}
+							/>
+							<AdminStatCard
+								label="No subscription"
+								value={insights.subscriptionNone}
+							/>
+							<AdminStatCard
+								label="Status unset"
+								value={insights.subscriptionUnset}
 							/>
 						</div>
 					</section>

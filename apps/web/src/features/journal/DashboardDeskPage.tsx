@@ -6,6 +6,7 @@ import { assets } from "@legacy-building/ui/lib/brand-journal";
 import { useQuery } from "convex/react";
 import { useCallback, useState } from "react";
 import { ProfileAvatarEditor } from "@/components/account/profile-avatar-editor";
+import { useJournalPaywall } from "@/components/billing/JournalPaywallProvider";
 import { DashboardFooter } from "@/components/journal/dashboard/DashboardFooter";
 import { DeskHeroCard } from "@/components/journal/dashboard/DeskHeroCard";
 import { DeskRecentJournal } from "@/components/journal/dashboard/DeskRecentJournal";
@@ -16,6 +17,7 @@ import { DEFAULT_STORY_TAB, type StoryTab } from "@/lib/journal/journalTypes";
 export function DashboardDeskPage() {
 	const { user } = useUser();
 	const { convexUser } = useCurrentUser();
+	const { guardJournalAction } = useJournalPaywall();
 
 	const [storyTab, setStoryTab] = useState<StoryTab>(DEFAULT_STORY_TAB);
 	const [selectedJournalId, setSelectedJournalId] =
@@ -39,22 +41,26 @@ export function DashboardDeskPage() {
 
 	const handleOpenJournal = useCallback(
 		(journalId: Id<"journals">, tab: StoryTab) => {
-			setStoryTab(tab);
-			setEntryPanelOpen(false);
-			setEntryPanelJournalId(null);
-			setSelectedJournalId(journalId);
+			guardJournalAction(() => {
+				setStoryTab(tab);
+				setEntryPanelOpen(false);
+				setEntryPanelJournalId(null);
+				setSelectedJournalId(journalId);
+			});
 		},
-		[],
+		[guardJournalAction],
 	);
 
 	const handleAddEntry = useCallback(
 		(journalId: Id<"journals">, tab: StoryTab) => {
-			setStoryTab(tab);
-			setSelectedJournalId(null);
-			setEntryPanelJournalId(journalId);
-			setEntryPanelOpen(true);
+			guardJournalAction(() => {
+				setStoryTab(tab);
+				setSelectedJournalId(null);
+				setEntryPanelJournalId(journalId);
+				setEntryPanelOpen(true);
+			});
 		},
-		[],
+		[guardJournalAction],
 	);
 
 	const handleEntryPanelOpenChange = useCallback((next: boolean) => {

@@ -17,12 +17,19 @@ import { toast } from "sonner";
 
 import {
 	AccountStatusBadge,
+	PaidAccessBadge,
 	RoleBadge,
 	SubscriptionStatusBadge,
 } from "@/components/subscription-status-badge";
 import {
+	formatOnboardingDate,
+	UserBillingSection,
+} from "@/components/user-billing-section";
+import {
 	adminDestructiveButtonClass,
 	adminDestructiveConfirmButtonClass,
+	adminDialogContentClass,
+	adminDialogOverlayClass,
 	adminPrimaryButtonClass,
 	adminPrimaryButtonSmClass,
 } from "@/lib/admin-theme";
@@ -123,126 +130,160 @@ export function UserDetailDialog({
 	return (
 		<>
 			<Dialog open={open} onOpenChange={onOpenChange}>
-				<DialogContent className="max-w-lg rounded-2xl sm:max-w-lg">
-					<DialogHeader>
+				<DialogContent
+					overlayClassName={adminDialogOverlayClass}
+					className={`flex max-w-2xl flex-col gap-0 overflow-hidden rounded-2xl p-0 sm:max-w-2xl ${adminDialogContentClass}`}
+				>
+					<DialogHeader className="shrink-0 border-border border-b px-6 py-4">
 						<DialogTitle className="font-heading text-popover-foreground">
 							User account
 						</DialogTitle>
 						<DialogDescription>
-							Manage role and account status. Subscription is read-only.
+							Manage role, account status, and review billing details.
 						</DialogDescription>
 					</DialogHeader>
 
-					{user === undefined ? (
-						<div className="space-y-3 py-2">
-							<Skeleton className="h-5 w-48 rounded-md" />
-							<Skeleton className="h-4 w-full rounded-md" />
-							<Skeleton className="h-4 w-3/4 rounded-md" />
-						</div>
-					) : user === null ? (
-						<p className="text-muted-foreground text-sm">User not found.</p>
-					) : (
-						<div className="space-y-4">
-							<div>
-								<p className="font-medium text-popover-foreground">
-									{user.name}
-								</p>
-								<p className="text-muted-foreground text-sm">{user.email}</p>
+					<div className="min-h-0 flex-1 overflow-y-auto px-6 py-4">
+						{user === undefined ? (
+							<div className="space-y-3">
+								<Skeleton className="h-5 w-48 rounded-md" />
+								<Skeleton className="h-4 w-full rounded-md" />
+								<Skeleton className="h-4 w-3/4 rounded-md" />
 							</div>
+						) : user === null ? (
+							<p className="text-muted-foreground text-sm">User not found.</p>
+						) : (
+							<div className="space-y-4">
+								<div>
+									<p className="font-medium text-popover-foreground">
+										{user.name}
+									</p>
+									<p className="text-muted-foreground text-sm">{user.email}</p>
+								</div>
 
-							<dl className="grid gap-3 text-sm">
-								<div className="flex items-center justify-between gap-4">
-									<dt className="text-muted-foreground">Role</dt>
-									<dd>
-										<RoleBadge role={user.role} />
-									</dd>
-								</div>
-								<div className="flex items-center justify-between gap-4">
-									<dt className="text-muted-foreground">Account</dt>
-									<dd>
-										<AccountStatusBadge status={user.accountStatus} />
-									</dd>
-								</div>
-								<div className="flex items-center justify-between gap-4">
-									<dt className="text-muted-foreground">Subscription</dt>
-									<dd>
-										<SubscriptionStatusBadge status={user.subscriptionStatus} />
-									</dd>
-								</div>
-								<div className="flex items-center justify-between gap-4">
-									<dt className="text-muted-foreground">Journals</dt>
-									<dd className="font-medium text-popover-foreground">
-										{user.journalCount}
-									</dd>
-								</div>
-								<div className="flex items-center justify-between gap-4">
-									<dt className="text-muted-foreground">Entries</dt>
-									<dd className="font-medium text-popover-foreground">
-										{user.entryCount}
-									</dd>
-								</div>
-							</dl>
+								<dl className="grid gap-3 text-sm">
+									<div className="flex items-center justify-between gap-4">
+										<dt className="text-muted-foreground">Role</dt>
+										<dd>
+											<RoleBadge role={user.role} />
+										</dd>
+									</div>
+									<div className="flex items-center justify-between gap-4">
+										<dt className="text-muted-foreground">Account</dt>
+										<dd>
+											<AccountStatusBadge status={user.accountStatus} />
+										</dd>
+									</div>
+									<div className="flex items-center justify-between gap-4">
+										<dt className="text-muted-foreground">Subscription</dt>
+										<dd>
+											<SubscriptionStatusBadge
+												status={user.subscriptionStatus}
+											/>
+										</dd>
+									</div>
+									<div className="flex items-center justify-between gap-4">
+										<dt className="text-muted-foreground">Journal access</dt>
+										<dd>
+											<PaidAccessBadge
+												hasAccess={user.billing.hasPaidFeatureAccess}
+											/>
+										</dd>
+									</div>
+									<div className="flex items-center justify-between gap-4">
+										<dt className="text-muted-foreground">Welcome completed</dt>
+										<dd className="font-medium text-popover-foreground">
+											{formatOnboardingDate(user.welcomeCompletedAt)}
+										</dd>
+									</div>
+									<div className="flex items-center justify-between gap-4">
+										<dt className="text-muted-foreground">Terms agreed</dt>
+										<dd className="font-medium text-popover-foreground">
+											{formatOnboardingDate(user.agreedToTermsAt)}
+										</dd>
+									</div>
+									<div className="flex items-center justify-between gap-4">
+										<dt className="text-muted-foreground">Journals</dt>
+										<dd className="font-medium text-popover-foreground">
+											{user.journalCount}
+										</dd>
+									</div>
+									<div className="flex items-center justify-between gap-4">
+										<dt className="text-muted-foreground">Entries</dt>
+										<dd className="font-medium text-popover-foreground">
+											{user.entryCount}
+										</dd>
+									</div>
+								</dl>
 
-							<div className="flex flex-col gap-2 border-border border-t pt-4 sm:flex-row">
-								{user.role === "admin" ? (
-									<Button
-										type="button"
-										variant="default"
-										size="sm"
-										className={`flex-1 ${adminDestructiveButtonClass}`}
-										onClick={() =>
-											setConfirmAction({ type: "role", role: "user" })
-										}
-									>
-										Remove admin
-									</Button>
-								) : (
-									<Button
-										type="button"
-										variant="default"
-										size="sm"
-										className={`flex-1 ${adminPrimaryButtonSmClass}`}
-										onClick={() =>
-											setConfirmAction({ type: "role", role: "admin" })
-										}
-									>
-										Make admin
-									</Button>
-								)}
-								{user.accountStatus === "suspended" ? (
-									<Button
-										type="button"
-										variant="default"
-										size="sm"
-										className={`flex-1 ${adminPrimaryButtonSmClass}`}
-										onClick={() =>
-											setConfirmAction({
-												type: "status",
-												status: "active",
-											})
-										}
-									>
-										Unsuspend
-									</Button>
-								) : (
-									<Button
-										type="button"
-										variant="default"
-										size="sm"
-										className={`flex-1 ${adminDestructiveButtonClass}`}
-										onClick={() =>
-											setConfirmAction({
-												type: "status",
-												status: "suspended",
-											})
-										}
-									>
-										Suspend account
-									</Button>
-								)}
+								<UserBillingSection
+									billing={user.billing}
+									stripeCustomerId={user.stripeCustomerId}
+								/>
 							</div>
+						)}
+					</div>
+
+					{user ? (
+						<div className="flex shrink-0 flex-col gap-2 border-border border-t px-6 py-4 sm:flex-row">
+							{user.role === "admin" ? (
+								<Button
+									type="button"
+									variant="default"
+									size="sm"
+									className={`flex-1 ${adminDestructiveButtonClass}`}
+									onClick={() =>
+										setConfirmAction({ type: "role", role: "user" })
+									}
+								>
+									Remove admin
+								</Button>
+							) : (
+								<Button
+									type="button"
+									variant="default"
+									size="sm"
+									className={`flex-1 ${adminPrimaryButtonSmClass}`}
+									onClick={() =>
+										setConfirmAction({ type: "role", role: "admin" })
+									}
+								>
+									Make admin
+								</Button>
+							)}
+							{user.accountStatus === "suspended" ? (
+								<Button
+									type="button"
+									variant="default"
+									size="sm"
+									className={`flex-1 ${adminPrimaryButtonSmClass}`}
+									onClick={() =>
+										setConfirmAction({
+											type: "status",
+											status: "active",
+										})
+									}
+								>
+									Unsuspend
+								</Button>
+							) : (
+								<Button
+									type="button"
+									variant="default"
+									size="sm"
+									className={`flex-1 ${adminDestructiveButtonClass}`}
+									onClick={() =>
+										setConfirmAction({
+											type: "status",
+											status: "suspended",
+										})
+									}
+								>
+									Suspend account
+								</Button>
+							)}
 						</div>
-					)}
+					) : null}
 				</DialogContent>
 			</Dialog>
 
@@ -250,7 +291,10 @@ export function UserDetailDialog({
 				open={confirmAction !== null}
 				onOpenChange={(o) => !o && closeConfirm()}
 			>
-				<DialogContent className="max-w-sm rounded-2xl">
+				<DialogContent
+					overlayClassName={adminDialogOverlayClass}
+					className={`max-w-sm rounded-2xl ${adminDialogContentClass}`}
+				>
 					<DialogHeader>
 						<DialogTitle className="font-heading">{confirmTitle}</DialogTitle>
 						<DialogDescription>{confirmDescription}</DialogDescription>
