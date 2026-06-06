@@ -1,9 +1,10 @@
 import { api } from "@legacy-building/backend/convex/_generated/api";
+import { Button } from "@legacy-building/ui/components/button";
 import { PageLoader } from "@legacy-building/ui/components/page-loader";
 import { Elements } from "@stripe/react-stripe-js";
 import { loadStripe } from "@stripe/stripe-js";
 import { Link, useNavigate } from "@tanstack/react-router";
-import { useAction, useQuery } from "convex/react";
+import { useAction, useConvex, useQuery } from "convex/react";
 import { ConvexError } from "convex/values";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { toast } from "sonner";
@@ -32,9 +33,26 @@ type CheckoutPageProps = {
 	flow: CheckoutFlow;
 };
 
+const checkoutBackLinkClass =
+	"w-fit rounded-sm text-[#008080] text-sm transition-colors hover:underline active:scale-[0.98] active:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#008080] focus-visible:ring-offset-2";
+
 export function CheckoutPage({ plan: initialPlan, flow }: CheckoutPageProps) {
 	const navigate = useNavigate();
-	const publishableKey = useQuery(api.stripe.queries.getStripePublishableKey);
+	const convex = useConvex();
+	const publishableKeyFromServer = useQuery(
+		api.stripe.queries.getStripePublishableKey,
+	);
+	const [retriedPublishableKey, setRetriedPublishableKey] = useState<
+		string | null | undefined
+	>(undefined);
+	const [billingConfigError, setBillingConfigError] = useState<string | null>(
+		null,
+	);
+	const [keyRetrying, setKeyRetrying] = useState(false);
+	const publishableKey =
+		retriedPublishableKey !== undefined
+			? retriedPublishableKey
+			: publishableKeyFromServer;
 	const products = useQuery(api.stripe.products.queries.listActive);
 	const subscription = useQuery(api.stripe.queries.getMySubscription);
 	const createEmbeddedCheckout = useAction(
@@ -174,8 +192,34 @@ export function CheckoutPage({ plan: initialPlan, flow }: CheckoutPageProps) {
 		return `Pay ${formatAmount(activeProduct.amountCents, activeProduct.currency)}`;
 	})();
 
+	const backHref = isUpgrade
+		? ROUTES.dashboardBillingCompare
+		: ROUTES.dashboardBilling;
+	const backLabel = isUpgrade ? "← Back to compare plans" : "← Back to plans";
+
+	const retryPublishableKey = async () => {
+		setKeyRetrying(true);
+		setBillingConfigError(null);
+		try {
+			const key = await convex.query(
+				api.stripe.queries.getStripePublishableKey,
+				{},
+			);
+			setRetriedPublishableKey(key);
+			if (!key) {
+				setBillingConfigError(
+					"Payment setup is temporarily unavailable. Please try again shortly.",
+				);
+			}
+		} catch (error) {
+			setBillingConfigError(messageFromError(error));
+		} finally {
+			setKeyRetrying(false);
+		}
+	};
+
 	if (
-		publishableKey === undefined ||
+		publishableKeyFromServer === undefined ||
 		products === undefined ||
 		subscription === undefined
 	) {
@@ -184,28 +228,49 @@ export function CheckoutPage({ plan: initialPlan, flow }: CheckoutPageProps) {
 
 	if (!publishableKey) {
 		return (
-			<div className="mt-20 flex flex-1 items-center justify-center px-4 py-16">
-				<p className="text-center text-[#525252] text-sm">
-					Billing is not configured. Set STRIPE_PUBLISHABLE_KEY in Convex.
-				</p>
+			<div className="relative flex min-h-svh w-full flex-col bg-[#f5f5f5]">
+				<div className="mt-20 flex flex-1 flex-col items-center justify-center px-4 py-16">
+					<div className="mx-auto flex w-full max-w-md flex-col items-center gap-4 rounded-2xl border border-[#e6e6e6] bg-white p-8 text-center shadow-sm">
+						<h1 className="font-semibold text-[#1a1a1a] text-xl">
+							Billing unavailable
+						</h1>
+						<p className="text-[#525252] text-sm leading-relaxed">
+							We couldn&apos;t load payment settings right now. You can retry or
+							return to billing to choose a plan later.
+						</p>
+						{billingConfigError ? (
+							<p className="text-[#b0200c] text-sm">{billingConfigError}</p>
+						) : null}
+						<div className="flex w-full flex-col gap-2 sm:flex-row sm:justify-center">
+							<Button
+								type="button"
+								className="h-11 rounded-xl bg-[#008080] text-white hover:bg-[#006b6b]"
+								disabled={keyRetrying}
+								onClick={() => void retryPublishableKey()}
+							>
+								{keyRetrying ? "Retrying…" : "Retry"}
+							</Button>
+							<Button
+								type="button"
+								variant="outline"
+								className="h-11 rounded-xl"
+								asChild
+							>
+								<Link to={backHref}>Go back</Link>
+							</Button>
+						</div>
+					</div>
+				</div>
 			</div>
 		);
 	}
-
-	const backHref = isUpgrade
-		? ROUTES.dashboardBillingCompare
-		: ROUTES.dashboardBilling;
-	const backLabel = isUpgrade ? "← Back to compare plans" : "← Back to plans";
 
 	return (
 		<div className="relative flex min-h-svh w-full flex-col bg-[#f5f5f5]">
 			<div className="mt-20 flex flex-1 flex-col px-4 py-8 sm:px-6 md:px-10">
 				<div className="mx-auto flex w-full max-w-[1040px] flex-col gap-8">
 					<header className="flex flex-col gap-2">
-						<Link
-							to={backHref}
-							className="w-fit text-[#008080] text-sm hover:underline"
-						>
+						<Link to={backHref} className={checkoutBackLinkClass}>
 							{backLabel}
 						</Link>
 						<h1 className="font-semibold text-3xl text-[#1a1a1a]">
