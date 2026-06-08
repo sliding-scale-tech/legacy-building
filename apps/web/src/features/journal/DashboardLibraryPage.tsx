@@ -140,7 +140,7 @@ export function DashboardLibraryPage() {
 					<Button
 						type="button"
 						onClick={openCreate}
-						className="min-h-11 rounded-xl px-5 font-medium text-sm leading-[1.4] hover:opacity-95"
+						className="min-h-[44px] shrink-0 rounded-xl px-5 font-medium text-sm leading-[1.4] hover:opacity-95"
 					>
 						Add Journal
 					</Button>

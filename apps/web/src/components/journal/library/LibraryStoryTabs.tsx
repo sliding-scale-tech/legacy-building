@@ -8,7 +8,7 @@ type LibraryStoryTabsProps = {
 };
 
 const triggerBase =
-	"h-auto min-w-0 flex-1 rounded-none border-0 px-2.5 py-2.5 text-sm font-normal leading-[1.4] shadow-none transition-[color,transform] after:hidden focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring active:scale-[0.98] sm:text-base";
+	"h-auto min-h-[40px] min-w-[170px] shrink-0 rounded-none border-0 p-2.5 text-base font-normal leading-[1.4] shadow-none transition-[color,transform] after:hidden focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring active:scale-[0.98]";
 
 const triggerInactive =
 	"bg-[#ebf6f6] text-[#1a1a1a] data-[state=inactive]:bg-[#ebf6f6] data-[state=inactive]:text-[#1a1a1a]";
@@ -25,7 +25,7 @@ export function LibraryStoryTabs({ value, onChange }: LibraryStoryTabsProps) {
 		>
 			<TabsList
 				variant="line"
-				className="h-auto w-full gap-0 rounded-xl bg-transparent p-0"
+				className="h-auto w-max max-w-full gap-0 rounded-xl bg-transparent p-0"
 			>
 				{STORY_TABS.map((tab, index) => {
 					const isFirst = index === 0;
