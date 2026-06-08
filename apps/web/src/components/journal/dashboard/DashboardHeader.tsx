@@ -25,7 +25,7 @@ const navLinkClass =
 	"mx-3 text-base leading-[1.4] transition-colors duration-200";
 
 const drawerNavLinkClass =
-	"flex w-full max-w-[260px] items-center justify-center rounded-xl px-4 py-3 text-center text-base leading-[1.4] transition-colors";
+	"flex w-full max-w-[260px] items-center justify-center rounded-xl px-4 py-3 text-center text-base leading-[1.4] transition-[color,transform] active:scale-[0.98]";
 
 export function DashboardHeader() {
 	const pathname = useRouterState({ select: (s) => s.location.pathname });
