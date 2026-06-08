@@ -179,7 +179,6 @@ export function DashboardLibraryPage() {
 			/>
 
 			<JournalDetailSheet
-				key={`journal-detail-${storyTab}`}
 				journalId={selectedJournalId}
 				open={selectedJournalId !== null}
 				onOpenChange={(next) => {
@@ -189,7 +188,6 @@ export function DashboardLibraryPage() {
 			/>
 
 			<AddJournalEntryPanel
-				key={`entry-panel-${storyTab}`}
 				journalId={entryPanelJournalId}
 				journals={journals ?? []}
 				open={entryPanelOpen}

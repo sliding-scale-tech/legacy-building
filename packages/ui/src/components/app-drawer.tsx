@@ -40,7 +40,7 @@ export function AppDrawer({
 			<DialogPrimitive.Portal>
 				<DialogPrimitive.Backdrop
 					className={cn(
-						"data-open:fade-in-0 data-closed:fade-out-0 fixed inset-0 z-[1505] bg-black/30 backdrop-blur-none duration-200",
+						"data-open:fade-in-0 data-closed:fade-out-0 fixed inset-0 z-[1505] bg-foreground/60 backdrop-blur-none duration-200",
 						"data-closed:pointer-events-none data-closed:invisible data-closed:animate-out",
 						"data-open:animate-in data-open:backdrop-blur-sm",
 						overlayClassName,
@@ -69,7 +69,7 @@ export function AppDrawer({
 								<Button
 									variant="ghost"
 									size="icon-sm"
-									className="absolute top-3 right-3"
+									className="absolute top-3 right-3 transition-transform hover:scale-110 focus:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 active:scale-95"
 								/>
 							}
 						>

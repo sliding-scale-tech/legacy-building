@@ -233,22 +233,22 @@ export function JournalDetailSheet({
 
 		setOrdering(true);
 		setExportError(null);
+		const checkoutWindow = window.open("", "_blank", "noopener,noreferrer");
+		if (!checkoutWindow) {
+			setOrdering(false);
+			const message =
+				"Popup blocked. Allow popups for this site and try again.";
+			setExportError(message);
+			toastMutationError(new Error(message), message);
+			return;
+		}
 		try {
 			const { checkoutUrl } = await createBookOrderCheckout({
 				journalId,
 				entryIds: selectedEntries.map((entry) => entry._id),
 				includeJournal: allExportableSelected,
 			});
-			const checkoutWindow = window.open(
-				checkoutUrl,
-				"_blank",
-				"noopener,noreferrer",
-			);
-			if (!checkoutWindow) {
-				throw new Error(
-					"Popup blocked. Allow popups for this site and try again.",
-				);
-			}
+			checkoutWindow.location.href = checkoutUrl;
 			setOrdering(false);
 		} catch (err) {
 			const message = "Could not start book checkout. Please try again.";
@@ -304,9 +304,9 @@ export function JournalDetailSheet({
 					<button
 						type="button"
 						aria-label="Close journal details"
-						tabIndex={open ? 0 : -1}
+						tabIndex={-1}
 						className={cn(
-							"fixed inset-0 z-[1505] border-0 bg-black/30 p-0 backdrop-blur-none transition-opacity duration-200",
+							"fixed inset-0 z-[1505] border-0 bg-foreground/60 p-0 backdrop-blur-none transition-opacity duration-200",
 							open
 								? "opacity-100 backdrop-blur-sm"
 								: "pointer-events-none opacity-0",

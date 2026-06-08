@@ -30,6 +30,7 @@ When changing journal/entry mutations, grep:
 
 - `apps/native/**`
 - `apps/web/**`
+- `apps/admin/**`
 - `packages/backend/convex/**`
 
 Do not require `imageId`, `coverImageId`, or `audioId` unless every caller always provides them.

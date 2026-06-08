@@ -50,7 +50,7 @@ export function AdminHeader() {
 				<div className="flex min-w-0 items-center gap-2">
 					<button
 						type="button"
-						className="flex size-10 shrink-0 items-center justify-center rounded-full text-white hover:bg-white/10 md:hidden"
+						className="flex size-10 shrink-0 items-center justify-center rounded-full text-white transition-transform hover:scale-110 hover:bg-white/10 focus:outline-none focus-visible:ring-2 focus-visible:ring-white/50 active:scale-95 md:hidden"
 						onClick={() => setMenuOpen(true)}
 						aria-label="Open navigation menu"
 					>
@@ -143,8 +143,8 @@ export function AdminHeader() {
 								className={cn(
 									drawerNavLinkClass,
 									isActive
-										? "bg-[#ebf6f6] font-semibold text-[#008080]"
-										: "font-normal text-[#1a1a1a] hover:bg-[#f7f7f7]",
+										? "bg-primary/10 font-semibold text-primary"
+										: "font-normal text-foreground hover:bg-muted",
 								)}
 							>
 								<Icon className="size-4 shrink-0" aria-hidden />

@@ -56,7 +56,7 @@ export function RecentJournalCard({
 					<button
 						type="button"
 						onClick={onOpenJournal}
-						className="min-w-0 flex-1 cursor-pointer border-0 bg-transparent p-0 text-left"
+						className="min-w-0 flex-1 cursor-pointer rounded-md border-0 bg-transparent p-0 text-left transition-opacity hover:opacity-90 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-foreground/60 focus-visible:ring-offset-2 focus-visible:ring-offset-transparent active:scale-[0.98]"
 					>
 						<p className="truncate font-semibold text-lg text-white leading-[1.4]">
 							{title}

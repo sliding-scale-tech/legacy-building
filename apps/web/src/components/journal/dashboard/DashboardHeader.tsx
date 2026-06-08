@@ -60,7 +60,7 @@ export function DashboardHeader() {
 					<div className="flex min-w-0 items-center gap-2">
 						<button
 							type="button"
-							className="flex size-10 shrink-0 items-center justify-center rounded-full text-white hover:bg-white/10 md:hidden"
+							className="flex size-10 shrink-0 items-center justify-center rounded-full text-white transition-transform hover:scale-110 hover:bg-white/10 focus:outline-none focus-visible:ring-2 focus-visible:ring-white/50 active:scale-95 md:hidden"
 							onClick={() => setMenuOpen(true)}
 							aria-label="Open navigation menu"
 						>
@@ -128,7 +128,7 @@ export function DashboardHeader() {
 					<button
 						type="button"
 						onClick={() => setMenuOpen(false)}
-						className="absolute top-3 right-3 flex size-9 items-center justify-center rounded-full text-white transition-colors hover:bg-white/10"
+						className="absolute top-3 right-3 flex size-9 items-center justify-center rounded-full text-white transition-transform hover:scale-110 hover:bg-white/10 focus:outline-none focus-visible:ring-2 focus-visible:ring-white/50 active:scale-95"
 						aria-label="Close navigation menu"
 					>
 						<X className="size-5" aria-hidden />
@@ -162,8 +162,8 @@ export function DashboardHeader() {
 								className={cn(
 									drawerNavLinkClass,
 									isActive
-										? "bg-[#ebf6f6] font-semibold text-[#008080]"
-										: "font-normal text-[#1a1a1a] hover:bg-[#f7f7f7]",
+										? "bg-primary/10 font-semibold text-primary"
+										: "font-normal text-foreground hover:bg-muted",
 								)}
 							>
 								{item.label}
@@ -172,14 +172,14 @@ export function DashboardHeader() {
 					})}
 				</nav>
 
-				<div className="mt-auto flex flex-col items-center border-[#e6e6e6] border-t p-4 pb-6">
+				<div className="mt-auto flex flex-col items-center border-border border-t p-4 pb-6">
 					<div className="mb-4 flex flex-col items-center gap-2 text-center">
 						<div
-							className="size-16 shrink-0 rounded-full border-2 border-[#008080] bg-center bg-cover bg-no-repeat"
+							className="size-16 shrink-0 rounded-full border-2 border-primary bg-center bg-cover bg-no-repeat"
 							style={{ backgroundImage: `url("${avatarUrl}")` }}
 							aria-hidden
 						/>
-						<p className="max-w-[240px] truncate font-medium text-[#1a1a1a] text-sm">
+						<p className="max-w-[240px] truncate font-medium text-foreground text-sm">
 							{user?.fullName ??
 								user?.primaryEmailAddress?.emailAddress ??
 								"Account"}
@@ -190,10 +190,13 @@ export function DashboardHeader() {
 						onClick={handleSignOut}
 						className={cn(
 							drawerNavLinkClass,
-							"gap-2.5 font-medium text-[#1a1a1a] hover:bg-[#f7f7f7]",
+							"gap-2.5 font-medium text-foreground hover:bg-muted",
 						)}
 					>
-						<LogOut className="size-4 shrink-0 text-[#525252]" aria-hidden />
+						<LogOut
+							className="size-4 shrink-0 text-muted-foreground"
+							aria-hidden
+						/>
 						Sign out
 					</button>
 				</div>

@@ -86,7 +86,7 @@ export function ImageCarousel({
 			{onImageAreaClick ? (
 				<button
 					type="button"
-					className="h-full w-full cursor-pointer border-0 bg-transparent p-0 text-left"
+					className="h-full w-full cursor-pointer border-0 bg-transparent p-0 text-left transition-transform focus:outline-none focus-visible:ring-2 focus-visible:ring-primary/40 active:scale-[0.98]"
 					onClick={onImageAreaClick}
 					aria-label={alt}
 				>
@@ -104,7 +104,7 @@ export function ImageCarousel({
 							e.stopPropagation();
 							goTo(activeIndex - 1);
 						}}
-						className="absolute top-1/2 left-2 z-10 flex size-8 -translate-y-1/2 items-center justify-center rounded-full bg-[#d4d4d4]/90 text-white shadow-sm transition-opacity hover:opacity-90"
+						className="absolute top-1/2 left-2 z-10 flex size-8 -translate-y-1/2 items-center justify-center rounded-full bg-muted-foreground/80 text-primary-foreground shadow-sm transition-transform hover:scale-110 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary/40 active:scale-95"
 						aria-label="Previous slide"
 					>
 						<ChevronLeft className="size-5" strokeWidth={2.5} aria-hidden />
@@ -115,7 +115,7 @@ export function ImageCarousel({
 							e.stopPropagation();
 							goTo(activeIndex + 1);
 						}}
-						className="absolute top-1/2 right-2 z-10 flex size-8 -translate-y-1/2 items-center justify-center rounded-full bg-[#d4d4d4]/90 text-white shadow-sm transition-opacity hover:opacity-90"
+						className="absolute top-1/2 right-2 z-10 flex size-8 -translate-y-1/2 items-center justify-center rounded-full bg-muted-foreground/80 text-primary-foreground shadow-sm transition-transform hover:scale-110 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary/40 active:scale-95"
 						aria-label="Next slide"
 					>
 						<ChevronRight className="size-5" strokeWidth={2.5} aria-hidden />

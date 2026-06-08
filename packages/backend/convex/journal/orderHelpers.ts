@@ -90,6 +90,28 @@ type DocugenerateResponse = {
 
 type PeechoPublicationResponse = Record<string, unknown>;
 
+const REQUEST_TIMEOUT_MS = 30_000;
+
+async function fetchWithTimeout(
+	url: string,
+	init: RequestInit,
+): Promise<Response> {
+	const controller = new AbortController();
+	const timeoutId = setTimeout(() => controller.abort(), REQUEST_TIMEOUT_MS);
+	try {
+		return await fetch(url, { ...init, signal: controller.signal });
+	} catch (error) {
+		if (error instanceof Error && error.name === "AbortError") {
+			throw new Error(
+				`Request timed out after ${REQUEST_TIMEOUT_MS / 1000} seconds.`,
+			);
+		}
+		throw error;
+	} finally {
+		clearTimeout(timeoutId);
+	}
+}
+
 async function parsePeechoResponseBody(response: Response): Promise<unknown> {
 	const text = (await response.text()).trim();
 	if (!text) return null;
@@ -181,7 +203,7 @@ export async function generateBookPdf(args: {
 	dedicationLine: string;
 	journalEntries: DocugenerateJournalEntry[];
 }): Promise<string> {
-	const response = await fetch(DOCUGENERATE_URL, {
+	const response = await fetchWithTimeout(DOCUGENERATE_URL, {
 		method: "POST",
 		headers: {
 			Authorization: requireDocugenerateApiKey(),
@@ -210,24 +232,28 @@ export async function generateBookPdf(args: {
 		}),
 	});
 
-	const payload = (await response.json()) as DocugenerateResponse & {
-		message?: string;
-		error?: string;
-	};
+	const payload = await parsePeechoResponseBody(response);
+	const record =
+		typeof payload === "object" && payload !== null
+			? (payload as DocugenerateResponse & {
+					message?: string;
+					error?: string;
+				})
+			: null;
 
 	if (!response.ok) {
 		throw new Error(
-			payload.message ??
-				payload.error ??
-				`DocuGenerate failed with status ${response.status}.`,
+			record?.message ??
+				record?.error ??
+				`DocuGenerate failed with status ${response.status}: ${summarizePeechoPayload(payload)}`,
 		);
 	}
 
-	if (!payload.document_uri) {
+	if (!record?.document_uri) {
 		throw new Error("DocuGenerate did not return a PDF URL.");
 	}
 
-	return payload.document_uri;
+	return record.document_uri;
 }
 
 export async function createPeechoPublication(args: {
@@ -239,7 +265,7 @@ export async function createPeechoPublication(args: {
 }): Promise<string> {
 	const { apiKey, buttonKey, checkoutBaseUrl } = requirePeechoConfig();
 
-	const response = await fetch(PEECHO_PUBLICATION_URL, {
+	const response = await fetchWithTimeout(PEECHO_PUBLICATION_URL, {
 		method: "POST",
 		headers: {
 			"Content-Type": "application/json",

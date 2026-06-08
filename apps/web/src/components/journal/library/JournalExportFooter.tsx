@@ -18,7 +18,7 @@ export function JournalExportFooter({
 	const busy = exporting || ordering;
 
 	return (
-		<div className="flex shrink-0 flex-col gap-2.5 border-[#e6e6e6] border-t bg-[#f7f7f7] px-5 py-4">
+		<div className="flex shrink-0 flex-col gap-2.5 border-border border-t bg-muted px-5 py-4">
 			<Button
 				type="button"
 				disabled={disabled || busy}
