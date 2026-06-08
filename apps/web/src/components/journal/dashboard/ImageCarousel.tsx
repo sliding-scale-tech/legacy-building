@@ -1,5 +1,6 @@
 import { brand } from "@legacy-building/ui/lib/brand-journal";
 import { cn } from "@legacy-building/ui/lib/utils";
+import { ChevronLeft, ChevronRight } from "lucide-react";
 import { useCallback, useEffect, useState } from "react";
 
 type ImageCarouselProps = {
@@ -7,6 +8,8 @@ type ImageCarouselProps = {
 	alt: string;
 	className?: string;
 	intervalMs?: number;
+	showArrows?: boolean;
+	onImageAreaClick?: () => void;
 };
 
 export function ImageCarousel({
@@ -14,6 +17,8 @@ export function ImageCarousel({
 	alt,
 	className,
 	intervalMs = 4000,
+	showArrows = true,
+	onImageAreaClick,
 }: ImageCarouselProps) {
 	const [activeIndex, setActiveIndex] = useState(0);
 	const count = imageUrls.length;
@@ -54,6 +59,23 @@ export function ImageCarousel({
 		);
 	}
 
+	const carouselTrack = (
+		<div
+			className="flex h-full transition-transform duration-500 ease-in-out"
+			style={{ transform: `translateX(-${activeIndex * 100}%)` }}
+		>
+			{imageUrls.map((url) => (
+				<img
+					key={url}
+					src={url}
+					alt={alt}
+					className="h-[200px] w-full shrink-0 object-contain"
+					draggable={false}
+				/>
+			))}
+		</div>
+	);
+
 	return (
 		<div
 			className={cn(
@@ -61,20 +83,45 @@ export function ImageCarousel({
 				className,
 			)}
 		>
-			<div
-				className="flex h-full transition-transform duration-500 ease-in-out"
-				style={{ transform: `translateX(-${activeIndex * 100}%)` }}
-			>
-				{imageUrls.map((url) => (
-					<img
-						key={url}
-						src={url}
-						alt={alt}
-						className="h-[200px] w-full shrink-0 object-contain"
-						draggable={false}
-					/>
-				))}
-			</div>
+			{onImageAreaClick ? (
+				<button
+					type="button"
+					className="h-full w-full cursor-pointer border-0 bg-transparent p-0 text-left transition-transform focus:outline-none focus-visible:ring-2 focus-visible:ring-primary/40 active:scale-[0.98]"
+					onClick={onImageAreaClick}
+					aria-label={alt}
+				>
+					{carouselTrack}
+				</button>
+			) : (
+				<div className="h-full">{carouselTrack}</div>
+			)}
+
+			{count > 1 && showArrows ? (
+				<>
+					<button
+						type="button"
+						onClick={(e) => {
+							e.stopPropagation();
+							goTo(activeIndex - 1);
+						}}
+						className="absolute top-1/2 left-2 z-10 flex size-8 -translate-y-1/2 items-center justify-center rounded-full bg-muted-foreground/80 text-primary-foreground shadow-sm transition-transform hover:scale-110 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary/40 active:scale-95"
+						aria-label="Previous slide"
+					>
+						<ChevronLeft className="size-5" strokeWidth={2.5} aria-hidden />
+					</button>
+					<button
+						type="button"
+						onClick={(e) => {
+							e.stopPropagation();
+							goTo(activeIndex + 1);
+						}}
+						className="absolute top-1/2 right-2 z-10 flex size-8 -translate-y-1/2 items-center justify-center rounded-full bg-muted-foreground/80 text-primary-foreground shadow-sm transition-transform hover:scale-110 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary/40 active:scale-95"
+						aria-label="Next slide"
+					>
+						<ChevronRight className="size-5" strokeWidth={2.5} aria-hidden />
+					</button>
+				</>
+			) : null}
 
 			{count > 1 ? (
 				<ul className="absolute inset-x-0 bottom-2 flex justify-center gap-1.5">
@@ -84,8 +131,11 @@ export function ImageCarousel({
 							<li key={`dot-${url}`}>
 								<button
 									type="button"
-									onClick={() => goTo(index)}
-									className="flex size-2.5 cursor-pointer items-center justify-center rounded-full p-0"
+									onClick={(e) => {
+										e.stopPropagation();
+										goTo(index);
+									}}
+									className="relative z-10 flex size-2.5 cursor-pointer items-center justify-center rounded-full p-0"
 									aria-label={`Slide ${index + 1}`}
 									aria-current={active ? "true" : undefined}
 								>

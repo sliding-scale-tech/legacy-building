@@ -308,7 +308,7 @@ export function AddJournalEntryPanel({
 				<div className="flex flex-col gap-3 px-4 pr-2 pb-4">
 					<EntryModeTabs value={mode} onChange={setMode} />
 
-					<h2 className="text-center font-semibold text-[#1a1a1a] text-[28px] leading-[1.4]">
+					<h2 className="text-center font-semibold text-[#1a1a1a] text-xl leading-[1.4] sm:text-[28px]">
 						{heading}
 					</h2>
 

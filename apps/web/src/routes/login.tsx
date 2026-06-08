@@ -27,15 +27,15 @@ function LoginPage() {
 
 	return (
 		<AuthLayout>
-			<div className="flex flex-col gap-2">
-				<h1 className="font-bold font-heading text-3xl text-foreground leading-tight tracking-tight sm:text-[2rem]">
+			<div className="flex flex-col gap-2 text-center lg:text-left">
+				<h1 className="font-bold font-heading text-2xl text-foreground leading-tight tracking-tight sm:text-3xl lg:text-[2rem]">
 					Log in to your account
 				</h1>
-				<p className="text-base text-muted-foreground">
+				<p className="text-muted-foreground text-sm sm:text-base">
 					Welcome back! Continue writing your story.
 				</p>
 			</div>
-			<div className="mt-8 flex flex-col gap-5">
+			<div className="mt-6 flex flex-col gap-5 sm:mt-8">
 				<SignInForm
 					signUpHref={signUpHref}
 					forgotOpen={forgotOpen}

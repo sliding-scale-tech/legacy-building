@@ -72,13 +72,24 @@ export function DashboardDeskPage() {
 
 	return (
 		<div className="relative flex min-h-svh w-full flex-col bg-white">
-			<div className="mt-20 flex flex-1 flex-col px-4 py-4 sm:px-6 sm:py-5 md:px-10">
-				<DeskHeroCard>
-					<div className="relative flex w-full max-w-[1200px] flex-1 flex-col items-center justify-center lg:min-h-[420px]">
+			<div className="mt-20 flex min-h-[calc(100svh-5rem)] flex-1 flex-col md:px-10 md:py-5">
+				<DeskHeroCard className="min-h-0 flex-1 rounded-none md:rounded-[20px]">
+					<div className="relative flex w-full max-w-[1200px] flex-1 flex-col items-center gap-6 pb-6 lg:min-h-[420px] lg:justify-center lg:gap-0 lg:pb-0">
+						<div className="flex flex-col items-center gap-4 pt-2 sm:gap-6 sm:pt-4 lg:pt-0">
+							<ProfileAvatarEditor
+								variant="desk"
+								src={avatarUrl}
+								hasCustomPhoto={hasCustomPhoto}
+							/>
+							<h1 className="text-center font-semibold text-[clamp(1.25rem,4vw,1.75rem)] text-foreground leading-[1.4]">
+								Hi, {userName}
+							</h1>
+						</div>
+
 						<div
 							className={[
-								"mb-6 w-full max-w-[300px] shrink-0 self-center",
-								"lg:absolute lg:top-[18%] lg:left-0 lg:mb-0 lg:self-auto",
+								"w-full max-w-[min(340px,100%)] shrink-0 self-center px-1",
+								"lg:absolute lg:top-[18%] lg:left-0 lg:mb-0 lg:px-0",
 								"xl:top-[22%]",
 							].join(" ")}
 						>
@@ -87,22 +98,11 @@ export function DashboardDeskPage() {
 								onAddEntry={handleAddEntry}
 							/>
 						</div>
-
-						<div className="flex flex-col items-center justify-center gap-4 sm:gap-6">
-							<ProfileAvatarEditor
-								variant="desk"
-								src={avatarUrl}
-								hasCustomPhoto={hasCustomPhoto}
-							/>
-							<h1 className="text-center font-semibold text-[#1a1a1a] text-[clamp(1.25rem,4vw,1.75rem)] leading-[1.4]">
-								Hi, {userName}{" "}
-							</h1>
-						</div>
 					</div>
 				</DeskHeroCard>
-			</div>
 
-			<DashboardFooter />
+				<DashboardFooter />
+			</div>
 
 			<JournalDetailSheet
 				journalId={selectedJournalId}

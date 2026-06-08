@@ -120,14 +120,17 @@ export function ProfileAvatarEditor({
 				disabled={busy}
 				onClick={() => fileInputRef.current?.click()}
 				className={cn(
-					"group relative shrink-0 overflow-hidden rounded-full focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#008080] focus-visible:ring-offset-2",
+					"group relative shrink-0 overflow-hidden rounded-full focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2",
 					busy && "cursor-wait",
 				)}
 				aria-label="Change profile photo"
 			>
 				<Avatar
 					className={cn(
-						"size-[clamp(7.5rem,32vw,12.5rem)] border-[#008080] bg-white",
+						isDesk
+							? "size-[clamp(9.5rem,40vw,12.5rem)] md:size-[clamp(7.5rem,32vw,12.5rem)]"
+							: "size-[clamp(7.5rem,32vw,12.5rem)]",
+						"border-primary bg-background",
 						"border-[3px] sm:border-4 md:border-[5px]",
 						"after:border-0",
 					)}

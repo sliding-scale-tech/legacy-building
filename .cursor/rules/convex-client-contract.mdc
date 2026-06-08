@@ -1,0 +1,36 @@
+---
+description: Keep Convex mutation args aligned with schema and client callers
+globs: packages/backend/convex/**/*.ts
+alwaysApply: false
+---
+
+# Convex client contract
+
+## Mutation args must match what clients send
+
+Before marking a field required in a mutation, check **all** callers (native, web, admin). If any client conditionally omits a value, the arg must be optional:
+
+```ts
+// Schema already optional — mutation must match
+imageId: v.optional(v.id("_storage")),
+
+// Handler: resolve storage only when present
+let imageUrl: string | undefined;
+if (args.imageId) {
+  imageUrl = (await ctx.storage.getUrl(args.imageId)) ?? undefined;
+  if (!imageUrl) throw new ConvexError({ code: "INVALID_ARGUMENT", message: "..." });
+}
+```
+
+Rule: read `schema.ts` first. Required mutation args that aren't required in the table definition will cause runtime validation errors when clients pass `undefined`.
+
+## Cross-app grep before tightening args
+
+When changing journal/entry mutations, grep:
+
+- `apps/native/**`
+- `apps/web/**`
+- `apps/admin/**`
+- `packages/backend/convex/**`
+
+Do not require `imageId`, `coverImageId`, or `audioId` unless every caller always provides them.

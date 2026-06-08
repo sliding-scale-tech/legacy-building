@@ -9,13 +9,22 @@ type AuthLayoutProps = {
 export function AuthLayout({ children }: AuthLayoutProps) {
 	return (
 		<div
-			className="relative flex min-h-svh w-full items-center justify-center px-4 py-8 sm:px-8 lg:px-12"
+			className="relative flex min-h-svh w-full items-center justify-center px-4 py-6 sm:px-6 sm:py-8 lg:px-12"
 			style={{ backgroundColor: brand.pageBackground }}
 		>
-			<div className="grid w-full max-w-[1400px] grid-cols-1 items-center gap-10 lg:grid-cols-2 lg:gap-16">
+			<div className="grid w-full max-w-[1400px] grid-cols-1 items-center lg:grid-cols-2 lg:gap-16">
 				<AuthHeroPanel />
 				<div className="flex w-full justify-center lg:justify-start">
-					<div className="w-full max-w-md">{children}</div>
+					<div className="w-full max-w-md">
+						<div className="mb-6 flex justify-center lg:hidden">
+							<img
+								src={assets.logo}
+								alt="Legacy Building"
+								className="h-10 w-auto object-contain"
+							/>
+						</div>
+						{children}
+					</div>
 				</div>
 			</div>
 		</div>
@@ -26,7 +35,7 @@ function AuthHeroPanel() {
 	return (
 		<div
 			className={cn(
-				"relative mx-auto flex aspect-square w-full max-w-[640px] overflow-hidden",
+				"relative mx-auto hidden aspect-square w-full max-w-[640px] overflow-hidden lg:flex",
 				"rounded-3xl shadow-[0_18px_48px_-24px_rgba(0,0,0,0.35)]",
 			)}
 		>

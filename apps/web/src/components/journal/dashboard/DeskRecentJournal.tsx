@@ -20,7 +20,7 @@ export function DeskRecentJournal({
 
 	if (recent === undefined) {
 		return (
-			<div className={cn("w-full max-w-[300px]", className)}>
+			<div className={cn("w-full max-w-[min(340px,100%)]", className)}>
 				<h2 className="mb-2 font-semibold text-[#1a1a1a] text-base leading-[1.4]">
 					Recent Journal
 				</h2>

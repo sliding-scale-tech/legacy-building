@@ -1,0 +1,42 @@
+---
+description: Accessible loading skeletons and stable React keys in admin
+globs: apps/admin/**/*.{tsx,ts}
+alwaysApply: false
+---
+
+# Admin loading & a11y
+
+## Loading wrappers need a valid ARIA role
+
+Biome rejects `aria-label` / `aria-busy` on a plain `<div>`. Use `role="status"`:
+
+```tsx
+<div role="status" aria-busy="true" aria-label="Loading users">
+  <Skeleton ... />
+</div>
+```
+
+## Skeleton row keys
+
+Do not use array index as React `key`. Use a stable constant:
+
+```tsx
+const SKELETON_ROWS = ["a", "b", "c", "d", "e"] as const;
+{SKELETON_ROWS.map((id) => (
+  <tr key={`users-table-skeleton-${id}`}>...</tr>
+))}
+```
+
+## Semantic tokens for status pills
+
+Use theme tokens, not hardcoded Tailwind color scales:
+
+```tsx
+// ❌ BAD
+"bg-green-50 text-green-700 dark:bg-green-500/15"
+
+// ✅ GOOD
+"bg-primary/10 text-primary"
+```
+
+Dialog overlays: `bg-foreground/60`, not `bg-[rgba(...)]`.

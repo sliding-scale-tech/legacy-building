@@ -17,7 +17,7 @@ type EntryModeTabsProps = {
 export function EntryModeTabs({ value, onChange }: EntryModeTabsProps) {
 	return (
 		<div
-			className="mx-auto inline-grid grid-cols-2 gap-0"
+			className="mx-auto grid w-full grid-cols-2 gap-0"
 			role="tablist"
 			aria-label="Entry mode"
 		>
@@ -32,7 +32,7 @@ export function EntryModeTabs({ value, onChange }: EntryModeTabsProps) {
 						aria-selected={isActive}
 						onClick={() => onChange(option.id)}
 						className={cn(
-							"min-h-10 min-w-[170px] cursor-pointer px-2.5 py-2.5 font-normal text-base leading-[1.4] transition-colors",
+							"min-h-10 min-w-0 cursor-pointer px-2.5 py-2.5 font-normal text-sm leading-[1.4] transition-colors sm:text-base",
 							isActive
 								? isWriting
 									? "rounded-[3px] bg-[#008080] text-white"
