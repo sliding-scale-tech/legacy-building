@@ -4,6 +4,7 @@ import { CalendarIcon } from "lucide-react";
 import { useMemo, useState } from "react";
 import { Button } from "@/components/journal/ui/button";
 import { Calendar } from "@/components/journal/ui/calendar";
+import { CalendarFooter } from "@/components/journal/ui/calendar-footer";
 import {
 	Popover,
 	PopoverContent,
@@ -74,7 +75,7 @@ export function DateField({
 				sideOffset={4}
 				collisionPadding={12}
 				className={cn(
-					"z-[2100] w-auto min-w-[280px] max-w-[320px] border border-[#e6e6e6] bg-white p-0 text-[#1a1a1a] shadow-lg ring-0",
+					"z-[2100] w-auto min-w-[296px] max-w-[320px] overflow-hidden border border-[#e6e6e6] bg-white p-0 text-[#1a1a1a] shadow-lg ring-0",
 					popoverClassName,
 				)}
 				onOpenAutoFocus={(e) => e.preventDefault()}
@@ -84,16 +85,15 @@ export function DateField({
 					selected={value}
 					onSelect={handleSelect}
 					defaultMonth={value ?? new Date()}
-					className="w-full min-w-[280px]"
-					classNames={{
-						root: "w-full min-w-[280px]",
-						months: "w-full",
-						month: "w-full gap-2",
-						month_caption: "mb-1 h-9",
-						nav: "absolute inset-x-0 top-0",
-						button_previous: "text-[#1a1a1a] hover:bg-[#ebf6f6]",
-						button_next: "text-[#1a1a1a] hover:bg-[#ebf6f6]",
+					className="w-full min-w-[296px]"
+				/>
+				<CalendarFooter
+					onToday={() => {
+						onChange(new Date());
+						setOpen(false);
 					}}
+					onClear={() => onChange(undefined)}
+					onClose={() => setOpen(false)}
 				/>
 			</PopoverContent>
 		</Popover>

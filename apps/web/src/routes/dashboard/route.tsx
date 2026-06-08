@@ -1,9 +1,11 @@
 import { buttonVariants } from "@legacy-building/ui/components/button";
+import { PageLoader } from "@legacy-building/ui/components/page-loader";
 import { cn } from "@legacy-building/ui/lib/utils";
 import { createFileRoute, Link, Outlet } from "@tanstack/react-router";
 import { Authenticated, AuthLoading, Unauthenticated } from "convex/react";
 
 import { SuspendedGuard } from "@/components/account/SuspendedGuard";
+import { JournalPaywallProvider } from "@/components/billing/JournalPaywallProvider";
 import { DashboardUserGate } from "@/components/dashboard/DashboardUserGate";
 import { DashboardHeader } from "@/components/journal/dashboard/DashboardHeader";
 import { WelcomeGuard } from "@/components/welcome/WelcomeGuard";
@@ -20,10 +22,12 @@ function DashboardLayout() {
 				<DashboardUserGate>
 					<SuspendedGuard>
 						<WelcomeGuard>
-							<div className="relative flex min-h-svh w-full flex-col bg-white">
-								<DashboardHeader />
-								<Outlet />
-							</div>
+							<JournalPaywallProvider>
+								<div className="relative flex min-h-svh w-full flex-col bg-white">
+									<DashboardHeader />
+									<Outlet />
+								</div>
+							</JournalPaywallProvider>
 						</WelcomeGuard>
 					</SuspendedGuard>
 				</DashboardUserGate>
@@ -40,9 +44,7 @@ function DashboardLayout() {
 				</div>
 			</Unauthenticated>
 			<AuthLoading>
-				<div className="container mx-auto max-w-3xl px-4 py-8">
-					<div className="h-8 w-48 animate-pulse rounded bg-muted" />
-				</div>
+				<PageLoader />
 			</AuthLoading>
 		</>
 	);

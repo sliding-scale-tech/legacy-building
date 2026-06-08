@@ -1,6 +1,9 @@
 import { verifyWebhook } from "@clerk/backend/webhooks";
+import { registerRoutes } from "@convex-dev/stripe";
+import type { GenericActionCtx, GenericDataModel } from "convex/server";
 import { httpRouter } from "convex/server";
-import { internal } from "./_generated/api";
+import type Stripe from "stripe";
+import { components, internal } from "./_generated/api";
 import { httpAction } from "./_generated/server";
 import type { ClerkUser } from "./helpers";
 import {
@@ -87,6 +90,49 @@ http.route({
 	path: "/clerk/register",
 	method: "POST",
 	handler: handleClerkWebhook,
+});
+
+/**
+ * Mirror the authoritative subscription status (already synced into the Stripe
+ * component's tables) onto our `users` table so the UI/access gates can read it
+ * cheaply. Runs after the component's default sync.
+ */
+async function mirrorSubscriptionEvent(
+	ctx: GenericActionCtx<GenericDataModel>,
+	event:
+		| Stripe.CustomerSubscriptionCreatedEvent
+		| Stripe.CustomerSubscriptionUpdatedEvent
+		| Stripe.CustomerSubscriptionDeletedEvent,
+) {
+	const subscription = event.data.object;
+	const userId =
+		typeof subscription.metadata?.userId === "string"
+			? subscription.metadata.userId
+			: undefined;
+	const stripeCustomerId =
+		typeof subscription.customer === "string"
+			? subscription.customer
+			: subscription.customer?.id;
+	const stripeStatus =
+		event.type === "customer.subscription.deleted"
+			? "canceled"
+			: subscription.status;
+
+	await ctx.runMutation(internal.stripe.mutations.mirrorSubscriptionStatus, {
+		clerkUserId: userId,
+		stripeCustomerId,
+		stripeStatus,
+	});
+}
+
+// Stripe webhook handler at /stripe/webhook (signature verified by the component).
+registerRoutes(http, components.stripe, {
+	webhookPath: "/stripe/webhook",
+	events: {
+		"customer.subscription.created": mirrorSubscriptionEvent,
+		"customer.subscription.updated": mirrorSubscriptionEvent,
+		"customer.subscription.deleted": mirrorSubscriptionEvent,
+	},
 });
 
 export default http;

@@ -7,7 +7,8 @@ import {
 } from "@legacy-building/ui/components/dropdown-menu";
 import { dashboardLayout } from "@legacy-building/ui/lib/brand-journal";
 import { cn } from "@legacy-building/ui/lib/utils";
-import { LogOut } from "lucide-react";
+import { useNavigate } from "@tanstack/react-router";
+import { CreditCard, LogOut } from "lucide-react";
 
 import { ROUTES } from "@/lib/routes";
 
@@ -19,11 +20,20 @@ export function DashboardHeaderProfileMenu({
 	avatarUrl,
 }: DashboardHeaderProfileMenuProps) {
 	const { signOut } = useClerk();
+	const navigate = useNavigate();
 	const size = dashboardLayout.headerAvatarSize;
 
 	const handleSignOut = () => {
 		void signOut({ redirectUrl: ROUTES.login });
 	};
+
+	const itemClass = cn(
+		"flex w-full cursor-pointer items-center gap-2.5 rounded-lg px-3 py-2",
+		"font-medium text-[#1a1a1a] text-sm outline-none",
+		"bg-white hover:bg-[#e8e8e8]",
+		"data-[highlighted]:bg-[#e8e8e8] data-[highlighted]:text-[#1a1a1a]",
+		"focus-visible:bg-[#e8e8e8] focus-visible:text-[#1a1a1a]",
+	);
 
 	return (
 		<DropdownMenu>
@@ -47,18 +57,17 @@ export function DashboardHeaderProfileMenu({
 			<DropdownMenuContent
 				align="end"
 				sideOffset={8}
-				className="z-[1605] min-w-[10rem] rounded-xl border border-[#e6e6e6] bg-white p-1 shadow-lg ring-0"
+				className="z-[1605] min-w-[12rem] rounded-xl border border-[#e6e6e6] bg-white p-1 shadow-lg ring-0"
 			>
 				<MenuPrimitive.Item
-					className={cn(
-						"flex w-full cursor-pointer items-center gap-2.5 rounded-lg px-3 py-2",
-						"font-medium text-[#1a1a1a] text-sm outline-none",
-						"bg-white hover:bg-[#e8e8e8]",
-						"data-[highlighted]:bg-[#e8e8e8] data-[highlighted]:text-[#1a1a1a]",
-						"focus-visible:bg-[#e8e8e8] focus-visible:text-[#1a1a1a]",
-					)}
-					onClick={handleSignOut}
+					className={itemClass}
+					onClick={() => void navigate({ to: ROUTES.dashboardBilling })}
 				>
+					<CreditCard className="size-4 shrink-0 text-[#525252]" aria-hidden />
+					Billing
+				</MenuPrimitive.Item>
+				<div className="my-1 h-px bg-[#e6e6e6]" aria-hidden />
+				<MenuPrimitive.Item className={itemClass} onClick={handleSignOut}>
 					<LogOut className="size-4 shrink-0 text-[#525252]" aria-hidden />
 					Sign out
 				</MenuPrimitive.Item>

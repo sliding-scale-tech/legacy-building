@@ -2,7 +2,7 @@ import { api } from "@legacy-building/backend/convex/_generated/api";
 import type { Id } from "@legacy-building/backend/convex/_generated/dataModel";
 import { Button } from "@legacy-building/ui/components/button";
 import { Input } from "@legacy-building/ui/components/input";
-import { Skeleton } from "@legacy-building/ui/components/skeleton";
+import { PageLoader } from "@legacy-building/ui/components/page-loader";
 import { createFileRoute } from "@tanstack/react-router";
 import { usePaginatedQuery } from "convex/react";
 import { Search } from "lucide-react";
@@ -10,7 +10,10 @@ import { useState } from "react";
 
 import { AdminTablePagination } from "@/components/admin-table-pagination";
 import { PaginatedTableFrame } from "@/components/paginated-table-frame";
-import { SubscriptionStatusBadge } from "@/components/subscription-status-badge";
+import {
+	PaidAccessBadge,
+	SubscriptionStatusBadge,
+} from "@/components/subscription-status-badge";
 import { UserDetailDialog } from "@/components/user-detail-dialog";
 import { usePaginatedPage } from "@/hooks/use-paginated-page";
 import {
@@ -31,9 +34,9 @@ export const Route = createFileRoute("/_admin/subscriptions")({
 function SubscriptionsPage() {
 	const [search, setSearch] = useState("");
 	const [searchInput, setSearchInput] = useState("");
-	const [statusFilter, setStatusFilter] = useState<"" | "active" | "canceled">(
-		"",
-	);
+	const [statusFilter, setStatusFilter] = useState<
+		"" | "active" | "trialing" | "grace_period" | "canceled"
+	>("");
 	const [selectedUserId, setSelectedUserId] = useState<Id<"users"> | null>(
 		null,
 	);
@@ -72,7 +75,8 @@ function SubscriptionsPage() {
 					Subscriptions
 				</h1>
 				<p className="mt-1 text-muted-foreground text-sm">
-					Users with an active or canceled subscription (read-only).
+					All users with billing activity — trialing, active, grace period, or
+					canceled (read-only).
 				</p>
 			</header>
 
@@ -100,23 +104,30 @@ function SubscriptionsPage() {
 				<select
 					value={statusFilter}
 					onChange={(e) => {
-						setStatusFilter(e.target.value as "" | "active" | "canceled");
+						setStatusFilter(
+							e.target.value as
+								| ""
+								| "active"
+								| "trialing"
+								| "grace_period"
+								| "canceled",
+						);
 						resetPage();
 					}}
 					className="h-11 rounded-xl border border-border bg-card px-3 text-sm"
 					aria-label="Filter by subscription status"
 				>
-					<option value="">All</option>
-					<option value="active">Active</option>
+					<option value="">All billing users</option>
+					<option value="active">Active (paid)</option>
+					<option value="trialing">Trialing</option>
+					<option value="grace_period">Grace period</option>
 					<option value="canceled">Canceled</option>
 				</select>
 			</div>
 
 			{isLoadingFirstPage ? (
-				<div className={`${adminCardClass} space-y-3 p-4`}>
-					{["a", "b", "c", "d", "e"].map((id) => (
-						<Skeleton key={id} className="h-12 w-full rounded-lg" />
-					))}
+				<div className={adminCardClass}>
+					<PageLoader overlay={false} className="min-h-[50svh]" />
 				</div>
 			) : (
 				<PaginatedTableFrame
@@ -126,17 +137,19 @@ function SubscriptionsPage() {
 					<div className={`${adminCardClass} overflow-hidden`}>
 						{pageItems.length === 0 ? (
 							<p className="p-8 text-center text-muted-foreground text-sm">
-								No users with active or canceled subscriptions match your
-								filters.
+								No users with billing history match your filters.
 							</p>
 						) : (
 							<div className="overflow-x-auto">
-								<table className="w-full min-w-[560px] text-left text-sm">
+								<table className="w-full min-w-[720px] text-left text-sm">
 									<thead>
 										<tr className={adminTableHeadRowClass}>
 											<th className={adminTableHeadCellClass}>Name</th>
 											<th className={adminTableHeadCellClass}>Email</th>
 											<th className={adminTableHeadCellClass}>Status</th>
+											<th className={adminTableHeadCellClass}>
+												Journal access
+											</th>
 										</tr>
 									</thead>
 									<tbody>
@@ -162,6 +175,11 @@ function SubscriptionsPage() {
 												<td className="px-4 py-3">
 													<SubscriptionStatusBadge
 														status={user.subscriptionStatus}
+													/>
+												</td>
+												<td className="px-4 py-3">
+													<PaidAccessBadge
+														hasAccess={user.hasPaidJournalAccess}
 													/>
 												</td>
 											</tr>

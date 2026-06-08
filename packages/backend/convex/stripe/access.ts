@@ -1,0 +1,46 @@
+import { ConvexError } from "convex/values";
+
+import { components } from "../_generated/api";
+import type { MutationCtx, QueryCtx } from "../_generated/server";
+
+/** Stripe subscription statuses that unlock paid plan features (first charge completed). */
+const PAID_STRIPE_STATUSES = new Set(["active", "past_due"]);
+
+type AccessCtx = QueryCtx | MutationCtx;
+
+export async function userHasPaidFeatureAccess(
+	ctx: AccessCtx,
+	clerkUserId: string,
+): Promise<boolean> {
+	const user = await ctx.db
+		.query("users")
+		.withIndex("by_clerk_id", (q) => q.eq("clerkId", clerkUserId))
+		.unique();
+
+	if (!user) return false;
+	if (user.role === "admin") return true;
+
+	// Never trust the mirrored `users.subscriptionStatus` alone — it can lag after
+	// cancel/reset. Require a live paid Stripe subscription instead.
+	const subscriptions = await ctx.runQuery(
+		components.stripe.public.listSubscriptionsByUserId,
+		{ userId: clerkUserId },
+	);
+
+	return subscriptions.some((subscription) =>
+		PAID_STRIPE_STATUSES.has(subscription.status),
+	);
+}
+
+export async function requirePaidFeatureAccess(
+	ctx: AccessCtx,
+	clerkUserId: string,
+): Promise<void> {
+	if (await userHasPaidFeatureAccess(ctx, clerkUserId)) return;
+
+	throw new ConvexError({
+		code: "SUBSCRIPTION_REQUIRED",
+		message:
+			"Subscribe and complete payment to use journal features. Visit Billing to continue.",
+	});
+}

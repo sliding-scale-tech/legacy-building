@@ -1,15 +1,20 @@
 import { useSignIn } from "@clerk/expo";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { firstClerkErrorMessage } from "@legacy-building/ui/lib/clerk-errors";
 import { type Href, Link, useRouter } from "expo-router";
+import { useState } from "react";
 import { Controller, useForm } from "react-hook-form";
-import { Pressable, Text, TextInput, View } from "react-native";
+import { Pressable, Text, View } from "react-native";
+
+import { AuthCodeField } from "@/components/auth/auth-code-field";
+import { AuthField } from "@/components/auth/auth-field";
+import { AuthHeader } from "@/components/auth/auth-header";
+import { AuthPrimaryButton } from "@/components/auth/auth-primary-button";
+import { AuthScreen } from "@/components/auth/auth-screen";
 import { GoogleOAuthButton } from "@/components/google-oauth-button";
-import {
-	type SignInFormValues,
-	type SignInMfaCodeFormValues,
-	signInMfaCodeSchema,
-	signInSchema,
-} from "@/lib/auth/schemas";
+import { type SignInFormValues, signInSchema } from "@/lib/auth/schemas";
+
+type MfaMethod = "email_code" | "totp" | "phone_code";
 
 function pushDecoratedUrl(
 	router: ReturnType<typeof useRouter>,
@@ -18,38 +23,116 @@ function pushDecoratedUrl(
 ) {
 	const url = decorateUrl(href);
 	const nextHref = url.startsWith("http") ? new URL(url).pathname : url;
-	router.push(nextHref as Href);
+	router.replace(nextHref as Href);
 }
 
-export default function Page() {
+function OrDivider() {
+	return (
+		<View className="my-1 flex-row items-center gap-3">
+			<View className="h-px flex-1 bg-white/30" />
+			<Text className="font-medium text-primary-foreground/70 text-xs uppercase tracking-widest">
+				Or
+			</Text>
+			<View className="h-px flex-1 bg-white/30" />
+		</View>
+	);
+}
+
+function mfaHint(method: MfaMethod) {
+	switch (method) {
+		case "email_code":
+			return "Enter the code we sent to your email to finish signing in.";
+		case "totp":
+			return "Enter the code from your authenticator app.";
+		case "phone_code":
+			return "Enter the code we sent to your phone.";
+	}
+}
+
+export default function SignInPage() {
 	const { signIn, errors, fetchStatus } = useSignIn();
 	const router = useRouter();
+	const [mfaMethod, setMfaMethod] = useState<MfaMethod | null>(null);
+	const [mfaRootError, setMfaRootError] = useState<string | undefined>();
 
 	const credentialsForm = useForm<SignInFormValues>({
 		resolver: zodResolver(signInSchema),
 		defaultValues: { email: "", password: "" },
 	});
 
-	const mfaForm = useForm<SignInMfaCodeFormValues>({
-		resolver: zodResolver(signInMfaCodeSchema),
-		defaultValues: { code: "" },
-	});
+	const resetFlow = async () => {
+		await signIn.reset();
+		setMfaMethod(null);
+		setMfaRootError(undefined);
+		credentialsForm.clearErrors("root");
+	};
 
-	const emailCodeFactor = signIn.supportedSecondFactors.find(
-		(factor) => factor.strategy === "email_code",
-	);
-	const requiresEmailCode =
-		signIn.status === "needs_client_trust" ||
-		(signIn.status === "needs_second_factor" && !!emailCodeFactor);
+	const finalizeSignIn = async () => {
+		const { error } = await signIn.finalize({
+			navigate: ({ session, decorateUrl }) => {
+				if (session?.currentTask) return;
+				pushDecoratedUrl(router, decorateUrl, "/(tabs)");
+			},
+		});
+		if (error) {
+			console.error(error);
+		}
+	};
+
+	const beginSecondFactor = async (): Promise<
+		{ ok: true; method: MfaMethod } | { ok: false; message: string }
+	> => {
+		const factors = signIn.supportedSecondFactors;
+
+		const emailFactor = factors.find((f) => f.strategy === "email_code");
+		if (emailFactor) {
+			const { error: sendError } = await signIn.mfa.sendEmailCode();
+			if (sendError) {
+				return {
+					ok: false,
+					message:
+						firstClerkErrorMessage(sendError) ??
+						"Could not send verification code.",
+				};
+			}
+			return { ok: true, method: "email_code" };
+		}
+
+		const totpFactor = factors.find((f) => f.strategy === "totp");
+		if (totpFactor) {
+			return { ok: true, method: "totp" };
+		}
+
+		const phoneFactor = factors.find((f) => f.strategy === "phone_code");
+		if (phoneFactor) {
+			const { error: sendError } = await signIn.mfa.sendPhoneCode();
+			if (sendError) {
+				return {
+					ok: false,
+					message:
+						firstClerkErrorMessage(sendError) ??
+						"Could not send verification code.",
+				};
+			}
+			return { ok: true, method: "phone_code" };
+		}
+
+		return {
+			ok: false,
+			message:
+				"Additional verification is required. Use another sign-in method or contact support.",
+		};
+	};
 
 	const onSubmit = credentialsForm.handleSubmit(async ({ email, password }) => {
+		credentialsForm.clearErrors("root");
+
 		const { error } = await signIn.password({
 			emailAddress: email.trim(),
 			password,
 		});
 
 		if (error) {
-			console.error(JSON.stringify(error, null, 2));
 			credentialsForm.setError("root", {
 				message: error.longMessage ?? "Unable to sign in. Please try again.",
 			});
@@ -57,209 +140,159 @@ export default function Page() {
 		}
 
 		if (signIn.status === "complete") {
-			await signIn.finalize({
-				navigate: ({ session, decorateUrl }) => {
-					if (session?.currentTask) return;
-					pushDecoratedUrl(router, decorateUrl, "/");
-				},
-			});
-		} else if (
+			await finalizeSignIn();
+			return;
+		}
+
+		if (
 			signIn.status === "needs_second_factor" ||
 			signIn.status === "needs_client_trust"
 		) {
-			if (emailCodeFactor) {
-				await signIn.mfa.sendEmailCode();
-			} else {
-				credentialsForm.setError("root", {
-					message:
-						"A second factor is required but email codes are unavailable.",
-				});
+			const result = await beginSecondFactor();
+			if (!result.ok) {
+				credentialsForm.setError("root", { message: result.message });
+				return;
 			}
-		} else {
-			credentialsForm.setError("root", {
-				message: "Sign-in could not be completed.",
-			});
+			setMfaMethod(result.method);
+			return;
 		}
+
+		credentialsForm.setError("root", {
+			message: "Sign-in could not be completed.",
+		});
 	});
 
-	const onVerify = mfaForm.handleSubmit(async ({ code }) => {
-		await signIn.mfa.verifyEmailCode({ code });
+	const onVerifyCode = async (code: string) => {
+		if (!mfaMethod) return;
+		setMfaRootError(undefined);
+
+		const { error } =
+			mfaMethod === "email_code"
+				? await signIn.mfa.verifyEmailCode({ code })
+				: mfaMethod === "totp"
+					? await signIn.mfa.verifyTOTP({ code })
+					: await signIn.mfa.verifyPhoneCode({ code });
+
+		if (error) {
+			setMfaRootError(
+				error.longMessage ?? "That code did not work. Please try again.",
+			);
+			return;
+		}
 
 		if (signIn.status === "complete") {
-			await signIn.finalize({
-				navigate: ({ session, decorateUrl }) => {
-					if (session?.currentTask) return;
-					pushDecoratedUrl(router, decorateUrl, "/");
-				},
-			});
+			await finalizeSignIn();
 		} else {
-			mfaForm.setError("root", {
-				message: "That code did not complete sign-in. Please try again.",
-			});
+			setMfaRootError("That code did not complete sign-in. Please try again.");
 		}
-	});
+	};
 
-	if (requiresEmailCode) {
-		const mfaErrors = mfaForm.formState.errors;
+	const resendCode = async () => {
+		if (!mfaMethod || mfaMethod === "totp") return;
+		setMfaRootError(undefined);
+
+		const { error } =
+			mfaMethod === "email_code"
+				? await signIn.mfa.sendEmailCode()
+				: await signIn.mfa.sendPhoneCode();
+
+		if (error) {
+			setMfaRootError(
+				firstClerkErrorMessage(error) ?? "Could not send a new code.",
+			);
+		}
+	};
+
+	if (mfaMethod) {
+		const canResend = mfaMethod === "email_code" || mfaMethod === "phone_code";
+
 		return (
-			<View className="flex-1 bg-background px-5 pt-8">
-				<Text className="mb-2 font-semibold text-2xl text-foreground tracking-tight">
-					Verify your account
-				</Text>
-				{emailCodeFactor ? (
-					<Text className="mb-4 text-muted-foreground text-sm leading-relaxed">
-						We sent a verification code to {emailCodeFactor.safeIdentifier}.
-					</Text>
-				) : null}
-				<Controller
-					control={mfaForm.control}
-					name="code"
-					render={({ field: { onChange, value } }) => (
-						<TextInput
-							className="h-12 rounded-full border border-border bg-popover px-5 text-base text-foreground"
-							value={value}
-							placeholder="Enter your verification code"
-							placeholderTextColor="#999"
-							onChangeText={onChange}
-							keyboardType="numeric"
-						/>
-					)}
+			<AuthScreen
+				header={
+					<AuthHeader title="Log in" backHref="/(auth)" backLabel="Back" />
+				}
+			>
+				<AuthCodeField
+					hint={mfaHint(mfaMethod)}
+					fieldError={errors.fields.code?.message}
+					rootError={mfaRootError}
+					loading={fetchStatus === "fetching"}
+					onVerify={onVerifyCode}
+					onResend={canResend ? resendCode : undefined}
+					onStartOver={resetFlow}
 				/>
-				{mfaErrors.code ? (
-					<Text className="mt-1 text-destructive text-xs">
-						{mfaErrors.code.message}
-					</Text>
-				) : null}
-				{errors.fields.code ? (
-					<Text className="mt-1 text-destructive text-xs">
-						{errors.fields.code.message}
-					</Text>
-				) : null}
-				{mfaErrors.root ? (
-					<Text className="mt-1 text-destructive text-xs">
-						{mfaErrors.root.message}
-					</Text>
-				) : null}
-				<Pressable
-					className="mt-4 h-12 items-center justify-center rounded-full bg-primary active:opacity-70 disabled:opacity-50"
-					onPress={onVerify}
-					disabled={fetchStatus === "fetching"}
-				>
-					<Text className="font-semibold text-base text-primary-foreground">
-						Verify
-					</Text>
-				</Pressable>
-				<Pressable
-					className="mt-3 h-10 items-center justify-center active:opacity-70"
-					onPress={() => signIn.mfa.sendEmailCode()}
-				>
-					<Text className="font-semibold text-primary text-sm">
-						I need a new code
-					</Text>
-				</Pressable>
-			</View>
+			</AuthScreen>
 		);
 	}
 
 	const fieldErrors = credentialsForm.formState.errors;
 
 	return (
-		<View className="flex-1 bg-background px-5 pt-8">
-			<Text className="mb-6 font-semibold text-2xl text-foreground tracking-tight">
-				Sign in
-			</Text>
-			<View className="gap-4">
-				<View className="gap-1">
-					<Controller
-						control={credentialsForm.control}
-						name="email"
-						render={({ field: { onChange, value } }) => (
-							<TextInput
-								className="h-12 rounded-full border border-border bg-popover px-5 text-base text-foreground"
-								autoCapitalize="none"
-								value={value}
-								placeholder="Email"
-								placeholderTextColor="#999"
-								onChangeText={onChange}
-								keyboardType="email-address"
-							/>
-						)}
-					/>
-					{fieldErrors.email ? (
-						<Text className="ml-2 text-destructive text-xs">
-							{fieldErrors.email.message}
+		<AuthScreen
+			header={<AuthHeader title="Log in" backHref="/(auth)" backLabel="Back" />}
+		>
+			<View className="gap-5">
+				<Controller
+					control={credentialsForm.control}
+					name="email"
+					render={({ field: { onChange, value } }) => (
+						<AuthField
+							label="Email"
+							value={value}
+							onChangeText={onChange}
+							autoCapitalize="none"
+							keyboardType="email-address"
+							autoComplete="email"
+							error={
+								fieldErrors.email?.message ?? errors.fields.identifier?.message
+							}
+						/>
+					)}
+				/>
+				<Controller
+					control={credentialsForm.control}
+					name="password"
+					render={({ field: { onChange, value } }) => (
+						<AuthField
+							label="Password"
+							value={value}
+							onChangeText={onChange}
+							secureTextEntry
+							autoComplete="password"
+							error={
+								fieldErrors.password?.message ?? errors.fields.password?.message
+							}
+						/>
+					)}
+				/>
+
+				<Link href={"/forgot-password" as Href} asChild>
+					<Pressable className="-mt-2 active:opacity-60">
+						<Text className="text-primary-foreground text-sm">
+							Forgot your password?{" "}
+							<Text className="font-semibold text-primary-foreground underline">
+								Click here
+							</Text>
 						</Text>
-					) : null}
-					{errors.fields.identifier ? (
-						<Text className="ml-2 text-destructive text-xs">
-							{errors.fields.identifier.message}
-						</Text>
-					) : null}
-				</View>
-				<View className="gap-1">
-					<Controller
-						control={credentialsForm.control}
-						name="password"
-						render={({ field: { onChange, value } }) => (
-							<TextInput
-								className="h-12 rounded-full border border-border bg-popover px-5 text-base text-foreground"
-								value={value}
-								placeholder="Password"
-								placeholderTextColor="#999"
-								secureTextEntry
-								onChangeText={onChange}
-							/>
-						)}
-					/>
-					{fieldErrors.password ? (
-						<Text className="ml-2 text-destructive text-xs">
-							{fieldErrors.password.message}
-						</Text>
-					) : null}
-					{errors.fields.password ? (
-						<Text className="ml-2 text-destructive text-xs">
-							{errors.fields.password.message}
-						</Text>
-					) : null}
-				</View>
-				<View className="flex-row items-center justify-between px-2">
-					<Link href="/forgot-password">
-						<Text className="font-medium text-foreground text-sm underline">
-							Forgot password?
-						</Text>
-					</Link>
-					<Link href="/sign-up">
-						<Text className="font-semibold text-foreground text-sm underline">
-							Create account
-						</Text>
-					</Link>
-				</View>
-				{fieldErrors.root ? (
-					<Text className="text-destructive text-xs">
+					</Pressable>
+				</Link>
+
+				{fieldErrors.root?.message ? (
+					<Text className="text-red-300 text-xs">
 						{fieldErrors.root.message}
 					</Text>
 				) : null}
-				<Pressable
-					className="mt-1 h-12 items-center justify-center rounded-full bg-primary active:opacity-70 disabled:opacity-50"
+
+				<AuthPrimaryButton
+					label="Log in"
 					onPress={onSubmit}
-					disabled={fetchStatus === "fetching"}
-				>
-					<Text className="font-semibold text-base text-primary-foreground">
-						Sign in
-					</Text>
-				</Pressable>
-				<View className="relative py-1">
-					<View className="absolute inset-0 items-center justify-center">
-						<View className="h-px w-full bg-border" />
-					</View>
-					<View className="items-center">
-						<Text className="bg-background px-3 font-medium text-muted-foreground text-xs uppercase tracking-widest">
-							Or
-						</Text>
-					</View>
-				</View>
+					loading={fetchStatus === "fetching"}
+				/>
+
+				<OrDivider />
+
 				<GoogleOAuthButton />
 			</View>
-		</View>
+		</AuthScreen>
 	);
 }

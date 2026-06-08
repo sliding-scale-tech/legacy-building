@@ -39,3 +39,8 @@ export const adminDestructiveButtonClass =
 /** Solid destructive confirm (dialog footer) */
 export const adminDestructiveConfirmButtonClass =
 	"h-11 rounded-xl border-0 bg-[#b0200c] px-4 font-medium text-white shadow-sm transition-colors hover:bg-[#9a1c0a] hover:text-white active:scale-[0.98] disabled:opacity-50";
+
+/** Admin header uses z-[1504]; dialogs must render above it, below the header edge. */
+export const adminDialogOverlayClass = "z-[1600]";
+export const adminDialogContentClass =
+	"top-[calc(5rem+1rem)] z-[1600] max-h-[calc(100dvh-7rem)] -translate-y-0";

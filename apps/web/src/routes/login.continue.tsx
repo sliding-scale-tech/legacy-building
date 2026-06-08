@@ -11,6 +11,7 @@ import {
 	FieldLabel,
 } from "@legacy-building/ui/components/field";
 import { Input } from "@legacy-building/ui/components/input";
+import { PageLoader } from "@legacy-building/ui/components/page-loader";
 import { APP_NAME } from "@legacy-building/ui/lib/brand";
 import { firstClerkErrorMessage } from "@legacy-building/ui/lib/clerk-errors";
 import { navigateAfterAuth } from "@legacy-building/ui/lib/navigation";
@@ -34,15 +35,7 @@ function LoginContinuePage() {
 	const { signUp, errors, fetchStatus } = useSignUp();
 
 	if (!signUp) {
-		return (
-			<div className="flex min-h-svh flex-col items-center justify-center gap-4">
-				<div
-					className="h-8 w-8 animate-spin rounded-full border-2 border-border border-t-primary"
-					aria-hidden
-				/>
-				<p className="text-muted-foreground text-sm">Loading…</p>
-			</div>
-		);
+		return <PageLoader message="Loading…" />;
 	}
 
 	return (

@@ -32,7 +32,30 @@ export const journalType = v.union(
 	v.literal("their_story"),
 );
 
+export const planIntervalValidator = v.union(
+	v.literal("monthly"),
+	v.literal("annual"),
+);
+
 export default defineSchema({
+	products: defineTable({
+		interval: planIntervalValidator,
+		name: v.string(),
+		stripePriceId: v.string(),
+		stripeProductId: v.optional(v.string()),
+		amountCents: v.number(),
+		currency: v.string(),
+		trialDays: v.number(),
+		features: v.array(v.string()),
+		tagline: v.optional(v.string()),
+		highlight: v.optional(v.string()),
+		sortOrder: v.number(),
+		active: v.boolean(),
+	})
+		.index("by_interval", ["interval"])
+		.index("by_stripe_price_id", ["stripePriceId"])
+		.index("by_active_and_sort", ["active", "sortOrder"]),
+
 	users: defineTable({
 		clerkId: v.string(),
 		email: v.string(),
@@ -44,6 +67,13 @@ export default defineSchema({
 		welcomeCompletedAt: v.optional(v.number()),
 		stripeCustomerId: v.optional(v.string()),
 		subscriptionStatus: v.optional(userSubscriptionStatusValidator),
+		/** Scheduled (deferred) plan switch, e.g. annual -> monthly at period end. */
+		pendingPlanChange: v.optional(
+			v.object({
+				interval: planIntervalValidator,
+				effectiveAt: v.number(),
+			}),
+		),
 		accountStatus: v.optional(accountStatusValidator),
 	})
 		.index("by_clerk_id", ["clerkId"])
@@ -61,6 +91,10 @@ export default defineSchema({
 		updatedAtMs: v.optional(v.number()),
 		/** Manual library order within a story tab (lower = earlier). */
 		sortOrder: v.optional(v.number()),
+		/** Optional end date for the journal period (e.g. "Apr 16 – Jul 2, 2026"). */
+		endDateMs: v.optional(v.number()),
+		/** Optional inline entry log captured at journal creation. */
+		entryLog: v.optional(v.string()),
 	})
 		.index("by_userId", ["userId"])
 		.index("by_userId_and_type", ["userId", "type"]),

@@ -4,6 +4,7 @@ import { cn } from "@legacy-building/ui/lib/utils";
 
 import {
 	AccountStatusBadge,
+	PaidAccessBadge,
 	RoleBadge,
 	SubscriptionStatusBadge,
 } from "@/components/subscription-status-badge";
@@ -29,6 +30,7 @@ export type AdminUserRow = {
 		| "canceled"
 		| "none"
 		| null;
+	hasPaidJournalAccess: boolean;
 };
 
 type UsersTableProps = {
@@ -37,6 +39,14 @@ type UsersTableProps = {
 	onSelectUser: (userId: Id<"users">) => void;
 };
 
+const USERS_TABLE_SKELETON_ROWS = [
+	"skeleton-row-a",
+	"skeleton-row-b",
+	"skeleton-row-c",
+	"skeleton-row-d",
+	"skeleton-row-e",
+] as const;
+
 export function UsersTable({
 	users,
 	isLoading,
@@ -44,11 +54,52 @@ export function UsersTable({
 }: UsersTableProps) {
 	if (isLoading) {
 		return (
-			<div className={cn(adminCardClass, "overflow-hidden p-4")}>
-				<div className="space-y-3">
-					{["a", "b", "c", "d", "e", "f"].map((id) => (
-						<Skeleton key={id} className="h-12 w-full rounded-lg" />
-					))}
+			<div
+				className={cn(adminCardClass, "overflow-hidden")}
+				role="status"
+				aria-busy="true"
+				aria-label="Loading users"
+			>
+				<div className="overflow-x-auto">
+					<table className="w-full min-w-[760px] text-left text-sm">
+						<thead>
+							<tr className={adminTableHeadRowClass}>
+								<th className={adminTableHeadCellClass}>Name</th>
+								<th className={adminTableHeadCellClass}>Email</th>
+								<th className={adminTableHeadCellClass}>Role</th>
+								<th className={adminTableHeadCellClass}>Account</th>
+								<th className={adminTableHeadCellClass}>Subscription</th>
+								<th className={adminTableHeadCellClass}>Journal access</th>
+							</tr>
+						</thead>
+						<tbody>
+							{USERS_TABLE_SKELETON_ROWS.map((rowKey) => (
+								<tr
+									key={rowKey}
+									className="border-border border-b last:border-0"
+								>
+									<td className="px-4 py-3">
+										<Skeleton className="h-4 w-32" />
+									</td>
+									<td className="px-4 py-3">
+										<Skeleton className="h-4 w-48" />
+									</td>
+									<td className="px-4 py-3">
+										<Skeleton className="h-5 w-16 rounded-full" />
+									</td>
+									<td className="px-4 py-3">
+										<Skeleton className="h-5 w-20 rounded-full" />
+									</td>
+									<td className="px-4 py-3">
+										<Skeleton className="h-5 w-24 rounded-full" />
+									</td>
+									<td className="px-4 py-3">
+										<Skeleton className="h-5 w-12 rounded-full" />
+									</td>
+								</tr>
+							))}
+						</tbody>
+					</table>
 				</div>
 			</div>
 		);
@@ -70,14 +121,15 @@ export function UsersTable({
 	return (
 		<div className={cn(adminCardClass, "overflow-hidden")}>
 			<div className="overflow-x-auto">
-				<table className="w-full min-w-[640px] text-left text-sm">
+				<table className="w-full min-w-[760px] text-left text-sm">
 					<thead>
 						<tr className={adminTableHeadRowClass}>
 							<th className={adminTableHeadCellClass}>Name</th>
 							<th className={adminTableHeadCellClass}>Email</th>
 							<th className={adminTableHeadCellClass}>Role</th>
-							<th className={adminTableHeadCellClass}>Status</th>
+							<th className={adminTableHeadCellClass}>Account</th>
 							<th className={adminTableHeadCellClass}>Subscription</th>
+							<th className={adminTableHeadCellClass}>Journal access</th>
 						</tr>
 					</thead>
 					<tbody>
@@ -106,6 +158,9 @@ export function UsersTable({
 								</td>
 								<td className="px-4 py-3">
 									<SubscriptionStatusBadge status={user.subscriptionStatus} />
+								</td>
+								<td className="px-4 py-3">
+									<PaidAccessBadge hasAccess={user.hasPaidJournalAccess} />
 								</td>
 							</tr>
 						))}

@@ -1,5 +1,5 @@
 import { useAuth } from "@clerk/react";
-import { Skeleton } from "@legacy-building/ui/components/skeleton";
+import { PageLoader } from "@legacy-building/ui/components/page-loader";
 import { useCurrentUser } from "@legacy-building/ui/hooks/use-current-user";
 import { createFileRoute, Navigate } from "@tanstack/react-router";
 import { ShieldCheck } from "lucide-react";
@@ -12,20 +12,6 @@ import { ROUTES } from "@/lib/routes";
 export const Route = createFileRoute("/sign-in")({
 	component: SignInPage,
 });
-
-function SignInSkeleton() {
-	return (
-		<div
-			className="fade-in-50 flex animate-in flex-col gap-4 duration-300"
-			aria-busy="true"
-			aria-live="polite"
-		>
-			<Skeleton className="h-12 w-full rounded-full" />
-			<Skeleton className="h-12 w-full rounded-full" />
-			<Skeleton className="mt-1 h-12 w-full rounded-full" />
-		</div>
-	);
-}
 
 function SignInPage() {
 	const { isLoaded } = useAuth();
@@ -62,7 +48,15 @@ function SignInPage() {
 						</p>
 
 						<div className="mt-8">
-							{isLoaded ? <AdminSignInForm /> : <SignInSkeleton />}
+							{isLoaded ? (
+								<AdminSignInForm />
+							) : (
+								<PageLoader
+									overlay={false}
+									className="min-h-[280px]"
+									size={220}
+								/>
+							)}
 						</div>
 
 						<p className="mt-8 text-center text-muted-foreground text-xs leading-relaxed">

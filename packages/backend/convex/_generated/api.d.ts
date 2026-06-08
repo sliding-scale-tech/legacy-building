@@ -9,6 +9,7 @@
  */
 
 import type * as admin_actions from "../admin/actions.js";
+import type * as admin_billing from "../admin/billing.js";
 import type * as admin_helpers from "../admin/helpers.js";
 import type * as admin_mutations from "../admin/mutations.js";
 import type * as admin_queries from "../admin/queries.js";
@@ -23,6 +24,14 @@ import type * as journal_mutations from "../journal/mutations.js";
 import type * as journal_queries from "../journal/queries.js";
 import type * as journal_sort from "../journal/sort.js";
 import type * as journal_storage from "../journal/storage.js";
+import type * as stripe_access from "../stripe/access.js";
+import type * as stripe_actions from "../stripe/actions.js";
+import type * as stripe_config from "../stripe/config.js";
+import type * as stripe_helpers from "../stripe/helpers.js";
+import type * as stripe_mutations from "../stripe/mutations.js";
+import type * as stripe_products_mutations from "../stripe/products/mutations.js";
+import type * as stripe_products_queries from "../stripe/products/queries.js";
+import type * as stripe_queries from "../stripe/queries.js";
 import type * as user_actionHelpers from "../user/actionHelpers.js";
 import type * as user_mutations from "../user/mutations.js";
 import type * as user_queries from "../user/queries.js";
@@ -35,6 +44,7 @@ import type {
 
 declare const fullApi: ApiFromModules<{
   "admin/actions": typeof admin_actions;
+  "admin/billing": typeof admin_billing;
   "admin/helpers": typeof admin_helpers;
   "admin/mutations": typeof admin_mutations;
   "admin/queries": typeof admin_queries;
@@ -49,6 +59,14 @@ declare const fullApi: ApiFromModules<{
   "journal/queries": typeof journal_queries;
   "journal/sort": typeof journal_sort;
   "journal/storage": typeof journal_storage;
+  "stripe/access": typeof stripe_access;
+  "stripe/actions": typeof stripe_actions;
+  "stripe/config": typeof stripe_config;
+  "stripe/helpers": typeof stripe_helpers;
+  "stripe/mutations": typeof stripe_mutations;
+  "stripe/products/mutations": typeof stripe_products_mutations;
+  "stripe/products/queries": typeof stripe_products_queries;
+  "stripe/queries": typeof stripe_queries;
   "user/actionHelpers": typeof user_actionHelpers;
   "user/mutations": typeof user_mutations;
   "user/queries": typeof user_queries;
@@ -80,4 +98,6 @@ export declare const internal: FilterApi<
   FunctionReference<any, "internal">
 >;
 
-export declare const components: {};
+export declare const components: {
+  stripe: import("@convex-dev/stripe/_generated/component.js").ComponentApi<"stripe">;
+};

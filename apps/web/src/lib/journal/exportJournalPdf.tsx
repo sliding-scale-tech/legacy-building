@@ -1,12 +1,18 @@
 import { pdf } from "@react-pdf/renderer";
-import {
-	type JournalEntryPdfSlice,
-	JournalExportPdfDocument,
-	type JournalForPdfExport,
-} from "@/lib/journal/journal-export-pdf-document";
-import type { EnrichedJournalEntry } from "@/lib/journal/journalEntryTypes";
 
-export type { JournalForPdfExport };
+import { MyStoryDocument } from "@/components/my-story-pdf/MyStoryDocument";
+import type { MyStoryEntry } from "@/components/my-story-pdf/types";
+import { formatPdfLongDate } from "@/lib/journal/formatDate";
+import type { EnrichedJournalEntry } from "@/lib/journal/journalEntryTypes";
+import type { JournalStoryType } from "@/lib/journal/journalTypes";
+
+export type JournalForPdfExport = {
+	title: string;
+	dateMs: number;
+	type: JournalStoryType;
+	dedication?: string;
+	coverImageUrl?: string;
+};
 
 async function fetchImageDataUrl(url: string): Promise<string | null> {
 	try {
@@ -30,17 +36,22 @@ function downloadPdfBlob(blob: Blob, filename: string) {
 	anchor.href = url;
 	anchor.download = filename;
 	anchor.click();
-	URL.revokeObjectURL(url);
+	setTimeout(() => {
+		URL.revokeObjectURL(url);
+		anchor.remove();
+	}, 1000);
 }
 
-async function prepareEntrySlices(
+async function mapEntriesToMyStory(
 	entries: EnrichedJournalEntry[],
-): Promise<JournalEntryPdfSlice[]> {
+): Promise<MyStoryEntry[]> {
 	const writingEntries = entries.filter((entry) => entry.mode === "writing");
 	return Promise.all(
 		writingEntries.map(async (entry) => ({
-			entry,
-			imageSrc: entry.imageUrl
+			heading: entry.title?.trim() || "Untitled entry",
+			date: formatPdfLongDate(entry.dateMs),
+			body: entry.body?.trim() ?? "",
+			imageBase64: entry.imageUrl
 				? ((await fetchImageDataUrl(entry.imageUrl)) ?? undefined)
 				: undefined,
 		})),
@@ -56,22 +67,19 @@ export async function exportJournalEntriesToPdf({
 	includeJournal: boolean;
 	entries: EnrichedJournalEntry[];
 }): Promise<void> {
-	const coverImageSrc =
-		includeJournal && journal.coverImageUrl
-			? ((await fetchImageDataUrl(journal.coverImageUrl)) ?? undefined)
-			: undefined;
-
-	const entrySlices = await prepareEntrySlices(entries);
+	const myStoryEntries = await mapEntriesToMyStory(entries);
+	const journalName = journal.title?.trim() || "Journal";
 
 	const blob = await pdf(
-		<JournalExportPdfDocument
-			journal={journal}
-			includeJournal={includeJournal}
-			coverImageSrc={coverImageSrc}
-			entries={entrySlices}
+		<MyStoryDocument
+			title="Story"
+			journalName={journalName}
+			entries={myStoryEntries}
+			includeCover={includeJournal}
+			storyType={journal.type}
 		/>,
 	).toBlob();
 
-	const safeName = journal.title.replace(/[^\w\s-]/g, "").trim() || "journal";
+	const safeName = journalName.replace(/[^\w\s-]/g, "").trim() || "journal";
 	downloadPdfBlob(blob, `${safeName}_entries.pdf`);
 }

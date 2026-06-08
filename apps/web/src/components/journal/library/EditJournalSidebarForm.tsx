@@ -66,7 +66,6 @@ export function EditJournalSidebarForm({
 		setShowErrors(false);
 		if (fileRef.current) fileRef.current.value = "";
 	}, [
-		journal._id,
 		journal.title,
 		journal.dateMs,
 		journal.dedication,

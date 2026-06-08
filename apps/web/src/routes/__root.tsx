@@ -1,4 +1,5 @@
 import { Toaster } from "@legacy-building/ui/components/sonner";
+import { assets } from "@legacy-building/ui/lib/brand-journal";
 import {
 	createRootRouteWithContext,
 	HeadContent,
@@ -30,7 +31,7 @@ export const Route = createRootRouteWithContext<RouterAppContext>()({
 		links: [
 			{
 				rel: "icon",
-				href: "/favicon.ico",
+				href: assets.favicon,
 			},
 		],
 	}),

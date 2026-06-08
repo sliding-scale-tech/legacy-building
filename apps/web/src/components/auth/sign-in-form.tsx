@@ -21,6 +21,7 @@ import { Link, useNavigate } from "@tanstack/react-router";
 import { useState } from "react";
 import { Controller, useForm } from "react-hook-form";
 import { ForgotPasswordForm } from "@/components/auth/forgot-password-form";
+import { PasswordInput } from "@/components/auth/password-input";
 import {
 	type SignInFormValues,
 	type SignInMfaCodeFormValues,
@@ -30,7 +31,12 @@ import {
 import { ROUTES } from "@/lib/routes";
 
 const authFieldClass =
-	"h-12 rounded-full border-border bg-popover px-5 text-base shadow-sm placeholder:text-muted-foreground md:text-sm";
+	"h-12 rounded-full border-border bg-background px-5 text-base shadow-sm placeholder:text-muted-foreground md:text-sm";
+
+const authLabelClass = "font-semibold text-foreground text-sm";
+
+const submitButtonClass =
+	"mt-2 h-12 w-full rounded-full bg-primary font-semibold text-base text-primary-foreground hover:bg-primary/90";
 
 type Props = {
 	signUpHref: string;
@@ -198,7 +204,7 @@ export function SignInForm({ signUpHref, forgotOpen, setForgotOpen }: Props) {
 							const invalid = fieldHasError(fieldState.invalid, clerkMessage);
 							return (
 								<Field data-invalid={invalid}>
-									<FieldLabel htmlFor={field.name} className="sr-only">
+									<FieldLabel htmlFor={field.name} className={authLabelClass}>
 										Verification code
 									</FieldLabel>
 									<Input
@@ -232,7 +238,7 @@ export function SignInForm({ signUpHref, forgotOpen, setForgotOpen }: Props) {
 						disabled={
 							fetchStatus === "fetching" || mfaForm.formState.isSubmitting
 						}
-						className="h-12 w-full rounded-full font-semibold text-base"
+						className={submitButtonClass}
 					>
 						Verify
 					</Button>
@@ -275,7 +281,7 @@ export function SignInForm({ signUpHref, forgotOpen, setForgotOpen }: Props) {
 					const invalid = fieldHasError(fieldState.invalid, clerkMessage);
 					return (
 						<Field data-invalid={invalid}>
-							<FieldLabel htmlFor={field.name} className="sr-only">
+							<FieldLabel htmlFor={field.name} className={authLabelClass}>
 								Email
 							</FieldLabel>
 							<Input
@@ -283,7 +289,6 @@ export function SignInForm({ signUpHref, forgotOpen, setForgotOpen }: Props) {
 								id={field.name}
 								type="email"
 								autoComplete="email"
-								placeholder="Email"
 								className={authFieldClass}
 								aria-invalid={invalid}
 							/>
@@ -304,15 +309,13 @@ export function SignInForm({ signUpHref, forgotOpen, setForgotOpen }: Props) {
 					const invalid = fieldHasError(fieldState.invalid, clerkMessage);
 					return (
 						<Field data-invalid={invalid}>
-							<FieldLabel htmlFor={field.name} className="sr-only">
+							<FieldLabel htmlFor={field.name} className={authLabelClass}>
 								Password
 							</FieldLabel>
-							<Input
+							<PasswordInput
 								{...field}
 								id={field.name}
-								type="password"
 								autoComplete="current-password"
-								placeholder="Password"
 								className={authFieldClass}
 								aria-invalid={invalid}
 							/>
@@ -321,21 +324,15 @@ export function SignInForm({ signUpHref, forgotOpen, setForgotOpen }: Props) {
 									errors={combinedFieldErrors(fieldState.error, clerkMessage)}
 								/>
 							) : null}
-							<div className="flex flex-row items-center justify-between gap-3 pt-0.5">
+							<div className="flex justify-end pt-0.5">
 								<Button
 									type="button"
 									variant="link"
-									className="h-auto p-0 font-medium text-foreground text-sm underline underline-offset-4 hover:text-foreground/80"
+									className="h-auto p-0 font-medium text-foreground text-sm hover:text-foreground/80"
 									onClick={() => void openForgot()}
 								>
 									Forgot password?
 								</Button>
-								<Link
-									to={signUpHref}
-									className="shrink-0 font-semibold text-foreground text-sm underline underline-offset-4 hover:text-foreground/80"
-								>
-									Create account
-								</Link>
 							</div>
 						</Field>
 					);
@@ -346,9 +343,9 @@ export function SignInForm({ signUpHref, forgotOpen, setForgotOpen }: Props) {
 					No account found for this email.{" "}
 					<Link
 						to={signUpHref}
-						className="font-semibold text-foreground underline underline-offset-4"
+						className="font-semibold text-primary hover:opacity-80"
 					>
-						Sign up
+						Register
 					</Link>{" "}
 					to create one.
 				</p>
@@ -362,9 +359,9 @@ export function SignInForm({ signUpHref, forgotOpen, setForgotOpen }: Props) {
 				disabled={
 					fetchStatus === "fetching" || credentialsForm.formState.isSubmitting
 				}
-				className="mt-1 h-12 w-full rounded-full font-semibold text-base"
+				className={submitButtonClass}
 			>
-				Sign in
+				Log in
 			</Button>
 		</form>
 	);

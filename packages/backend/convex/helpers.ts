@@ -9,8 +9,20 @@ export type ClerkUser = {
 	email_addresses: Array<{ id: string; email_address: string }>;
 	image_url?: string | null;
 	public_metadata?: { role?: string } | null;
+	unsafe_metadata?: { displayName?: string; role?: string } | null;
 	external_accounts?: Array<{ provider: string }>;
 };
+
+const SIGNUP_DISPLAY_NAME_METADATA_KEY = "displayName";
+
+export function displayNameFromClerkUnsafe(
+	clerkUser: ClerkUser,
+): string | undefined {
+	const raw = clerkUser.unsafe_metadata?.[SIGNUP_DISPLAY_NAME_METADATA_KEY];
+	if (typeof raw !== "string") return undefined;
+	const trimmed = raw.trim();
+	return trimmed.length >= 2 ? trimmed : undefined;
+}
 
 function clerkFullName(clerkUser: ClerkUser): string {
 	return [clerkUser.first_name, clerkUser.last_name]
@@ -63,8 +75,14 @@ export function getEmailAndName(clerkUser: ClerkUser): {
 	return { email, name };
 }
 
-/** Initial Convex `name` on first Clerk sync (Google → hyphenated full name). */
+/** Initial Convex `name` on first Clerk sync (Clerk username → legacy metadata → Google). */
 export function getInitialNameFromClerk(clerkUser: ClerkUser): string {
+	const clerkUsername = (clerkUser.username ?? "").trim();
+	if (clerkUsername.length >= 2) return clerkUsername;
+
+	const fromLegacyMetadata = displayNameFromClerkUnsafe(clerkUser);
+	if (fromLegacyMetadata) return fromLegacyMetadata;
+
 	const { name } = getEmailAndName(clerkUser);
 	if (name === "Unknown") return name;
 	if (isGoogleClerkUser(clerkUser)) {

@@ -15,6 +15,7 @@ const navLinks = [
 	{ id: "desk", label: "Desk", to: ROUTES.dashboardDesk },
 	{ id: "library", label: "Library", to: ROUTES.dashboardLibrary },
 	{ id: "account", label: "Account", to: ROUTES.dashboardAccount },
+	{ id: "billing", label: "Billing", to: ROUTES.dashboardBilling },
 ] as const;
 
 const navLinkClass =

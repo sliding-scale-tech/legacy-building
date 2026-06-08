@@ -1,8 +1,9 @@
+import { useUser } from "@clerk/react";
 import { api } from "@legacy-building/backend/convex/_generated/api";
 import { Button } from "@legacy-building/ui/components/button";
+import { PageLoader } from "@legacy-building/ui/components/page-loader";
 import { useCurrentUser } from "@legacy-building/ui/hooks/use-current-user";
 import { useMutation } from "convex/react";
-import { Loader2 } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 
 type DashboardUserGateProps = {
@@ -11,7 +12,23 @@ type DashboardUserGateProps = {
 
 const CONNECTION_TIMEOUT_MS = 20_000;
 
+function preferredNameFromClerkUser(
+	user: ReturnType<typeof useUser>["user"],
+): string | undefined {
+	const clerkUsername = user?.username?.trim();
+	if (clerkUsername && clerkUsername.length >= 2) {
+		return clerkUsername;
+	}
+	const legacy = user?.unsafeMetadata?.displayName;
+	if (typeof legacy === "string") {
+		const trimmed = legacy.trim();
+		if (trimmed.length >= 2) return trimmed;
+	}
+	return undefined;
+}
+
 export function DashboardUserGate({ children }: DashboardUserGateProps) {
+	const { user } = useUser();
 	const { convexUser, isLoading, isSignedIn } = useCurrentUser();
 	const ensureCurrentUser = useMutation(api.user.mutations.ensureCurrentUser);
 
@@ -43,7 +60,9 @@ export function DashboardUserGate({ children }: DashboardUserGateProps) {
 		setEnsuring(true);
 		setSetupError(null);
 
-		ensureCurrentUser({})
+		ensureCurrentUser({
+			preferredName: preferredNameFromClerkUser(user),
+		})
 			.catch((err) => {
 				ensureAttempted.current = false;
 				const message =
@@ -55,7 +74,7 @@ export function DashboardUserGate({ children }: DashboardUserGateProps) {
 			.finally(() => {
 				setEnsuring(false);
 			});
-	}, [convexUser, ensureCurrentUser, isLoading, isSignedIn]);
+	}, [convexUser, ensureCurrentUser, isLoading, isSignedIn, user]);
 
 	const retrySetup = () => {
 		ensureAttempted.current = false;
@@ -65,14 +84,14 @@ export function DashboardUserGate({ children }: DashboardUserGateProps) {
 
 	if (isLoading || ensuring) {
 		return (
-			<DashboardGateShell>
-				<Loader2 className="size-8 animate-spin text-[#008080]" aria-hidden />
-				<p className="mt-4 font-medium text-[#1a1a1a] text-sm">
-					{ensuring
+			<PageLoader
+				size={240}
+				message={
+					ensuring
 						? "Setting up your account…"
-						: "Connecting to your workspace…"}
-				</p>
-			</DashboardGateShell>
+						: "Connecting to your workspace…"
+				}
+			/>
 		);
 	}
 
@@ -118,12 +137,7 @@ export function DashboardUserGate({ children }: DashboardUserGateProps) {
 	}
 
 	if (isSignedIn && convexUser === null) {
-		return (
-			<DashboardGateShell>
-				<Loader2 className="size-8 animate-spin text-[#008080]" aria-hidden />
-				<p className="mt-4 text-[#525252] text-sm">Preparing your account…</p>
-			</DashboardGateShell>
-		);
+		return <PageLoader size={240} message="Preparing your account…" />;
 	}
 
 	return children;

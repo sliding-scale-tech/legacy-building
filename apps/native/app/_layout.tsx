@@ -12,7 +12,7 @@ import { NativeAppProviders } from "@/components/native-app-providers";
 import { AppThemeProvider } from "@/contexts/app-theme-context";
 
 export const unstable_settings = {
-	initialRouteName: "(drawer)",
+	initialRouteName: "index",
 };
 
 const convex = new ConvexReactClient(env.EXPO_PUBLIC_CONVEX_URL, {
@@ -26,8 +26,25 @@ function StackLayout() {
 				headerShown: false,
 			}}
 		>
-			<Stack.Screen name="(drawer)" />
+			<Stack.Screen name="index" />
+			<Stack.Screen name="(tabs)" />
 			<Stack.Screen name="(auth)" />
+			<Stack.Screen
+				name="journal/create"
+				options={{ presentation: "modal", headerShown: false }}
+			/>
+			<Stack.Screen
+				name="journal/[journalId]/index"
+				options={{ headerShown: false }}
+			/>
+			<Stack.Screen
+				name="journal/[journalId]/new-entry"
+				options={{ presentation: "modal", headerShown: false }}
+			/>
+			<Stack.Screen
+				name="journal/entry/[entryId]"
+				options={{ headerShown: false }}
+			/>
 			<Stack.Screen
 				name="modal"
 				options={{ title: "Modal", presentation: "modal", headerShown: true }}

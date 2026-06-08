@@ -38,7 +38,16 @@ export function fieldHasError(
 	return invalid || Boolean(clerkMessage);
 }
 
-type ClerkFieldError = { message?: string } | null | undefined;
+type ClerkFieldError =
+	| { message?: string; longMessage?: string }
+	| null
+	| undefined;
+
+/** Prefer Clerk's longMessage (e.g. "username is not a valid parameter…") over short "is unknown". */
+export function clerkFieldMessage(field: ClerkFieldError): string | undefined {
+	if (!field) return undefined;
+	return field.longMessage ?? field.message;
+}
 
 type ClerkFieldErrors = {
 	identifier?: ClerkFieldError;
@@ -50,10 +59,10 @@ type ClerkFieldErrors = {
 
 export function hasClerkFieldErrors(fields: ClerkFieldErrors): boolean {
 	return Boolean(
-		fields.identifier?.message ||
-			fields.password?.message ||
-			fields.emailAddress?.message ||
-			fields.code?.message ||
-			fields.username?.message,
+		clerkFieldMessage(fields.identifier) ||
+			clerkFieldMessage(fields.password) ||
+			clerkFieldMessage(fields.emailAddress) ||
+			clerkFieldMessage(fields.code) ||
+			clerkFieldMessage(fields.username),
 	);
 }

@@ -5,18 +5,12 @@ import { useMutation } from "convex/react";
 import { Camera, X } from "lucide-react";
 import { useCallback, useEffect, useId, useRef, useState } from "react";
 import { DateField } from "@/components/journal/library/DateField";
+import { JournalTypePicker } from "@/components/journal/library/JournalTypePicker";
 import { Button } from "@/components/journal/ui/button";
-import {
-	Dialog,
-	DialogContent,
-	DialogTitle,
-} from "@/components/journal/ui/dialog";
+import { Dialog, DialogTitle } from "@/components/journal/ui/dialog";
+import { DialogContentWithOverlay } from "@/components/journal/ui/dialog-content-with-overlay";
 import { Input } from "@/components/journal/ui/input";
-import {
-	RadioGroup,
-	RadioGroupItem,
-} from "@/components/journal/ui/radio-group";
-import { STORY_TABS, type StoryTab } from "@/lib/journal/journalTypes";
+import type { StoryTab } from "@/lib/journal/journalTypes";
 import {
 	messageFromUnknownError,
 	toastMutationError,
@@ -164,15 +158,17 @@ export function CreateJournalDialog({
 
 	return (
 		<Dialog open={open} onOpenChange={handleClose}>
-			<DialogContent
+			<DialogContentWithOverlay
 				showCloseButton={false}
-				overlayClassName="z-[2001] bg-[rgba(82,82,82,0.6)]"
+				overlayClassName="z-[2001] bg-foreground/60"
 				className={cn(
-					"fixed top-1/2 right-0 left-0 z-[2002] mx-auto flex w-[calc(100%-20px)] min-w-[280px] max-w-[600px] flex-col",
-					"!translate-x-0 max-h-[min(calc(100dvh-32px),920px)] -translate-y-1/2",
+					"fixed top-[100px] right-0 left-0 z-[2002] mx-auto flex w-[calc(100%-20px)] flex-col",
+					"min-h-[296px] min-w-[296px] max-w-[600px]",
+					"!max-w-[600px] !translate-x-0 !translate-y-0",
+					"max-h-[min(calc(100dvh-120px),920px)]",
 					"overflow-hidden rounded-[20px] border-0 bg-white p-0",
 					"shadow-[0_4px_24px_rgba(0,0,0,0.12)] ring-0",
-					"sm:min-w-[296px]",
+					"sm:max-w-[600px]",
 				)}
 				onOpenAutoFocus={(e) => e.preventDefault()}
 			>
@@ -180,8 +176,8 @@ export function CreateJournalDialog({
 					id={formId}
 					className={cn(
 						"library-modal-scroll flex w-full flex-col overflow-y-auto overscroll-contain bg-white",
-						"gap-4 p-4 sm:gap-6 sm:p-5",
-						"max-h-[min(calc(100dvh-24px),920px)]",
+						"gap-6 rounded-xl p-5",
+						"max-h-[min(calc(100dvh-120px),920px)]",
 					)}
 					onSubmit={(e) => {
 						e.preventDefault();
@@ -189,12 +185,7 @@ export function CreateJournalDialog({
 					}}
 				>
 					<div className="flex shrink-0 items-start justify-between gap-3">
-						<DialogTitle
-							className={cn(
-								"pr-2 font-semibold text-[#1a1a1a] leading-[1.4]",
-								"text-xl sm:text-2xl",
-							)}
-						>
+						<DialogTitle className="pr-2 font-semibold text-2xl text-[#1a1a1a] leading-[1.4]">
 							Create a new journal
 						</DialogTitle>
 						<Button
@@ -210,7 +201,7 @@ export function CreateJournalDialog({
 						</Button>
 					</div>
 
-					<div className="grid grid-cols-1 gap-3 sm:gap-6 min-[360px]:grid-cols-2">
+					<div className="grid grid-cols-2 gap-6">
 						<div className="flex min-w-0 flex-col gap-1">
 							<label htmlFor={`${formId}-title`} className={fieldLabelClass}>
 								Title
@@ -237,37 +228,12 @@ export function CreateJournalDialog({
 
 					<div className="flex flex-col gap-1">
 						<span className={fieldLabelClass}>Journal type</span>
-						<RadioGroup
+						<JournalTypePicker
+							formId={formId}
 							value={storyType}
-							onValueChange={(next) => setStoryType(next as StoryTab)}
-							className="flex flex-col gap-3"
-						>
-							{STORY_TABS.map((option) => {
-								const selected = storyType === option.id;
-								return (
-									<label
-										key={option.id}
-										htmlFor={`${formId}-type-${option.id}`}
-										className={cn(
-											"flex min-h-10 w-full cursor-pointer items-center justify-between",
-											"rounded-xl border px-3 py-1.5 text-left transition-colors",
-											selected
-												? "border-[#008080] bg-[#ebf6f6]"
-												: "border-[#c7c7c7] bg-white",
-										)}
-									>
-										<span className="text-[#1a1a1a] text-sm leading-[1.4]">
-											{option.label}
-										</span>
-										<RadioGroupItem
-											id={`${formId}-type-${option.id}`}
-											value={option.id}
-											className="border-[#c7c7c7] text-[#008080] data-[state=checked]:border-[#008080]"
-										/>
-									</label>
-								);
-							})}
-						</RadioGroup>
+							onChange={setStoryType}
+							resetKey={open}
+						/>
 					</div>
 
 					<div className="flex flex-col gap-1">
@@ -292,7 +258,7 @@ export function CreateJournalDialog({
 								className={cn(
 									"relative flex w-full cursor-pointer items-center justify-center",
 									"overflow-hidden rounded-xl border bg-white",
-									"h-[120px] sm:h-[150px]",
+									"h-[150px]",
 									imageShowError ? "border-[#b0200c]" : "border-[#c7c7c7]",
 								)}
 								aria-invalid={imageShowError}
@@ -338,7 +304,7 @@ export function CreateJournalDialog({
 						</p>
 					) : null}
 
-					<div className="flex shrink-0 gap-4 pb-[max(0px,env(safe-area-inset-bottom))] sm:gap-6">
+					<div className="flex shrink-0 gap-6 pb-[max(0px,env(safe-area-inset-bottom))]">
 						<Button
 							type="button"
 							onClick={() => handleClose(false)}
@@ -355,7 +321,7 @@ export function CreateJournalDialog({
 						</Button>
 					</div>
 				</form>
-			</DialogContent>
+			</DialogContentWithOverlay>
 		</Dialog>
 	);
 }

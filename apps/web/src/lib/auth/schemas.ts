@@ -16,11 +16,24 @@ export const signInMfaCodeSchema = z.object({
 
 export type SignInMfaCodeFormValues = z.infer<typeof signInMfaCodeSchema>;
 
-export const signUpSchema = z.object({
-	fullName: z.string().trim().min(1, "Enter your full name."),
-	email: z.string().min(1, "Enter your email.").email("Enter a valid email."),
-	password: z.string().min(6, "Password must be at least 6 characters."),
-});
+export const signUpSchema = z
+	.object({
+		username: z
+			.string()
+			.trim()
+			.min(1, "Enter a username.")
+			.min(4, "Username must be at least 4 characters."),
+		email: z.string().min(1, "Enter your email.").email("Enter a valid email."),
+		password: z.string().min(6, "Password must be at least 6 characters."),
+		confirmPassword: z.string().min(1, "Confirm your password."),
+		acceptTerms: z.literal(true, {
+			message: "You must agree to the Terms of Service and Privacy Policy.",
+		}),
+	})
+	.refine((data) => data.password === data.confirmPassword, {
+		message: "Passwords do not match.",
+		path: ["confirmPassword"],
+	});
 
 export type SignUpFormValues = z.infer<typeof signUpSchema>;
 

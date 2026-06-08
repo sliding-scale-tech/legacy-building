@@ -1,5 +1,5 @@
+import { PageLoader } from "@legacy-building/ui/components/page-loader";
 import { PasswordChangeForm } from "@legacy-building/ui/components/password-change-form";
-import { Skeleton } from "@legacy-building/ui/components/skeleton";
 import { useCurrentUser } from "@legacy-building/ui/hooks/use-current-user";
 import { createFileRoute } from "@tanstack/react-router";
 import { Authenticated, AuthLoading, Unauthenticated } from "convex/react";
@@ -9,15 +9,6 @@ import { adminCardClass, adminContainerClass } from "@/lib/admin-theme";
 export const Route = createFileRoute("/_admin/settings")({
 	component: SettingsPage,
 });
-
-function SettingsSkeleton() {
-	return (
-		<div className="fade-in-50 animate-in space-y-6 duration-300">
-			<Skeleton className="h-9 w-32 rounded-md" />
-			<Skeleton className="h-48 w-full rounded-xl" />
-		</div>
-	);
-}
 
 function Section({
 	title,
@@ -51,7 +42,7 @@ function SettingsPage() {
 		<div className={`${adminContainerClass} max-w-3xl`}>
 			<Authenticated>
 				{isLoading || !convexUser ? (
-					<SettingsSkeleton />
+					<PageLoader overlay={false} className="min-h-[50svh]" />
 				) : (
 					<div className="fade-in-50 slide-in-from-bottom-2 animate-in space-y-6 duration-300">
 						<header>
@@ -83,7 +74,7 @@ function SettingsPage() {
 			</Unauthenticated>
 
 			<AuthLoading>
-				<SettingsSkeleton />
+				<PageLoader overlay={false} className="min-h-[50svh]" />
 			</AuthLoading>
 		</div>
 	);
