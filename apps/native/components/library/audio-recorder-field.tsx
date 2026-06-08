@@ -60,9 +60,11 @@ export function AudioRecorderField({
 
 	const [preparing, setPreparing] = useState(false);
 
+	// Default to a playback-friendly session so recorded audio plays out the
+	// main speaker. We only flip to record mode for the duration of recording.
 	useEffect(() => {
 		void setAudioModeAsync({
-			allowsRecording: true,
+			allowsRecording: false,
 			playsInSilentMode: true,
 		}).catch((err) => {
 			console.warn("[AudioRecorderField] setAudioModeAsync failed:", err);
@@ -75,6 +77,7 @@ export function AudioRecorderField({
 	const handleStartRecording = async () => {
 		if (disabled || preparing) return;
 		setPreparing(true);
+		let recordingStarted = false;
 		try {
 			const permission = await requestRecordingPermissionsAsync();
 			if (!permission.granted) {
@@ -91,14 +94,26 @@ export function AudioRecorderField({
 				);
 				return;
 			}
+			// Switch to record mode for capture.
+			await setAudioModeAsync({
+				allowsRecording: true,
+				playsInSilentMode: true,
+			});
 			await recorder.prepareToRecordAsync();
 			recorder.record();
+			recordingStarted = true;
 		} catch (err) {
 			Alert.alert(
 				"Could not start recording",
 				err instanceof Error ? err.message : "Please try again.",
 			);
 		} finally {
+			if (!recordingStarted) {
+				await setAudioModeAsync({
+					allowsRecording: false,
+					playsInSilentMode: true,
+				}).catch(() => {});
+			}
 			setPreparing(false);
 		}
 	};
@@ -106,11 +121,29 @@ export function AudioRecorderField({
 	const handleStopRecording = async () => {
 		try {
 			await recorder.stop();
+			// Back to playback mode so the just-recorded clip plays out the speaker.
+			await setAudioModeAsync({
+				allowsRecording: false,
+				playsInSilentMode: true,
+			}).catch(() => {});
+			const durationMs =
+				recorder.getStatus().durationMillis ??
+				recorderState.durationMillis ??
+				0;
+
+			// `recorder.uri` points at the finalized recording. We hand it off as-is;
+			// the modern File API in `uploadBinaryToConvex` reads it natively at
+			// upload time (no scoped-cache restriction like the legacy FS APIs).
 			const uri = recorder.uri;
-			const durationMs = recorderState.durationMillis ?? 0;
-			if (uri) {
-				onChange({ uri, mimeType: "audio/m4a", durationMs });
+			if (!uri) {
+				Alert.alert(
+					"Could not save recording",
+					"No recording file was produced. Please try again.",
+				);
+				return;
 			}
+
+			onChange({ uri, mimeType: "audio/m4a", durationMs });
 		} catch (err) {
 			Alert.alert(
 				"Could not save recording",

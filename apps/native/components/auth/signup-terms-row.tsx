@@ -1,6 +1,6 @@
-import { legalRoutes } from "@legacy-building/ui/lib/brand-journal";
 import * as WebBrowser from "expo-web-browser";
 import { Pressable, Text, View } from "react-native";
+import { nativeLegalRoutes } from "@/lib/legal-routes";
 import { nativeLegalUrl } from "@/lib/native-legal-url";
 
 type SignupTermsRowProps = {
@@ -38,7 +38,7 @@ export function SignupTermsRow({
 						className="font-semibold text-primary-foreground underline"
 						onPress={() =>
 							void WebBrowser.openBrowserAsync(
-								nativeLegalUrl(legalRoutes.terms),
+								nativeLegalUrl(nativeLegalRoutes.terms),
 							)
 						}
 					>
@@ -49,7 +49,7 @@ export function SignupTermsRow({
 						className="font-semibold text-primary-foreground underline"
 						onPress={() =>
 							void WebBrowser.openBrowserAsync(
-								nativeLegalUrl(legalRoutes.privacy),
+								nativeLegalUrl(nativeLegalRoutes.privacy),
 							)
 						}
 					>

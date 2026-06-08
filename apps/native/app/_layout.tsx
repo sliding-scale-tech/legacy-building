@@ -46,6 +46,18 @@ function StackLayout() {
 				options={{ headerShown: false }}
 			/>
 			<Stack.Screen
+				name="account/personal-details"
+				options={{ headerShown: false }}
+			/>
+			<Stack.Screen
+				name="account/change-email"
+				options={{ headerShown: false }}
+			/>
+			<Stack.Screen
+				name="account/change-password"
+				options={{ headerShown: false }}
+			/>
+			<Stack.Screen
 				name="modal"
 				options={{ title: "Modal", presentation: "modal", headerShown: true }}
 			/>

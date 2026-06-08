@@ -233,7 +233,9 @@ export function JournalDetailSheet({
 
 		setOrdering(true);
 		setExportError(null);
-		const checkoutWindow = window.open("", "_blank", "noopener,noreferrer");
+		// Open synchronously on click. Do not pass "noopener" here — it makes
+		// window.open return null even when the tab opens successfully.
+		const checkoutWindow = window.open("about:blank", "_blank");
 		if (!checkoutWindow) {
 			setOrdering(false);
 			const message =
@@ -242,15 +244,17 @@ export function JournalDetailSheet({
 			toastMutationError(new Error(message), message);
 			return;
 		}
+		checkoutWindow.opener = null;
 		try {
 			const { checkoutUrl } = await createBookOrderCheckout({
 				journalId,
 				entryIds: selectedEntries.map((entry) => entry._id),
 				includeJournal: allExportableSelected,
 			});
-			checkoutWindow.location.href = checkoutUrl;
+			checkoutWindow.location.replace(checkoutUrl);
 			setOrdering(false);
 		} catch (err) {
+			checkoutWindow.close();
 			const message = "Could not start book checkout. Please try again.";
 			setExportError(message);
 			toastMutationError(err, message);

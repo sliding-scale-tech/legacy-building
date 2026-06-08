@@ -33,13 +33,13 @@ export function DeskRecentJournal({
 		return null;
 	}
 
-	const { journal, slideImageUrls } = recent;
+	const { journal, slideImageUrls, postedAtMs } = recent;
 
 	return (
 		<RecentJournalCard
 			className={className}
 			title={journal.title}
-			dateMs={journal.dateMs}
+			dateMs={postedAtMs}
 			slideImageUrls={slideImageUrls}
 			onOpenJournal={() => onOpenJournal(journal._id, journal.type as StoryTab)}
 			onAddEntry={() => onAddEntry(journal._id, journal.type as StoryTab)}

@@ -26,7 +26,6 @@ import {
 	type EntryMode,
 	EntryModeTabs,
 } from "@/components/library/entry-mode-tabs";
-import { formatDateLong } from "@/lib/journal/formatDate";
 import { parseMonthDayYear } from "@/lib/journal/parse-date";
 import {
 	type PickedEntryImage,
@@ -132,6 +131,8 @@ export default function NewEntryScreen() {
 		} else if (!audio) {
 			Alert.alert("No audio yet", "Tap the mic to record before saving.");
 			return;
+		} else if (!title.trim() || dateMs === null) {
+			return;
 		}
 
 		setSubmitting(true);
@@ -144,7 +145,6 @@ export default function NewEntryScreen() {
 					generateUploadUrl: () => generateUploadUrl(),
 				});
 			}
-
 			let audioId: Id<"_storage"> | undefined;
 			if (mode === "recording" && audio) {
 				audioId = await uploadBinaryToConvex({
@@ -154,12 +154,8 @@ export default function NewEntryScreen() {
 				});
 			}
 
-			const entryTitle =
-				mode === "recording" && !title.trim()
-					? `Audio entry · ${formatDateLong(Date.now())}`
-					: title.trim();
-			const entryDateMs =
-				mode === "recording" ? (dateMs ?? Date.now()) : (dateMs as number);
+			const entryTitle = title.trim();
+			const entryDateMs = dateMs as number;
 
 			await createEntry({
 				journalId,
@@ -192,6 +188,55 @@ export default function NewEntryScreen() {
 	]);
 
 	const isRecordingMode = mode === "recording";
+	const showRecordingDetails = isRecordingMode && audio !== null;
+
+	const imagePickerSection = (
+		<View className="gap-3 rounded-2xl border border-border/60 bg-secondary/20 p-3">
+			{image ? (
+				<View className="overflow-hidden rounded-xl">
+					<Image
+						source={{ uri: image.uri }}
+						className="h-44 w-full"
+						resizeMode="cover"
+					/>
+					<Pressable
+						onPress={() => setImage(null)}
+						accessibilityRole="button"
+						accessibilityLabel="Remove photo"
+						className="absolute top-2 right-2 size-9 items-center justify-center rounded-full bg-overlay active:opacity-80"
+					>
+						<Ionicons name="close" size={20} color={accentForeground} />
+					</Pressable>
+				</View>
+			) : (
+				<>
+					<Pressable
+						onPress={() => void handleTakePhoto()}
+						accessibilityRole="button"
+						accessibilityLabel="Take a photo"
+						className="items-center gap-1.5 rounded-xl bg-background py-5 active:opacity-90"
+					>
+						<Ionicons name="camera-outline" size={26} color={foreground} />
+						<Text className="font-semibold text-base text-foreground">
+							Take Photo
+						</Text>
+					</Pressable>
+
+					<Pressable
+						onPress={() => void handlePickFromLibrary()}
+						accessibilityRole="button"
+						accessibilityLabel="Choose from library"
+						className="items-center gap-1.5 rounded-xl bg-background py-5 active:opacity-90"
+					>
+						<Ionicons name="images-outline" size={26} color={foreground} />
+						<Text className="font-semibold text-base text-foreground">
+							Choose from Library
+						</Text>
+					</Pressable>
+				</>
+			)}
+		</View>
+	);
 
 	return (
 		<View
@@ -306,75 +351,58 @@ export default function NewEntryScreen() {
 							</View>
 
 							{/* Take Photo / Choose from Library */}
-							<View className="gap-3 rounded-2xl border border-border/60 bg-secondary/20 p-3">
-								{image ? (
-									<View className="overflow-hidden rounded-xl">
-										<Image
-											source={{ uri: image.uri }}
-											className="h-44 w-full"
-											resizeMode="cover"
-										/>
-										<Pressable
-											onPress={() => setImage(null)}
-											accessibilityRole="button"
-											accessibilityLabel="Remove photo"
-											className="absolute top-2 right-2 size-9 items-center justify-center rounded-full bg-black/55 active:opacity-80"
-										>
-											<Ionicons
-												name="close"
-												size={20}
-												color={accentForeground}
-											/>
-										</Pressable>
-									</View>
-								) : (
-									<>
-										<Pressable
-											onPress={() => void handleTakePhoto()}
-											accessibilityRole="button"
-											accessibilityLabel="Take a photo"
-											className="items-center gap-1.5 rounded-xl bg-background py-5 active:opacity-90"
-										>
-											<Ionicons
-												name="camera-outline"
-												size={26}
-												color={foreground}
-											/>
-											<Text className="font-semibold text-base text-foreground">
-												Take Photo
-											</Text>
-										</Pressable>
-
-										<Pressable
-											onPress={() => void handlePickFromLibrary()}
-											accessibilityRole="button"
-											accessibilityLabel="Choose from library"
-											className="items-center gap-1.5 rounded-xl bg-background py-5 active:opacity-90"
-										>
-											<Ionicons
-												name="images-outline"
-												size={26}
-												color={foreground}
-											/>
-											<Text className="font-semibold text-base text-foreground">
-												Choose from Library
-											</Text>
-										</Pressable>
-									</>
-								)}
-							</View>
+							{imagePickerSection}
 						</>
 					) : (
-						<View className="items-center gap-3">
+						<View className="gap-5">
 							<AudioRecorderField
 								value={audio}
 								onChange={setAudio}
 								disabled={submitting}
 							/>
-							{audio ? (
-								<Text className="text-muted-foreground text-sm">
-									Tap Create above to save this entry.
-								</Text>
+
+							{showRecordingDetails ? (
+								<>
+									<View className="gap-1.5">
+										<Text className="font-semibold text-base text-foreground">
+											Title
+										</Text>
+										<TextInput
+											value={title}
+											onChangeText={setTitle}
+											placeholder=""
+											placeholderTextColor={placeholderColor}
+											className={`h-14 rounded-2xl border bg-background px-4 text-base text-foreground ${
+												showErrors && !title.trim()
+													? "border-destructive"
+													: "border-border"
+											}`}
+										/>
+									</View>
+
+									<View className="gap-1.5">
+										<Text className="font-semibold text-base text-foreground">
+											Start Date
+										</Text>
+										<DateField
+											value={dateInput}
+											onChange={setDateInput}
+											placeholder="Select date"
+											invalid={showErrors && dateMs === null}
+										/>
+									</View>
+
+									<View className="gap-1.5">
+										<Text className="font-semibold text-base text-foreground">
+											Photo (optional)
+										</Text>
+										{imagePickerSection}
+									</View>
+
+									<Text className="text-center text-muted-foreground text-sm">
+										Tap Create above when you&apos;re ready to save.
+									</Text>
+								</>
 							) : (
 								<Text className="text-center text-sm" style={{ color: accent }}>
 									Tap the microphone to start. Tap again to stop.
@@ -388,6 +416,15 @@ export default function NewEntryScreen() {
 					(!title.trim() || dateMs === null || !body.trim()) ? (
 						<Text className="text-center text-destructive text-sm">
 							Please fill in the title, start date, and entry log.
+						</Text>
+					) : null}
+
+					{showErrors &&
+					mode === "recording" &&
+					audio &&
+					(!title.trim() || dateMs === null) ? (
+						<Text className="text-center text-destructive text-sm">
+							Please add a title and start date for this recording.
 						</Text>
 					) : null}
 				</ScrollView>

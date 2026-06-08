@@ -1221,6 +1221,69 @@ export const reactivateSubscription = action({
 	},
 });
 
+/**
+ * Propagate an email change to Stripe (and immediately to the Convex user row).
+ *
+ * Called by the client right after a successful Clerk email change so the
+ * Stripe customer's email stays in sync — future invoices / receipts go to the
+ * new address. Convex is also patched here so the UI updates without waiting
+ * for the Clerk `user.updated` webhook.
+ *
+ * No-ops gracefully if the user has no Stripe customer yet (never subscribed).
+ */
+export const syncCustomerEmail = action({
+	args: { email: v.string() },
+	returns: v.null(),
+	handler: async (ctx, args) => {
+		const identity = await ctx.auth.getUserIdentity();
+		if (!identity) {
+			throw new ConvexError({
+				code: "UNAUTHENTICATED",
+				message: "You must be signed in to update your email.",
+			});
+		}
+
+		const email = args.email.trim();
+		if (!email || !email.includes("@")) {
+			throw new ConvexError({
+				code: "INVALID_ARGUMENT",
+				message: "A valid email address is required.",
+			});
+		}
+
+		const normalizedEmail = email.trim().toLowerCase();
+		const existingOwner = await ctx.runQuery(
+			internal.user.queries.getByEmailInternal,
+			{ email: normalizedEmail },
+		);
+		if (existingOwner && existingOwner.clerkId !== identity.subject) {
+			throw new ConvexError({
+				code: "EMAIL_IN_USE",
+				message:
+					"That email is already linked to another account. Choose a different email.",
+			});
+		}
+
+		// Keep the Convex row in sync immediately (webhook will also confirm).
+		await ctx.runMutation(internal.user.mutations.setEmailByClerkId, {
+			clerkId: identity.subject,
+			email,
+		});
+
+		const user = await ctx.runQuery(
+			internal.user.queries.getByClerkIdInternal,
+			{ clerkId: identity.subject },
+		);
+
+		if (user?.stripeCustomerId) {
+			const stripe = new Stripe(requireSecretKey());
+			await stripe.customers.update(user.stripeCustomerId, { email });
+		}
+
+		return null;
+	},
+});
+
 /** Fetch invoices live from Stripe (fallback when component sync is empty). */
 export const listMyInvoicesLive = action({
 	args: {},

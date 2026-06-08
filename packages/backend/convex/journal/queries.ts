@@ -4,11 +4,7 @@ import type { Doc } from "../_generated/dataModel";
 import { query } from "../_generated/server";
 import { journalType } from "../schema";
 import { assertJournalOwner, requireClerkUserId } from "./auth";
-import {
-	enrichJournal,
-	journalActivityMs,
-	resolveEntryImageUrl,
-} from "./enrich";
+import { enrichJournal, resolveEntryImageUrl } from "./enrich";
 import { compareJournalsForLibrary } from "./sort";
 
 export const getById = query({
@@ -22,35 +18,53 @@ export const getById = query({
 	},
 });
 
-/** Most recently updated journal for the desk widget, with carousel image URLs. */
+/** Most recently posted journal for the desk widget, with carousel image URLs. */
 export const getRecentForDesk = query({
 	args: {},
 	handler: async (ctx) => {
 		const userId = await requireClerkUserId(ctx);
-		const journals = await ctx.db
-			.query("journals")
-			.withIndex("by_userId", (q) => q.eq("userId", userId))
-			.collect();
 
-		if (journals.length === 0) {
-			return null;
+		const latestEntry = await ctx.db
+			.query("journalEntries")
+			.withIndex("by_userId", (q) => q.eq("userId", userId))
+			.order("desc")
+			.first();
+
+		let journal: Doc<"journals"> | null = null;
+		let postedAtMs: number | undefined;
+
+		if (latestEntry) {
+			journal = await ctx.db.get(latestEntry.journalId);
+			if (journal && journal.userId !== userId) {
+				journal = null;
+			} else if (journal) {
+				postedAtMs = latestEntry._creationTime;
+			}
 		}
 
-		const journal = journals.sort(
-			(a, b) => journalActivityMs(b) - journalActivityMs(a),
-		)[0];
 		if (!journal) {
+			journal = await ctx.db
+				.query("journals")
+				.withIndex("by_userId", (q) => q.eq("userId", userId))
+				.order("desc")
+				.first();
+			if (journal) {
+				postedAtMs = journal._creationTime;
+			}
+		}
+
+		if (!journal || postedAtMs === undefined) {
 			return null;
 		}
 
 		const enriched = await enrichJournal(ctx, journal);
 
-		const entries = await ctx.db
+		const journalEntries = await ctx.db
 			.query("journalEntries")
 			.withIndex("by_journalId", (q) => q.eq("journalId", journal._id))
 			.collect();
 
-		const sortedEntries = entries.sort((a, b) => b.dateMs - a.dateMs);
+		const sortedEntries = journalEntries.sort((a, b) => b.dateMs - a.dateMs);
 		const slideImageUrls: string[] = [];
 
 		for (const entry of sortedEntries) {
@@ -67,6 +81,7 @@ export const getRecentForDesk = query({
 		return {
 			journal: enriched,
 			slideImageUrls,
+			postedAtMs,
 		};
 	},
 });
