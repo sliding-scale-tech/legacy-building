@@ -3,7 +3,9 @@ import { PageLoader } from "@legacy-building/ui/components/page-loader";
 import { createFileRoute, Link, Navigate } from "@tanstack/react-router";
 
 import { AuthLayout } from "@/components/auth/auth-layout";
+import { GoogleOAuthButton } from "@/components/auth/google-oauth-button";
 import { SignUpForm } from "@/components/auth/sign-up-form";
+import { signupMetadataFromType } from "@/lib/auth/signup-metadata";
 import { ROUTES } from "@/lib/routes";
 
 export const Route = createFileRoute("/signup")({
@@ -40,6 +42,18 @@ function SignUpPage() {
 			</div>
 			<div className="mt-6 flex flex-col gap-4">
 				<SignUpForm signupType={type} />
+				<div className="relative py-1">
+					<div className="absolute inset-0 flex items-center" aria-hidden>
+						<span className="w-full border-border border-t" />
+					</div>
+					<div className="relative flex justify-center font-medium text-muted-foreground text-xs uppercase tracking-[0.14em]">
+						<span className="bg-transparent px-3">Or</span>
+					</div>
+				</div>
+				<GoogleOAuthButton
+					mode="sign-up"
+					unsafeMetadata={signupMetadataFromType(type ?? null)}
+				/>
 				<p className="text-center text-muted-foreground text-sm">
 					Already have an Account?{" "}
 					<Link

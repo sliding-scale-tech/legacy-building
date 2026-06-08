@@ -48,7 +48,7 @@ export function DashboardBillingPage() {
 
 	return (
 		<div className="relative flex min-h-svh w-full flex-col bg-billing-subscribe">
-			<div className="mt-20 flex flex-1 flex-col gap-10 px-4 py-10 sm:px-6 md:px-10 md:py-12">
+			<div className="mx-auto mt-20 flex w-full max-w-[1040px] flex-1 flex-col gap-10 px-4 py-10 sm:px-6 md:px-10 md:py-12">
 				<BillingSubscribePanel />
 			</div>
 		</div>

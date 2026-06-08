@@ -15,12 +15,15 @@ import type * as admin_mutations from "../admin/mutations.js";
 import type * as admin_queries from "../admin/queries.js";
 import type * as helpers from "../helpers.js";
 import type * as http from "../http.js";
+import type * as journal_actions from "../journal/actions.js";
 import type * as journal_auth from "../journal/auth.js";
 import type * as journal_enrich from "../journal/enrich.js";
 import type * as journal_entries_mutations from "../journal/entries/mutations.js";
 import type * as journal_entries_queries from "../journal/entries/queries.js";
 import type * as journal_migrations from "../journal/migrations.js";
 import type * as journal_mutations from "../journal/mutations.js";
+import type * as journal_orderHelpers from "../journal/orderHelpers.js";
+import type * as journal_orderQueries from "../journal/orderQueries.js";
 import type * as journal_queries from "../journal/queries.js";
 import type * as journal_sort from "../journal/sort.js";
 import type * as journal_storage from "../journal/storage.js";
@@ -33,6 +36,7 @@ import type * as stripe_products_mutations from "../stripe/products/mutations.js
 import type * as stripe_products_queries from "../stripe/products/queries.js";
 import type * as stripe_queries from "../stripe/queries.js";
 import type * as user_actionHelpers from "../user/actionHelpers.js";
+import type * as user_actions from "../user/actions.js";
 import type * as user_mutations from "../user/mutations.js";
 import type * as user_queries from "../user/queries.js";
 
@@ -50,12 +54,15 @@ declare const fullApi: ApiFromModules<{
   "admin/queries": typeof admin_queries;
   helpers: typeof helpers;
   http: typeof http;
+  "journal/actions": typeof journal_actions;
   "journal/auth": typeof journal_auth;
   "journal/enrich": typeof journal_enrich;
   "journal/entries/mutations": typeof journal_entries_mutations;
   "journal/entries/queries": typeof journal_entries_queries;
   "journal/migrations": typeof journal_migrations;
   "journal/mutations": typeof journal_mutations;
+  "journal/orderHelpers": typeof journal_orderHelpers;
+  "journal/orderQueries": typeof journal_orderQueries;
   "journal/queries": typeof journal_queries;
   "journal/sort": typeof journal_sort;
   "journal/storage": typeof journal_storage;
@@ -68,6 +75,7 @@ declare const fullApi: ApiFromModules<{
   "stripe/products/queries": typeof stripe_products_queries;
   "stripe/queries": typeof stripe_queries;
   "user/actionHelpers": typeof user_actionHelpers;
+  "user/actions": typeof user_actions;
   "user/mutations": typeof user_mutations;
   "user/queries": typeof user_queries;
 }>;

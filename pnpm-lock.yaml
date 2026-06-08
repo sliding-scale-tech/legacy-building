@@ -160,6 +160,9 @@ importers:
       '@hookform/resolvers':
         specifier: ^5.4.0
         version: 5.4.0(react-hook-form@7.77.0(react@19.2.3))
+      '@legacy-building/assets':
+        specifier: workspace:*
+        version: link:../../packages/assets
       '@legacy-building/backend':
         specifier: workspace:*
         version: link:../../packages/backend
@@ -323,6 +326,9 @@ importers:
       '@hookform/resolvers':
         specifier: ^5.2.2
         version: 5.4.0(react-hook-form@7.77.0(react@19.2.7))
+      '@legacy-building/assets':
+        specifier: workspace:*
+        version: link:../../packages/assets
       '@legacy-building/backend':
         specifier: workspace:*
         version: link:../../packages/backend

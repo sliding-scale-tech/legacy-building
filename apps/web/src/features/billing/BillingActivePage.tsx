@@ -199,16 +199,22 @@ export function BillingActivePage({ showWelcome }: BillingActivePageProps) {
 								</p>
 							) : null}
 						</div>
-						<div className="flex flex-wrap gap-3">
+						<div className="flex shrink-0 flex-row flex-nowrap items-center gap-2 sm:gap-3">
 							<a
 								href="mailto:support@legacybuilding.com"
-								className={cn(billingOutlineButtonClass, "h-10 px-4")}
+								className={cn(
+									billingOutlineButtonClass,
+									"h-10 shrink-0 whitespace-nowrap px-3 sm:px-4",
+								)}
 							>
 								Contact Support
 							</a>
 							<Link
 								to={ROUTES.dashboardBillingCompare}
-								className={cn(billingPrimaryButtonClass, "h-10 px-4")}
+								className={cn(
+									billingPrimaryButtonClass,
+									"h-10 shrink-0 whitespace-nowrap px-3 sm:px-4",
+								)}
 							>
 								Compare Plans
 							</Link>
@@ -254,7 +260,7 @@ export function BillingActivePage({ showWelcome }: BillingActivePageProps) {
 								</ul>
 							</div>
 
-							<div className="flex flex-wrap items-center gap-4 border-border border-t pt-6">
+							<div className="flex flex-col items-center gap-4 border-border border-t pt-6 md:flex-row md:items-center md:justify-start">
 								<Link
 									to={ROUTES.dashboardBillingCompare}
 									className={cn(
@@ -265,7 +271,7 @@ export function BillingActivePage({ showWelcome }: BillingActivePageProps) {
 									Upgrade Subscription
 								</Link>
 								{confirmCancel ? (
-									<div className="flex flex-wrap items-center gap-2">
+									<div className="flex flex-wrap items-center justify-center gap-2 md:justify-start">
 										<button
 											type="button"
 											onClick={() => void handleCancel()}

@@ -366,3 +366,26 @@ export const deleteByClerkId = internalMutation({
 		await deleteAllDataForClerkUser(ctx, clerkId);
 	},
 });
+
+/**
+ * Internal: patch a user's email immediately after a Clerk email change so the
+ * Convex row reflects the new email without waiting for the Clerk webhook.
+ */
+export const setEmailByClerkId = internalMutation({
+	args: {
+		clerkId: v.string(),
+		email: v.string(),
+	},
+	handler: async (ctx, { clerkId, email }) => {
+		const normalized = email.trim().toLowerCase();
+		if (!normalized) return;
+		const user = await ctx.db
+			.query("users")
+			.withIndex("by_clerk_id", (q) => q.eq("clerkId", clerkId))
+			.unique();
+		if (!user) return;
+		if (user.email !== normalized) {
+			await ctx.db.patch(user._id, { email: normalized });
+		}
+	},
+});

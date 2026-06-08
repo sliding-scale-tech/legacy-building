@@ -163,7 +163,7 @@ export function CreateJournalDialog({
 				overlayClassName="z-[2001] bg-foreground/60"
 				className={cn(
 					"fixed top-[100px] right-0 left-0 z-[2002] mx-auto flex w-[calc(100%-20px)] flex-col",
-					"min-h-[296px] min-w-[296px] max-w-[600px]",
+					"min-h-[296px] min-w-0 max-w-[600px]",
 					"!max-w-[600px] !translate-x-0 !translate-y-0",
 					"max-h-[min(calc(100dvh-120px),920px)]",
 					"overflow-hidden rounded-[20px] border-0 bg-white p-0",
@@ -201,7 +201,7 @@ export function CreateJournalDialog({
 						</Button>
 					</div>
 
-					<div className="grid grid-cols-2 gap-6">
+					<div className="grid grid-cols-1 gap-6 sm:grid-cols-2">
 						<div className="flex min-w-0 flex-col gap-1">
 							<label htmlFor={`${formId}-title`} className={fieldLabelClass}>
 								Title

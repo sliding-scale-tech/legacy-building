@@ -15,14 +15,12 @@ function PlanRadio({ selected }: { selected: boolean }) {
 	return (
 		<span
 			className={cn(
-				"flex size-5 shrink-0 items-center justify-center rounded-full border-2",
-				selected ? "border-white bg-white" : "border-white/50 bg-transparent",
+				"flex size-5 shrink-0 items-center justify-center rounded-full border-2 bg-background",
+				selected ? "border-primary" : "border-border",
 			)}
 			aria-hidden
 		>
-			{selected ? (
-				<span className="size-2.5 rounded-full bg-[#1a4540]" />
-			) : null}
+			{selected ? <span className="size-2.5 rounded-full bg-primary" /> : null}
 		</span>
 	);
 }
@@ -48,10 +46,10 @@ function PlanCard({
 			onClick={onSelect}
 			className={cn(
 				"relative flex w-full cursor-pointer flex-col gap-1 rounded-xl border px-4 py-4 text-left transition-colors",
-				"focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/40",
+				"focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/30",
 				selected
-					? "border-white/30 bg-white/10"
-					: "border-white/15 bg-white/5 hover:border-white/25 hover:bg-white/8",
+					? "border-2 border-primary bg-card shadow-sm"
+					: "border-border bg-card hover:border-muted-foreground/40",
 			)}
 			aria-pressed={selected}
 		>
@@ -65,7 +63,9 @@ function PlanCard({
 				<div className="flex min-w-0 flex-1 flex-col gap-1">{children}</div>
 			</div>
 			{isCurrent ? (
-				<span className="mt-1 pl-8 text-white/70 text-xs">Current plan</span>
+				<span className="mt-1 pl-8 text-muted-foreground text-xs">
+					Current plan
+				</span>
 			) : null}
 		</button>
 	);
@@ -107,15 +107,15 @@ export function BillingSubscribePanel() {
 		<div className="mx-auto flex w-full max-w-[960px] flex-col items-center gap-8">
 			<div className="flex flex-col items-center gap-4 text-center">
 				<img
-					src={assets.whiteLogo}
+					src={assets.logo}
 					alt="Legacy Building"
 					className="h-10 w-auto object-contain"
 				/>
 				<div className="flex flex-col gap-2">
-					<h1 className="font-semibold text-3xl text-white leading-tight sm:text-[32px]">
+					<h1 className="font-semibold text-3xl text-foreground leading-tight sm:text-[32px]">
 						Unlock your full legacy experience
 					</h1>
-					<p className="text-sm text-white/75 sm:text-base">
+					<p className="text-muted-foreground text-sm sm:text-base">
 						Start free today — write, record, and preserve your story
 					</p>
 				</div>
@@ -125,9 +125,9 @@ export function BillingSubscribePanel() {
 				<div className="flex flex-col gap-3">
 					{isLoading ? (
 						<>
-							<div className="h-[88px] animate-pulse rounded-xl bg-white/10" />
-							<div className="h-[72px] animate-pulse rounded-xl bg-white/10" />
-							<div className="h-[72px] animate-pulse rounded-xl bg-white/10" />
+							<div className="h-[88px] animate-pulse rounded-xl bg-muted" />
+							<div className="h-[72px] animate-pulse rounded-xl bg-muted" />
+							<div className="h-[72px] animate-pulse rounded-xl bg-muted" />
 						</>
 					) : (
 						<>
@@ -137,10 +137,10 @@ export function BillingSubscribePanel() {
 								isCurrent={isCurrentChoice("trial")}
 								badge="Most popular"
 							>
-								<p className="font-semibold text-base text-white">
+								<p className="font-semibold text-base text-foreground">
 									{trialDays} days free
 								</p>
-								<p className="text-white/65 text-xs leading-relaxed">
+								<p className="text-muted-foreground text-xs leading-relaxed">
 									Then {monthlyPrice}/mo — cancel anytime before day {trialDays}
 								</p>
 							</PlanCard>
@@ -151,12 +151,14 @@ export function BillingSubscribePanel() {
 								isCurrent={isCurrentChoice("monthly")}
 							>
 								<div className="flex items-baseline justify-between gap-2">
-									<p className="font-semibold text-base text-white">Monthly</p>
-									<p className="font-semibold text-base text-white">
+									<p className="font-semibold text-base text-foreground">
+										Monthly
+									</p>
+									<p className="font-semibold text-base text-foreground">
 										{monthlyPrice}/mo
 									</p>
 								</div>
-								<p className="text-white/65 text-xs">
+								<p className="text-muted-foreground text-xs">
 									Full access from day one — no trial
 								</p>
 							</PlanCard>
@@ -167,12 +169,14 @@ export function BillingSubscribePanel() {
 								isCurrent={isCurrentChoice("annual")}
 							>
 								<div className="flex items-baseline justify-between gap-2">
-									<p className="font-semibold text-base text-white">Annual</p>
-									<p className="font-semibold text-base text-white">
+									<p className="font-semibold text-base text-foreground">
+										Annual
+									</p>
+									<p className="font-semibold text-base text-foreground">
 										{annualPrice}/yr
 									</p>
 								</div>
-								<p className="text-white/65 text-xs">
+								<p className="text-muted-foreground text-xs">
 									Save 37% — just {annualMonthly}/month
 								</p>
 							</PlanCard>
@@ -181,21 +185,23 @@ export function BillingSubscribePanel() {
 				</div>
 
 				<div className="flex flex-col gap-5">
-					<p className="font-medium text-white/55 text-xs uppercase tracking-[0.12em]">
+					<p className="font-medium text-muted-foreground text-xs uppercase tracking-[0.12em]">
 						Everything included
 					</p>
 					<ul className="flex flex-col gap-5">
 						{BILLING_FEATURES.map((feature) => (
 							<li key={feature.title} className="flex gap-3">
-								<feature.icon
-									className="mt-0.5 size-4 shrink-0 text-white/90"
+								<span
+									className="mt-0.5 flex size-8 shrink-0 items-center justify-center rounded-full bg-primary/10"
 									aria-hidden
-								/>
+								>
+									<feature.icon className="size-4 text-primary" aria-hidden />
+								</span>
 								<div className="flex flex-col gap-0.5">
-									<span className="font-medium text-sm text-white">
+									<span className="font-medium text-foreground text-sm">
 										{feature.title}
 									</span>
-									<span className="text-white/60 text-xs leading-relaxed">
+									<span className="text-muted-foreground text-xs leading-relaxed">
 										{feature.description}
 									</span>
 								</div>
@@ -205,13 +211,13 @@ export function BillingSubscribePanel() {
 				</div>
 			</div>
 
-			<div className="w-full max-w-[720px] rounded-2xl border border-white/10 bg-white/5 px-5 py-6 sm:px-8">
-				<p className="mb-5 text-center font-medium text-white/55 text-xs uppercase tracking-[0.12em]">
+			<div className="w-full max-w-[720px] rounded-2xl border border-border bg-card px-5 py-6 shadow-sm sm:px-8">
+				<p className="mb-5 text-center font-medium text-muted-foreground text-xs uppercase tracking-[0.12em]">
 					How your trial works
 				</p>
 				<div className="relative flex items-start justify-between gap-2">
 					<div
-						className="absolute top-[11px] right-[8%] left-[8%] h-px bg-white/25"
+						className="absolute top-[11px] right-[8%] left-[8%] h-px bg-border"
 						aria-hidden
 					/>
 					{trialSteps.map((step) => (
@@ -223,26 +229,26 @@ export function BillingSubscribePanel() {
 								className={cn(
 									"flex size-6 items-center justify-center rounded-full border-2",
 									step.done
-										? "border-white bg-white text-[#1a4540]"
-										: "border-white/40 bg-[#1a4540] text-transparent",
+										? "border-primary bg-primary text-primary-foreground"
+										: "border-border bg-card text-transparent",
 								)}
 							>
 								{step.done ? (
 									<Check className="size-3.5" strokeWidth={3} aria-hidden />
 								) : (
-									<Circle className="size-2.5 text-white/30" aria-hidden />
+									<Circle className="size-2.5 text-border" aria-hidden />
 								)}
 							</span>
-							<span className="font-medium text-white text-xs">
+							<span className="font-medium text-foreground text-xs">
 								{step.label}
 							</span>
-							<span className="max-w-[120px] text-[10px] text-white/60 leading-snug sm:text-xs">
+							<span className="max-w-[120px] text-[10px] text-muted-foreground leading-snug sm:text-xs">
 								{step.description}
 							</span>
 						</div>
 					))}
 				</div>
-				<p className="mt-6 text-center text-[10px] text-white/55 leading-relaxed sm:text-xs">
+				<p className="mt-6 text-center text-[10px] text-muted-foreground leading-relaxed sm:text-xs">
 					Free for {trialDays} days, then {monthlyPrice}/month. Payment will be
 					charged to your account at the end of the free trial. Your
 					subscription automatically renews unless cancelled at least 24 hours
@@ -258,9 +264,9 @@ export function BillingSubscribePanel() {
 						to={ROUTES.dashboardBillingCheckout}
 						search={{ plan: selected, flow: "subscribe" }}
 						className={cn(
-							"flex h-12 w-full cursor-pointer items-center justify-center gap-2 rounded-xl bg-white font-semibold text-[#1a4540] text-sm",
-							"transition-colors hover:bg-white/95",
-							"focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/50",
+							"flex h-12 w-full cursor-pointer items-center justify-center gap-2 rounded-xl bg-primary font-semibold text-primary-foreground text-sm",
+							"transition-colors hover:bg-primary/90",
+							"focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/40",
 						)}
 					>
 						{ctaLabel}
@@ -271,9 +277,9 @@ export function BillingSubscribePanel() {
 						onClick={() => void checkout()}
 						disabled={ctaDisabled}
 						className={cn(
-							"flex h-12 w-full items-center justify-center gap-2 rounded-xl bg-white font-semibold text-[#1a4540] text-sm",
-							"transition-colors hover:bg-white/95",
-							"focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/50",
+							"flex h-12 w-full items-center justify-center gap-2 rounded-xl bg-primary font-semibold text-primary-foreground text-sm",
+							"transition-colors hover:bg-primary/90",
+							"focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/40",
 							!ctaDisabled && "cursor-pointer",
 							"disabled:cursor-not-allowed disabled:opacity-60",
 						)}
@@ -289,13 +295,13 @@ export function BillingSubscribePanel() {
 					</button>
 				)}
 				{!hasActiveSub && selected === "trial" ? (
-					<p className="text-center text-white/60 text-xs">
+					<p className="text-center text-muted-foreground text-xs">
 						No charge today — cancel anytime before day {trialDays}
 					</p>
 				) : null}
 				<Link
 					to={ROUTES.terms}
-					className="text-white/50 text-xs underline-offset-2 hover:text-white/70 hover:underline"
+					className="text-muted-foreground text-xs underline-offset-2 hover:text-foreground hover:underline"
 				>
 					Terms of subscription
 				</Link>

@@ -1,4 +1,4 @@
-import type { legalRoutes } from "@legacy-building/ui/lib/brand-journal";
+import type { nativeLegalRoutes } from "@/lib/legal-routes";
 
 /** Web app origin for opening /terms and /privacy in the device browser. */
 const WEB_APP_ORIGIN =
@@ -6,7 +6,7 @@ const WEB_APP_ORIGIN =
 	"http://localhost:3001";
 
 export function nativeLegalUrl(
-	path: (typeof legalRoutes)[keyof typeof legalRoutes],
+	path: (typeof nativeLegalRoutes)[keyof typeof nativeLegalRoutes],
 ) {
 	return `${WEB_APP_ORIGIN}${path}`;
 }

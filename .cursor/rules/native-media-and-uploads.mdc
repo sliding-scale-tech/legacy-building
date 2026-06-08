@@ -1,0 +1,58 @@
+---
+description: expo-audio, file uploads, and media player gotchas on native
+globs: apps/native/**/*.{tsx,ts}
+alwaysApply: false
+---
+
+# Native media & uploads
+
+## Convex uploads — modern File API only
+
+- Use `uploadBinaryToConvex` from `@/lib/journal/upload-binary`.
+- **Never** use `expo-file-system/legacy` `uploadAsync` — it fails on Android cache URIs (picked images, expo-audio recordings).
+
+```tsx
+// ❌ BAD
+import { uploadAsync } from "expo-file-system/legacy";
+
+// ✅ GOOD
+import { uploadBinaryToConvex } from "@/lib/journal/upload-binary";
+return uploadBinaryToConvex({ uri, mimeType, generateUploadUrl });
+```
+
+## expo-audio player source
+
+Memoize the source object passed to `useAudioPlayer` — new `{ uri }` every render can recreate the player:
+
+```tsx
+const audioUri = value?.uri;
+const playerSource = useMemo(
+  () => (audioUri ? { uri: audioUri } : null),
+  [audioUri],
+);
+const player = useAudioPlayer(playerSource);
+```
+
+## Audio mode setup
+
+Do not swallow `setAudioModeAsync` errors with empty `.catch(() => {})`:
+
+```tsx
+.catch((err) => {
+  console.warn("[ComponentName] setAudioModeAsync failed:", err);
+});
+```
+
+## Duration / time math — zero is valid
+
+Use nullish coalescing (`??`), not `||`, for `duration` and `currentTime`. `0` is falsy with `||`.
+
+```tsx
+// ❌ BAD — treats 0 as missing
+const duration = status.duration || 0;
+Math.min(current, duration || Number.POSITIVE_INFINITY);
+
+// ✅ GOOD
+const duration = status.duration ?? 0;
+Math.min(current, duration > 0 ? duration : Number.POSITIVE_INFINITY);
+```

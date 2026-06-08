@@ -1,9 +1,10 @@
 import { Ionicons } from "@expo/vector-icons";
 import { api } from "@legacy-building/backend/convex/_generated/api";
 import { useMutation } from "convex/react";
+import { ConvexError } from "convex/values";
 import { router, useLocalSearchParams } from "expo-router";
 import { useThemeColor } from "heroui-native/hooks";
-import { useCallback, useMemo, useRef, useState } from "react";
+import { useCallback, useMemo, useState } from "react";
 import {
 	ActivityIndicator,
 	Alert,
@@ -34,7 +35,16 @@ import {
 	pickCoverImage,
 	uploadCoverImage,
 } from "@/lib/journal/upload-cover-image";
-import { useMutationToast } from "@/lib/mutation-toast";
+
+function messageFromError(err: unknown, fallback: string): string {
+	if (err instanceof ConvexError) {
+		const data = err.data as { message?: string } | string | undefined;
+		if (typeof data === "string") return data;
+		if (data?.message) return data.message;
+	}
+	if (err instanceof Error) return err.message;
+	return fallback;
+}
 
 export default function CreateJournalScreen() {
 	const insets = useSafeAreaInsets();
@@ -47,7 +57,6 @@ export default function CreateJournalScreen() {
 	const generateUploadUrl = useMutation(
 		api.journal.mutations.generateUploadUrl,
 	);
-	const mutationToast = useMutationToast();
 
 	const [title, setTitle] = useState("");
 	const [dedication, setDedication] = useState("");
@@ -60,10 +69,8 @@ export default function CreateJournalScreen() {
 	const [coverSize, setCoverSize] = useState<number>(0);
 	const [showErrors, setShowErrors] = useState(false);
 	const [submitting, setSubmitting] = useState(false);
-	const isSubmittingRef = useRef(false);
 
 	const primary = useThemeColor("accent");
-	const primaryForeground = useThemeColor("primary-foreground");
 	const placeholderColor = useThemeColor("field-placeholder");
 
 	const startMs = useMemo(() => parseMonthDayYear(startDate), [startDate]);
@@ -110,11 +117,9 @@ export default function CreateJournalScreen() {
 	}, [submitting]);
 
 	const handleSubmit = useCallback(async () => {
-		if (isSubmittingRef.current) return;
 		setShowErrors(true);
 		if (formInvalid || startMs === null) return;
 
-		isSubmittingRef.current = true;
 		setSubmitting(true);
 		try {
 			let coverImageId:
@@ -142,12 +147,13 @@ export default function CreateJournalScreen() {
 				entryLog: entryLog.trim() ? entryLog.trim() : undefined,
 			});
 
-			mutationToast.success("Journal created.");
 			router.back();
 		} catch (err) {
-			mutationToast.error(err, "Could not create journal. Please try again.");
+			Alert.alert(
+				"Could not create journal",
+				messageFromError(err, "Please try again."),
+			);
 		} finally {
-			isSubmittingRef.current = false;
 			setSubmitting(false);
 		}
 	}, [
@@ -160,7 +166,6 @@ export default function CreateJournalScreen() {
 		entryLog,
 		formInvalid,
 		generateUploadUrl,
-		mutationToast,
 		startMs,
 		storyType,
 		title,
@@ -379,9 +384,7 @@ export default function CreateJournalScreen() {
 							submitting ? "opacity-70" : ""
 						}`}
 					>
-						{submitting ? (
-							<ActivityIndicator color={primaryForeground} />
-						) : null}
+						{submitting ? <ActivityIndicator color="#ffffff" /> : null}
 						<Text className="font-semibold text-base text-primary-foreground">
 							{submitting ? "Creating…" : "Create Journal"}
 						</Text>

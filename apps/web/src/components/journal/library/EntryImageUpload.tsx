@@ -20,12 +20,12 @@ export function EntryImageUpload({
 	const imageRef = useRef<HTMLInputElement>(null);
 
 	return (
-		<div className="relative w-fit min-w-[265px]">
+		<div className="relative w-full min-w-0">
 			<button
 				type="button"
 				onClick={() => imageRef.current?.click()}
 				className={cn(
-					"relative flex min-h-[200px] min-w-[265px] cursor-pointer items-center justify-center overflow-hidden rounded-[12px] border bg-white",
+					"relative flex min-h-[200px] w-full min-w-0 cursor-pointer items-center justify-center overflow-hidden rounded-[12px] border bg-white",
 					invalid ? "border-[#b0200c]" : "border-[#c7c7c7]",
 				)}
 				aria-invalid={invalid}

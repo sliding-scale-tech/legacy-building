@@ -11,7 +11,9 @@
 		"rootDirs": ["."],
 		"paths": {
 			"@/*": ["./src/*"],
-			"@legacy-building/ui/*": ["../../packages/ui/src/*"]
+			"@legacy-building/ui/*": ["../../packages/ui/src/*"],
+			"@legacy-building/assets": ["../../packages/assets/src/index.ts"],
+			"@legacy-building/assets/*": ["../../packages/assets/*"]
 		}
 	}
 }

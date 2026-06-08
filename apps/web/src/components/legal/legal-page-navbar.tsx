@@ -1,9 +1,5 @@
 import { useAuth } from "@clerk/react";
-import {
-	assets,
-	brand,
-	dashboardLayout,
-} from "@legacy-building/ui/lib/brand-journal";
+import { assets, brand } from "@legacy-building/ui/lib/brand-journal";
 import { cn } from "@legacy-building/ui/lib/utils";
 import { Link, useNavigate } from "@tanstack/react-router";
 import { ChevronLeft } from "lucide-react";
@@ -37,24 +33,16 @@ export function LegalPageNavbar() {
 			className={cn(
 				"fixed inset-x-0 top-0 z-[1504] flex min-h-[80px] items-center justify-center",
 				"bg-center bg-cover bg-no-repeat shadow-[0_2px_2px_0_#f7f7f7]",
+				"px-4 md:pr-10 md:pl-[29px]",
 			)}
 			style={{
 				backgroundImage: `url("${assets.headerBackground}")`,
-				paddingLeft: dashboardLayout.headerPaddingLeft,
-				paddingRight: dashboardLayout.headerPaddingRight,
 			}}
 		>
-			<div
-				className="flex w-full max-w-[1200px] items-center justify-between gap-4"
-				style={{ minHeight: dashboardLayout.headerMinHeight }}
-			>
+			<div className="flex min-h-[80px] w-full max-w-[1200px] items-center justify-between gap-4">
 				<Link
 					to={logoHref}
-					className="relative shrink-0"
-					style={{
-						width: dashboardLayout.logoWidth,
-						height: dashboardLayout.logoHeight,
-					}}
+					className="relative h-[30px] w-[120px] shrink-0 md:h-[50px] md:w-[200px]"
 					aria-label="Legacy Building home"
 				>
 					<img

@@ -1,0 +1,67 @@
+---
+description: Native Pressable, disabled UI, mutation toasts, submit guards
+globs: apps/native/**/*.{tsx,ts}
+alwaysApply: false
+---
+
+# Native interactions & mutations
+
+## Pressable must be honest
+
+- Every `Pressable` with `accessibilityRole="button"` needs a working `onPress`, or remove/hide it.
+- When `disabled={...}`, also set:
+  - `accessibilityState={{ disabled: isDisabled }}`
+  - visual feedback: `disabled:opacity-40` or `disabled:opacity-50` on `className`
+  - muted icon color when disabled (e.g. `useThemeColor("muted-foreground")`)
+
+```tsx
+// ❌ BAD — disabled prop only, still looks clickable
+<Pressable disabled={!entry} onPress={handleMenu}>
+
+// ✅ GOOD
+const isDisabled = entry == null;
+<Pressable
+  disabled={isDisabled}
+  accessibilityState={{ disabled: isDisabled }}
+  className="... active:opacity-70 disabled:opacity-40"
+>
+  <Ionicons color={isDisabled ? mutedForeground : accentForeground} />
+</Pressable>
+```
+
+## Mutation feedback — toast, not Alert
+
+- Use `useMutationToast()` from `@/lib/mutation-toast` for mutation success/failure.
+- `mutationToast.error(err, "Fallback message")` — pass raw `err`, not pre-parsed string.
+- `mutationToast.success("...")` on success before navigation.
+- Keep `Alert.alert` only for permission/settings flows, not mutation results.
+
+## Error extraction
+
+- Import `messageFromError` from `@/lib/error-utils` when Alert is still required.
+- Do not copy-paste `messageFromError` into screen files.
+
+## Double-submit guard
+
+`disabled={submitting}` alone is not enough — rerender is async. Block re-entry synchronously:
+
+```tsx
+const isSubmittingRef = useRef(false);
+
+const handleSubmit = async () => {
+  if (isSubmittingRef.current) return;
+  // validation...
+  isSubmittingRef.current = true;
+  setSubmitting(true);
+  try { /* upload + mutation */ }
+  finally {
+    isSubmittingRef.current = false;
+    setSubmitting(false);
+  }
+};
+```
+
+## Spinner / icon colors
+
+- Use `useThemeColor("primary-foreground")` (or `accent-foreground`) for `ActivityIndicator`.
+- Never hardcode `#ffffff` or hex in native components.

@@ -27,7 +27,13 @@ export const listByJournal = query({
 	args: { journalId: v.id("journals") },
 	handler: async (ctx, args) => {
 		const userId = await requireClerkUserId(ctx);
-		await getOwnedJournal(ctx, args.journalId, userId);
+
+		// Gracefully return empty when the journal was just deleted — the live
+		// query fires before the screen unmounts, and throwing here causes a
+		// render error.
+		const journal = await ctx.db.get(args.journalId);
+		if (!journal) return [];
+		if (journal.userId !== userId) return [];
 
 		const entries = await ctx.db
 			.query("journalEntries")
