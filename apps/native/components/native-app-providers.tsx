@@ -1,4 +1,3 @@
-import { NativeTermsAgreement } from "@/components/native-terms-agreement";
 import { useNativeDeviceInfoSync } from "@/hooks/use-native-device-info-sync";
 
 export function NativeAppProviders({
@@ -8,10 +7,5 @@ export function NativeAppProviders({
 }) {
 	useNativeDeviceInfoSync();
 
-	return (
-		<>
-			{children}
-			<NativeTermsAgreement />
-		</>
-	);
+	return children;
 }

@@ -14,6 +14,8 @@ Do not overwrite or fork the default shadcn component code. Compose and extend v
 
 Use the CSS variable color tokens (e.g. `bg-background`, `text-foreground`, `bg-primary`, `text-muted-foreground`, `border-border`, `bg-destructive`) — never hardcode hex / `rgb()` / arbitrary `bg-[#...]` values in components.
 
+For success/paid/status badges, prefer `bg-primary/10 text-primary` — do not use hardcoded `green-*` Tailwind scales. Modal overlays: `bg-foreground/60`, not `bg-[rgba(...)]`.
+
 **Where to add new tokens:**
 
 - Default: add to the shared `packages/ui/src/styles/globals.css`. It's consumed by both `apps/web` and `apps/admin`, so any new color is available everywhere.

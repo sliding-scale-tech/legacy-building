@@ -127,7 +127,10 @@ export function ProfileAvatarEditor({
 			>
 				<Avatar
 					className={cn(
-						"size-[clamp(7.5rem,32vw,12.5rem)] border-[#008080] bg-white",
+						isDesk
+							? "size-[clamp(9.5rem,40vw,12.5rem)] md:size-[clamp(7.5rem,32vw,12.5rem)]"
+							: "size-[clamp(7.5rem,32vw,12.5rem)]",
+						"border-[#008080] bg-white",
 						"border-[3px] sm:border-4 md:border-[5px]",
 						"after:border-0",
 					)}

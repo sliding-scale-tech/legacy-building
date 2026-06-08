@@ -75,7 +75,7 @@ export function DateField({
 				sideOffset={4}
 				collisionPadding={12}
 				className={cn(
-					"z-[2100] w-auto min-w-[296px] max-w-[320px] overflow-hidden border border-[#e6e6e6] bg-white p-0 text-[#1a1a1a] shadow-lg ring-0",
+					"z-[2100] w-auto min-w-0 max-w-[calc(100vw-2rem)] overflow-hidden border border-[#e6e6e6] bg-white p-0 text-[#1a1a1a] shadow-lg ring-0 sm:min-w-[296px] sm:max-w-[320px]",
 					popoverClassName,
 				)}
 				onOpenAutoFocus={(e) => e.preventDefault()}
@@ -85,7 +85,7 @@ export function DateField({
 					selected={value}
 					onSelect={handleSelect}
 					defaultMonth={value ?? new Date()}
-					className="w-full min-w-[296px]"
+					className="w-full min-w-0 sm:min-w-[296px]"
 				/>
 				<CalendarFooter
 					onToday={() => {

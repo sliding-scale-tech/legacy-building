@@ -4,7 +4,7 @@ import type {
 	Id,
 } from "@legacy-building/backend/convex/_generated/dataModel";
 import { Button } from "@legacy-building/ui/components/button";
-import { brand, dashboardLayout } from "@legacy-building/ui/lib/brand-journal";
+import { brand } from "@legacy-building/ui/lib/brand-journal";
 import { useNavigate, useRouterState } from "@tanstack/react-router";
 import { useQuery } from "convex/react";
 import { useCallback, useEffect, useState } from "react";
@@ -134,14 +134,8 @@ export function DashboardLibraryPage() {
 
 	return (
 		<>
-			<main
-				className="mx-auto flex w-full max-w-[1200px] flex-1 flex-col gap-5"
-				style={{
-					marginTop: dashboardLayout.contentMarginTop,
-					padding: `${dashboardLayout.contentPaddingY}px ${dashboardLayout.contentPaddingX}px`,
-				}}
-			>
-				<div className="flex flex-wrap items-center justify-between gap-3">
+			<main className="mx-auto mt-20 flex w-full max-w-[1200px] flex-1 flex-col gap-5 px-4 py-4 sm:px-6 md:px-10 md:py-5">
+				<div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
 					<LibraryStoryTabs value={storyTab} onChange={handleStoryTabChange} />
 					<Button
 						type="button"
@@ -185,7 +179,7 @@ export function DashboardLibraryPage() {
 			/>
 
 			<JournalDetailSheet
-				key={storyTab}
+				key={`journal-detail-${storyTab}`}
 				journalId={selectedJournalId}
 				open={selectedJournalId !== null}
 				onOpenChange={(next) => {
@@ -195,7 +189,7 @@ export function DashboardLibraryPage() {
 			/>
 
 			<AddJournalEntryPanel
-				key={storyTab}
+				key={`entry-panel-${storyTab}`}
 				journalId={entryPanelJournalId}
 				journals={journals ?? []}
 				open={entryPanelOpen}

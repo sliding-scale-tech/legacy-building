@@ -8,7 +8,7 @@ type LibraryStoryTabsProps = {
 };
 
 const triggerBase =
-	"h-auto min-w-[170px] flex-none rounded-none border-0 px-2.5 py-2.5 text-base font-normal leading-[1.4] shadow-none transition-colors after:hidden focus-visible:ring-0";
+	"h-auto min-w-0 flex-1 rounded-none border-0 px-2.5 py-2.5 text-sm font-normal leading-[1.4] shadow-none transition-colors after:hidden focus-visible:ring-0 sm:text-base";
 
 const triggerInactive =
 	"bg-[#ebf6f6] text-[#1a1a1a] data-[state=inactive]:bg-[#ebf6f6] data-[state=inactive]:text-[#1a1a1a]";
@@ -25,7 +25,7 @@ export function LibraryStoryTabs({ value, onChange }: LibraryStoryTabsProps) {
 		>
 			<TabsList
 				variant="line"
-				className="h-auto w-fit gap-0 rounded-xl bg-transparent p-0"
+				className="h-auto w-full gap-0 rounded-xl bg-transparent p-0"
 			>
 				{STORY_TABS.map((tab, index) => {
 					const isFirst = index === 0;

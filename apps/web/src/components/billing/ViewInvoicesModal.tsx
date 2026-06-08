@@ -66,7 +66,7 @@ export function ViewInvoicesModal({
 			<DialogContentWithOverlay
 				showCloseButton={false}
 				overlayClassName="bg-foreground/60"
-				className="z-[2002] max-h-[min(90vh,720px)] w-full max-w-[720px] gap-0 overflow-hidden rounded-2xl border border-border bg-popover p-0 text-popover-foreground shadow-xl sm:max-w-[720px]"
+				className="z-[2002] max-h-[min(90vh,720px)] w-[calc(100%-2rem)] max-w-[720px] gap-0 overflow-hidden rounded-2xl border border-border bg-popover p-0 text-popover-foreground shadow-xl sm:max-w-[720px]"
 			>
 				<div className="flex items-center justify-between border-border border-b px-6 py-5">
 					<DialogTitle className="font-semibold text-foreground text-xl">

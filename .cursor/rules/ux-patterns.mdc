@@ -25,6 +25,7 @@ Every screen / feature must satisfy the checklist below. If something doesn't ap
 
 - Use **optimistic updates** for any mutation where the new state is predictable (toggles, likes, reorder, delete, inline edits). Convex: `useMutation(...).withOptimisticUpdate(...)`.
 - Confirm success / failure with a **Sonner toast** (`import { toast } from "sonner"`): `toast.success`, `toast.error`, or `toast.promise` for in-flight work. No `alert()`, no custom toast.
+- **Native app**: use `useMutationToast()` from `@/lib/mutation-toast` (HeroUI toast) — same rules: success + error toasts, no `Alert` for mutation results.
 
 ## Interaction
 

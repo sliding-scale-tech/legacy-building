@@ -1,7 +1,6 @@
-import { Button } from "@legacy-building/ui/components/button";
-import { useNavigate } from "@tanstack/react-router";
+import { Link } from "@tanstack/react-router";
 import { Lock } from "lucide-react";
-
+import { Button } from "@/components/journal/ui/button";
 import {
 	Dialog,
 	DialogDescription,
@@ -21,13 +20,6 @@ export function JournalPaywallDialog({
 	open,
 	onOpenChange,
 }: JournalPaywallDialogProps) {
-	const navigate = useNavigate();
-
-	const goToBilling = () => {
-		onOpenChange(false);
-		void navigate({ to: ROUTES.dashboardBilling });
-	};
-
 	return (
 		<Dialog open={open} onOpenChange={onOpenChange}>
 			<DialogContentWithOverlay
@@ -50,11 +42,15 @@ export function JournalPaywallDialog({
 				</DialogHeader>
 				<DialogFooter className="mt-2 flex-col gap-2 sm:flex-col">
 					<Button
-						type="button"
+						asChild
 						className="h-11 w-full rounded-xl bg-[#008080] text-white hover:bg-[#006b6b]"
-						onClick={goToBilling}
 					>
-						View plans
+						<Link
+							to={ROUTES.dashboardBilling}
+							onClick={() => onOpenChange(false)}
+						>
+							View plans
+						</Link>
 					</Button>
 					<Button
 						type="button"
