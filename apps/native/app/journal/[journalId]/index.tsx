@@ -431,7 +431,11 @@ export default function JournalDetailScreen() {
 							{exporting ? (
 								<ActivityIndicator color={accentForeground} />
 							) : (
-								<Ionicons name="download-outline" size={20} color="#ffffff" />
+								<Ionicons
+									name="download-outline"
+									size={20}
+									color={accentForeground}
+								/>
 							)}
 							<Text className="font-semibold text-base text-primary-foreground">
 								{exporting
@@ -470,7 +474,11 @@ export default function JournalDetailScreen() {
 						{exporting ? (
 							<ActivityIndicator color={accentForeground} />
 						) : (
-							<Ionicons name="create-outline" size={20} color="#ffffff" />
+							<Ionicons
+								name="create-outline"
+								size={20}
+								color={accentForeground}
+							/>
 						)}
 						<Text className="font-semibold text-base text-primary-foreground">
 							{exporting ? "Exporting…" : "Create Journal Entry"}
@@ -492,7 +500,7 @@ export default function JournalDetailScreen() {
 					className="flex-1"
 				>
 					<Pressable
-						className="flex-1 items-center justify-center bg-black/50 px-6"
+						className="flex-1 items-center justify-center bg-overlay px-6"
 						onPress={() => !renaming && setRenameOpen(false)}
 					>
 						<Pressable

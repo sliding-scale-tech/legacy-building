@@ -77,6 +77,7 @@ export function AudioRecorderField({
 	const handleStartRecording = async () => {
 		if (disabled || preparing) return;
 		setPreparing(true);
+		let recordingStarted = false;
 		try {
 			const permission = await requestRecordingPermissionsAsync();
 			if (!permission.granted) {
@@ -100,12 +101,19 @@ export function AudioRecorderField({
 			});
 			await recorder.prepareToRecordAsync();
 			recorder.record();
+			recordingStarted = true;
 		} catch (err) {
 			Alert.alert(
 				"Could not start recording",
 				err instanceof Error ? err.message : "Please try again.",
 			);
 		} finally {
+			if (!recordingStarted) {
+				await setAudioModeAsync({
+					allowsRecording: false,
+					playsInSilentMode: true,
+				}).catch(() => {});
+			}
 			setPreparing(false);
 		}
 	};

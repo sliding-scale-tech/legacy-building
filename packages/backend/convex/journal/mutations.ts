@@ -10,6 +10,23 @@ import {
 import { journalLibrarySortKey } from "./sort";
 import { deleteEntryStorageFiles, deleteJournalCoverStorage } from "./storage";
 
+function normalizeJournalTitle(title: string): string {
+	const trimmed = title.trim();
+	if (trimmed.length < 1) {
+		throw new ConvexError({
+			code: "INVALID_ARGUMENT",
+			message: "Journal name can't be empty.",
+		});
+	}
+	if (trimmed.length > 120) {
+		throw new ConvexError({
+			code: "INVALID_ARGUMENT",
+			message: "Journal name must be 120 characters or less.",
+		});
+	}
+	return trimmed;
+}
+
 async function nextSortOrderForType(
 	ctx: MutationCtx,
 	userId: string,
@@ -164,7 +181,7 @@ export const update = mutation({
 		}
 
 		await ctx.db.patch(args.id, {
-			title: args.title.trim(),
+			title: normalizeJournalTitle(args.title),
 			dateMs: args.dateMs,
 			dedication: args.dedication,
 			coverImageId,
@@ -183,23 +200,10 @@ export const rename = mutation({
 	handler: async (ctx, args) => {
 		const userId = await requireClerkUserId(ctx);
 		const journal = await getOwnedJournal(ctx, args.id, userId);
-
-		const trimmed = args.title.trim();
-		if (trimmed.length < 1) {
-			throw new ConvexError({
-				code: "INVALID_ARGUMENT",
-				message: "Journal name can't be empty.",
-			});
-		}
-		if (trimmed.length > 120) {
-			throw new ConvexError({
-				code: "INVALID_ARGUMENT",
-				message: "Journal name must be 120 characters or less.",
-			});
-		}
+		const title = normalizeJournalTitle(args.title);
 
 		await ctx.db.patch(journal._id, {
-			title: trimmed,
+			title,
 			updatedAtMs: Date.now(),
 		});
 	},

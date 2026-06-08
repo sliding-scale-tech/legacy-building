@@ -48,7 +48,7 @@ export const assertEmailAvailableForChange = action({
 
 		const secretKey = process.env.CLERK_SECRET_KEY;
 		if (!secretKey) {
-			throw new Error("CLERK_SECRET_KEY is not configured in Convex.");
+			throw new ConvexError("CLERK_SECRET_KEY is not configured in Convex.");
 		}
 
 		const clerk = createClerkClient({ secretKey });

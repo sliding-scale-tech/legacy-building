@@ -208,7 +208,6 @@ export default function ChangeEmailScreen() {
 									className="h-14 rounded-2xl border border-border bg-background px-4 text-base text-foreground tracking-[8px]"
 								/>
 							</View>
-							å
 							<Pressable
 								onPress={() => void handleVerify()}
 								disabled={busy}

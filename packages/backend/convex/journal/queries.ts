@@ -24,14 +24,11 @@ export const getRecentForDesk = query({
 	handler: async (ctx) => {
 		const userId = await requireClerkUserId(ctx);
 
-		const entries = await ctx.db
+		const latestEntry = await ctx.db
 			.query("journalEntries")
 			.withIndex("by_userId", (q) => q.eq("userId", userId))
-			.collect();
-
-		const latestEntry = [...entries].sort(
-			(a, b) => b._creationTime - a._creationTime,
-		)[0];
+			.order("desc")
+			.first();
 
 		let journal: Doc<"journals"> | null = null;
 		let postedAtMs: number | undefined;
@@ -46,14 +43,11 @@ export const getRecentForDesk = query({
 		}
 
 		if (!journal) {
-			const journals = await ctx.db
+			journal = await ctx.db
 				.query("journals")
 				.withIndex("by_userId", (q) => q.eq("userId", userId))
-				.collect();
-
-			journal = [...journals].sort(
-				(a, b) => b._creationTime - a._creationTime,
-			)[0];
+				.order("desc")
+				.first();
 			if (journal) {
 				postedAtMs = journal._creationTime;
 			}
