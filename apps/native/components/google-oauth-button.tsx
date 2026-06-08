@@ -1,8 +1,9 @@
 import { useSSO } from "@clerk/expo";
+import googleLogo from "@legacy-building/assets/images/google logo.jpeg";
 import * as Linking from "expo-linking";
 import * as WebBrowser from "expo-web-browser";
 import { useEffect, useState } from "react";
-import { Platform, Pressable, Text, View } from "react-native";
+import { Image, Platform, Pressable, Text } from "react-native";
 
 function useWarmUpBrowser() {
 	useEffect(() => {
@@ -53,9 +54,13 @@ export function GoogleOAuthButton() {
 			onPress={() => void handlePress()}
 			disabled={pending}
 		>
-			<View className="h-8 w-8 items-center justify-center rounded-full bg-background ring-1">
-				<Text className="font-semibold text-foreground text-sm">G</Text>
-			</View>
+			<Image
+				source={googleLogo}
+				className="h-8 w-8 rounded-full bg-background p-1 ring-1 ring-border"
+				resizeMode="contain"
+				accessibilityElementsHidden
+				importantForAccessibility="no"
+			/>
 			<Text className="font-medium text-base text-foreground">
 				{pending ? "Connecting…" : "Continue with Google"}
 			</Text>

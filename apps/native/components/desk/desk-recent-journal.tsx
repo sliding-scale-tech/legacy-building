@@ -1,12 +1,14 @@
 import { Ionicons } from "@expo/vector-icons";
 import { api } from "@legacy-building/backend/convex/_generated/api";
 import { useQuery } from "convex/react";
+import { useRouter } from "expo-router";
 import { useThemeColor } from "heroui-native";
 import { Image, Pressable, Text, View } from "react-native";
 
 import { formatDate } from "@/lib/journal/formatDate";
 
 export function DeskRecentJournal() {
+	const router = useRouter();
 	const recent = useQuery(api.journal.queries.getRecentForDesk);
 	const primary = useThemeColor("accent");
 
@@ -25,7 +27,7 @@ export function DeskRecentJournal() {
 		return null;
 	}
 
-	const { journal, slideImageUrls } = recent;
+	const { journal, slideImageUrls, postedAtMs } = recent;
 	const previewImage = slideImageUrls[0] ?? null;
 
 	return (
@@ -35,6 +37,12 @@ export function DeskRecentJournal() {
 			</Text>
 
 			<Pressable
+				onPress={() =>
+					router.push({
+						pathname: "/journal/[journalId]",
+						params: { journalId: journal._id },
+					})
+				}
 				className="overflow-hidden rounded-xl bg-card active:opacity-95"
 				accessibilityRole="button"
 				accessibilityLabel={`Open journal ${journal.title}`}
@@ -57,7 +65,7 @@ export function DeskRecentJournal() {
 							{journal.title}
 						</Text>
 						<Text className="mt-0.5 text-primary-foreground/85 text-sm">
-							{formatDate(journal.dateMs)}
+							{formatDate(postedAtMs)}
 						</Text>
 					</View>
 
@@ -65,7 +73,13 @@ export function DeskRecentJournal() {
 						className="size-10 shrink-0 items-center justify-center rounded-full bg-background active:opacity-80"
 						accessibilityRole="button"
 						accessibilityLabel="Add journal entry"
-						onPress={(e) => e.stopPropagation()}
+						onPress={(e) => {
+							e.stopPropagation();
+							router.push({
+								pathname: "/journal/[journalId]/new-entry",
+								params: { journalId: journal._id },
+							});
+						}}
 					>
 						<Ionicons name="add" size={22} color={primary} />
 					</Pressable>

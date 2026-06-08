@@ -1,4 +1,3 @@
-import { assets } from "@legacy-building/ui/lib/brand-journal";
 import type { ReactNode } from "react";
 import {
 	ImageBackground,
@@ -9,6 +8,7 @@ import {
 	View,
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { nativeAssets } from "@/lib/assets";
 
 type AuthScreenProps = {
 	children: ReactNode;
@@ -40,7 +40,7 @@ export function AuthScreen({
 	return (
 		<View className="flex-1 bg-primary">
 			<ImageBackground
-				source={{ uri: assets.authPanelBackground }}
+				source={{ uri: nativeAssets.authPanelBackground }}
 				style={StyleSheet.absoluteFill}
 				resizeMode="cover"
 			>

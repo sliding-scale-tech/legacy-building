@@ -1,6 +1,5 @@
 import { useUser } from "@clerk/expo";
 import { api } from "@legacy-building/backend/convex/_generated/api";
-import { assets } from "@legacy-building/ui/lib/brand-journal";
 import { useMutation } from "convex/react";
 import { ConvexError } from "convex/values";
 import { Spinner } from "heroui-native";
@@ -14,7 +13,6 @@ import {
 	View,
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-
 import { DeskProfileAvatar } from "@/components/desk/desk-profile-avatar";
 import { DeskRecentJournal } from "@/components/desk/desk-recent-journal";
 import { useNativeCurrentUser } from "@/hooks/use-native-current-user";
@@ -22,6 +20,7 @@ import {
 	pickProfileImage,
 	uploadProfileImage,
 } from "@/lib/account/upload-profile-picture";
+import { nativeAssets } from "@/lib/assets";
 
 export default function DeskScreen() {
 	const insets = useSafeAreaInsets();
@@ -50,7 +49,9 @@ export default function DeskScreen() {
 		"there";
 
 	const avatarUrl =
-		convexUser?.profilePictureUrl ?? user?.imageUrl ?? assets.defaultAvatar;
+		convexUser?.profilePictureUrl ??
+		user?.imageUrl ??
+		nativeAssets.defaultAvatar;
 
 	const handleAvatarPress = useCallback(async () => {
 		if (uploadingAvatar) return;
@@ -108,7 +109,7 @@ export default function DeskScreen() {
 			</View>
 
 			<ImageBackground
-				source={{ uri: assets.deskHeroBackground }}
+				source={{ uri: nativeAssets.deskHeroBackground }}
 				className="flex-1"
 				resizeMode="cover"
 			>
