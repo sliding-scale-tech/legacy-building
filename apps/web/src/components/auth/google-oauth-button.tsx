@@ -1,4 +1,5 @@
 import { useClerk, useSignIn, useSignUp } from "@clerk/react";
+import { imageAssets } from "@legacy-building/assets";
 import { Button } from "@legacy-building/ui/components/button";
 import { useState } from "react";
 import { ROUTES } from "@/lib/routes";
@@ -131,11 +132,11 @@ export function GoogleOAuthButton(
 
 function GoogleGlyph() {
 	return (
-		<span
-			className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-background font-semibold text-foreground text-sm ring-1 ring-border"
+		<img
+			src={imageAssets.googleLogo}
+			alt=""
 			aria-hidden
-		>
-			G
-		</span>
+			className="h-8 w-8 shrink-0 rounded-full bg-background object-contain p-1 ring-1 ring-border"
+		/>
 	);
 }

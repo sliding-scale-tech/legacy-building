@@ -2,7 +2,11 @@ import { ConvexError, v } from "convex/values";
 
 import { type MutationCtx, mutation } from "../_generated/server";
 import { journalType } from "../schema";
-import { getOwnedJournal, requirePaidJournalAccess } from "./auth";
+import {
+	getOwnedJournal,
+	requireClerkUserId,
+	requirePaidJournalAccess,
+} from "./auth";
 import { journalLibrarySortKey } from "./sort";
 import { deleteEntryStorageFiles, deleteJournalCoverStorage } from "./storage";
 
@@ -165,6 +169,37 @@ export const update = mutation({
 			dedication: args.dedication,
 			coverImageId,
 			coverImageUrl,
+			updatedAtMs: Date.now(),
+		});
+	},
+});
+
+/** Lightweight title-only rename (no paid gate, no cover/date handling). */
+export const rename = mutation({
+	args: {
+		id: v.id("journals"),
+		title: v.string(),
+	},
+	handler: async (ctx, args) => {
+		const userId = await requireClerkUserId(ctx);
+		const journal = await getOwnedJournal(ctx, args.id, userId);
+
+		const trimmed = args.title.trim();
+		if (trimmed.length < 1) {
+			throw new ConvexError({
+				code: "INVALID_ARGUMENT",
+				message: "Journal name can't be empty.",
+			});
+		}
+		if (trimmed.length > 120) {
+			throw new ConvexError({
+				code: "INVALID_ARGUMENT",
+				message: "Journal name must be 120 characters or less.",
+			});
+		}
+
+		await ctx.db.patch(journal._id, {
+			title: trimmed,
 			updatedAtMs: Date.now(),
 		});
 	},

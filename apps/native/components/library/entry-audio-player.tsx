@@ -1,6 +1,11 @@
 import { Ionicons } from "@expo/vector-icons";
-import { useAudioPlayer, useAudioPlayerStatus } from "expo-audio";
+import {
+	setAudioModeAsync,
+	useAudioPlayer,
+	useAudioPlayerStatus,
+} from "expo-audio";
 import { useThemeColor } from "heroui-native/hooks";
+import { useEffect } from "react";
 import { Pressable, Text, View } from "react-native";
 
 function formatClock(seconds: number): string {
@@ -20,6 +25,14 @@ export function EntryAudioPlayer({ uri }: EntryAudioPlayerProps) {
 	const player = useAudioPlayer({ uri });
 	const status = useAudioPlayerStatus(player);
 	const warningForeground = useThemeColor("warning-foreground");
+
+	// Ensure playback routes to the main speaker, not the quiet earpiece.
+	useEffect(() => {
+		void setAudioModeAsync({
+			allowsRecording: false,
+			playsInSilentMode: true,
+		}).catch(() => {});
+	}, []);
 
 	const isPlaying = status.playing;
 	const duration = status.duration ?? 0;

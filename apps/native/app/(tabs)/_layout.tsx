@@ -10,7 +10,7 @@ export default function TabLayout() {
 	const didRedirect = useRef(false);
 	const [activeTint, inactiveTint, tabBackground, tabBorder] = useThemeColor([
 		"accent",
-		"mutedForeground",
+		"foreground",
 		"background",
 		"border",
 	]);

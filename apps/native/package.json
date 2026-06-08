@@ -18,6 +18,7 @@
 		"@expo/vector-icons": "^15.1.1",
 		"@gorhom/bottom-sheet": "^5.2.14",
 		"@hookform/resolvers": "^5.4.0",
+		"@legacy-building/assets": "workspace:*",
 		"@legacy-building/backend": "workspace:*",
 		"@legacy-building/env": "workspace:*",
 		"@legacy-building/ui": "workspace:*",
