@@ -121,8 +121,10 @@ export default function AccountScreen() {
 		);
 	};
 
-	const openLegal = (path: string) => {
-		void WebBrowser.openBrowserAsync(nativeLegalUrl(path as any));
+	const openLegal = (
+		path: (typeof nativeLegalRoutes)[keyof typeof nativeLegalRoutes],
+	) => {
+		void WebBrowser.openBrowserAsync(nativeLegalUrl(path));
 	};
 
 	return (

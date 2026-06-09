@@ -16,6 +16,7 @@ import {
 import { SidebarEditActions } from "@/components/journal/library/SidebarEditActions";
 import { Button } from "@/components/journal/ui/button";
 import { Input } from "@/components/journal/ui/input";
+import { compressImageFile } from "@/lib/journal/compressImageFile";
 import {
 	messageFromUnknownError,
 	toastMutationError,
@@ -95,9 +96,10 @@ export function EditJournalSidebarForm({
 		return () => window.removeEventListener("keydown", onKeyDown);
 	}, [handleCancel]);
 
-	const handleCoverChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-		const file = e.target.files?.[0];
-		if (!file) return;
+	const handleCoverChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+		const raw = e.target.files?.[0];
+		if (!raw) return;
+		const file = await compressImageFile(raw);
 		if (coverPreview?.startsWith("blob:")) {
 			URL.revokeObjectURL(coverPreview);
 		}
@@ -165,7 +167,7 @@ export function EditJournalSidebarForm({
 						<img
 							src={coverPreview}
 							alt="Cover preview"
-							className="absolute inset-0 size-full object-contain p-3"
+							className="absolute inset-0 size-full object-contain object-center p-3"
 						/>
 					) : null}
 					<span

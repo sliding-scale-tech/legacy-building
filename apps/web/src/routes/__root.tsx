@@ -66,7 +66,7 @@ function RootComponent() {
 					{showMarketingHeader ? <Header /> : null}
 					<Outlet />
 				</div>
-				<Toaster richColors />
+				<Toaster />
 			</ThemeProvider>
 			<TanStackRouterDevtools position="bottom-left" />
 		</>

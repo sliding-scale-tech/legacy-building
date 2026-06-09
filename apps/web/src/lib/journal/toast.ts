@@ -26,3 +26,8 @@ export function toastMutationError(err: unknown, fallback: string) {
 export function toastMutationSuccess(message: string) {
 	toast.success(message);
 }
+
+/** Bubble-style informational toast (white box, teal text). */
+export function toastBubbleMessage(message: string) {
+	toast(message);
+}

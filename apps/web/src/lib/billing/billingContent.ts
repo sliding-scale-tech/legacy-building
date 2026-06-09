@@ -66,7 +66,8 @@ export function buildTrialSteps(monthlyPriceLabel: string) {
 		},
 		{
 			label: "Day 7",
-			description: `${monthlyPriceLabel}/month billed monthly`,
+			description: `${monthlyPriceLabel}/month`,
+			subdescription: "billed monthly",
 			done: false,
 		},
 	] as const;

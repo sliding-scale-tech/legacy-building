@@ -9,22 +9,31 @@ type JournalCoverImageProps = {
 	coverImageUrl?: string;
 };
 
+function isHttpUrl(url: string | undefined): url is string {
+	return url?.startsWith("http") ?? false;
+}
+
 export function JournalCoverImage({
 	coverImageId,
 	coverImageUrl,
 }: JournalCoverImageProps) {
 	const [failedSrc, setFailedSrc] = useState<string | null>(null);
+	const [refreshFromStorage, setRefreshFromStorage] = useState(false);
+
+	const hasCachedUrl = isHttpUrl(coverImageUrl);
+	const shouldFetchStorage =
+		Boolean(coverImageId) && (!hasCachedUrl || refreshFromStorage);
 
 	const storageUrl = useQuery(
 		api.journal.queries.getCoverImageUrl,
-		coverImageId ? { storageId: coverImageId } : "skip",
+		shouldFetchStorage && coverImageId ? { storageId: coverImageId } : "skip",
 	);
 
-	const src = coverImageId
-		? (storageUrl ?? coverImageUrl)
-		: coverImageUrl?.startsWith("http")
+	const src = refreshFromStorage
+		? (storageUrl ?? undefined)
+		: hasCachedUrl
 			? coverImageUrl
-			: undefined;
+			: (storageUrl ?? undefined);
 
 	const loadError = failedSrc === src;
 
@@ -38,8 +47,16 @@ export function JournalCoverImage({
 		<img
 			src={src}
 			alt=""
+			loading="lazy"
+			decoding="async"
 			className="absolute inset-0 size-full object-contain p-3"
-			onError={() => setFailedSrc(src)}
+			onError={() => {
+				if (!refreshFromStorage && coverImageId && hasCachedUrl) {
+					setRefreshFromStorage(true);
+					return;
+				}
+				setFailedSrc(src);
+			}}
 		/>
 	);
 }

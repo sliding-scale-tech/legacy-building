@@ -12,11 +12,13 @@ import {
 	fieldInputClass,
 	fieldLabelClass,
 	fieldTextareaClass,
+	uploadedImageFitClass,
 } from "@/components/journal/library/libraryFormStyles";
 import { SidebarEditActions } from "@/components/journal/library/SidebarEditActions";
 import { Button } from "@/components/journal/ui/button";
 import { Input } from "@/components/journal/ui/input";
 import { Textarea } from "@/components/journal/ui/textarea";
+import { compressImageFile } from "@/lib/journal/compressImageFile";
 import {
 	type EnrichedJournalEntry,
 	entryAccentColor,
@@ -106,9 +108,10 @@ export function EditJournalEntrySidebarForm({
 		return () => window.removeEventListener("keydown", onKeyDown);
 	}, [handleCancel]);
 
-	const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-		const file = e.target.files?.[0];
-		if (!file) return;
+	const handleImageChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+		const raw = e.target.files?.[0];
+		if (!raw) return;
+		const file = await compressImageFile(raw);
 		if (imagePreview?.startsWith("blob:")) {
 			URL.revokeObjectURL(imagePreview);
 		}
@@ -191,7 +194,7 @@ export function EditJournalEntrySidebarForm({
 						<img
 							src={imagePreview}
 							alt="Entry preview"
-							className="absolute inset-0 size-full object-cover"
+							className={cn("absolute inset-0", uploadedImageFitClass)}
 						/>
 					) : null}
 					<span

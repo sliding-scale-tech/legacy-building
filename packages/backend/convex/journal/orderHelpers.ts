@@ -1,5 +1,18 @@
 import type { Doc, Id } from "../_generated/dataModel";
 
+/** Peecho minimum writing entries required to order a printed book. */
+export const MIN_BOOK_ORDER_ENTRIES = 22;
+
+export function minimumBookOrderMessage(selectedCount: number): string {
+	if (selectedCount >= MIN_BOOK_ORDER_ENTRIES) {
+		return "";
+	}
+	const remaining = MIN_BOOK_ORDER_ENTRIES - selectedCount;
+	return `Books can be ordered with ${MIN_BOOK_ORDER_ENTRIES} entries or more. You have ${selectedCount} selected — add ${remaining} more ${
+		remaining === 1 ? "entry" : "entries"
+	}.`;
+}
+
 export const DOCUGENERATE_URL = "https://api.docugenerate.com/v1/document";
 export const PEECHO_PUBLICATION_URL =
 	"https://www.peecho.com/rest/v2/publication/create";

@@ -7,8 +7,14 @@ import { components, internal } from "../_generated/api";
 import type { Doc } from "../_generated/dataModel";
 import { action } from "../_generated/server";
 import {
+	createProrationPaymentCheckoutSession,
+	createSubscriptionEmbeddedCheckoutSession,
+	subscriptionLatestInvoiceId,
+} from "./embeddedCheckout";
+import {
 	getActiveSubscriptionForUser,
 	requireStripeSecretKey,
+	resolveCheckoutReturnUrl,
 } from "./helpers";
 
 const stripeSubscriptions = new StripeSubscriptions(components.stripe, {});
@@ -64,166 +70,13 @@ async function createSubscriptionCheckoutUrl(
 	return session.url;
 }
 
-type EmbeddedCheckoutResult = {
-	clientSecret: string;
-	intentType: "setup" | "payment";
-	customerId: string;
-	subscriptionId: string;
-	/** True when we created a standalone SetupIntent (needs finalize after confirm). */
-	usesFallbackSetup: boolean;
-};
-
-type InvoiceWithSecrets = Stripe.Invoice & {
-	confirmation_secret?: { client_secret: string } | null;
-	payment_intent?: Stripe.PaymentIntent | string | null;
-};
-
-async function resolveSetupIntentSecret(
-	stripe: Stripe,
-	pending: Stripe.SetupIntent | string | null | undefined,
-): Promise<string | null> {
-	if (typeof pending === "object" && pending?.client_secret) {
-		return pending.client_secret;
-	}
-	if (typeof pending === "string") {
-		const setupIntent = await stripe.setupIntents.retrieve(pending);
-		return setupIntent.client_secret ?? null;
-	}
-	return null;
-}
-
-async function resolveInvoicePaymentSecret(
-	stripe: Stripe,
-	invoice: InvoiceWithSecrets,
-): Promise<string | null> {
-	if (invoice.confirmation_secret?.client_secret) {
-		return invoice.confirmation_secret.client_secret;
-	}
-
-	const paymentIntent = invoice.payment_intent;
-	if (typeof paymentIntent === "object" && paymentIntent?.client_secret) {
-		return paymentIntent.client_secret;
-	}
-	if (typeof paymentIntent === "string") {
-		const resolved = await stripe.paymentIntents.retrieve(paymentIntent);
-		return resolved.client_secret ?? null;
-	}
-	return null;
-}
-
-/** Resolve a client secret for Stripe Elements from an incomplete subscription. */
-async function resolveEmbeddedCheckoutSecret(
-	stripe: Stripe,
-	subscription: Stripe.Subscription,
-	applyTrial: boolean,
-	customerId: string,
-	userId: string,
-): Promise<EmbeddedCheckoutResult | null> {
-	if (applyTrial) {
-		const setupSecret = await resolveSetupIntentSecret(
-			stripe,
-			subscription.pending_setup_intent,
-		);
-		if (setupSecret) {
-			return {
-				clientSecret: setupSecret,
-				intentType: "setup",
-				customerId,
-				subscriptionId: subscription.id,
-				usesFallbackSetup: false,
-			};
-		}
-
-		// Some Stripe API versions omit pending_setup_intent on $0 trial invoices.
-		const setupIntent = await stripe.setupIntents.create({
-			customer: customerId,
-			automatic_payment_methods: { enabled: true },
-			usage: "off_session",
-			metadata: { userId, subscriptionId: subscription.id },
-		});
-		if (!setupIntent.client_secret) return null;
-
-		return {
-			clientSecret: setupIntent.client_secret,
-			intentType: "setup",
-			customerId,
-			subscriptionId: subscription.id,
-			usesFallbackSetup: true,
-		};
-	}
-
-	const invoice =
-		typeof subscription.latest_invoice === "string"
-			? await stripe.invoices.retrieve(subscription.latest_invoice, {
-					expand: ["confirmation_secret", "payment_intent"],
-				})
-			: subscription.latest_invoice;
-
-	if (invoice && typeof invoice === "object") {
-		const paymentSecret = await resolveInvoicePaymentSecret(
-			stripe,
-			invoice as InvoiceWithSecrets,
-		);
-		if (paymentSecret) {
-			return {
-				clientSecret: paymentSecret,
-				intentType: "payment",
-				customerId,
-				subscriptionId: subscription.id,
-				usesFallbackSetup: false,
-			};
-		}
-	}
-
-	return null;
-}
-
-async function startEmbeddedProductCheckout(
-	stripe: Stripe,
-	customerId: string,
-	userId: string,
-	product: Doc<"products">,
-	applyTrial: boolean,
-): Promise<EmbeddedCheckoutResult> {
-	const subscription: Stripe.Subscription = await stripe.subscriptions.create({
-		customer: customerId,
-		items: [{ price: product.stripePriceId }],
-		metadata: { userId },
-		...(applyTrial ? { trial_period_days: product.trialDays } : {}),
-		payment_behavior: "default_incomplete",
-		payment_settings: {
-			save_default_payment_method: "on_subscription",
-		},
-		expand: ["latest_invoice.confirmation_secret", "pending_setup_intent"],
-	});
-
-	const checkout = await resolveEmbeddedCheckoutSecret(
-		stripe,
-		subscription,
-		applyTrial,
-		customerId,
-		userId,
-	);
-	if (!checkout) {
-		throw new ConvexError({
-			code: "CHECKOUT_FAILED",
-			message: "Could not start checkout. Please try again.",
-		});
-	}
-	return checkout;
-}
-
 type EmbeddedCheckoutResponse =
-	| (EmbeddedCheckoutResult & { completed: false })
+	| { completed: false; clientSecret: string }
 	| { completed: true };
 
 const embeddedCheckoutResponseValidator = v.object({
 	completed: v.boolean(),
 	clientSecret: v.optional(v.string()),
-	intentType: v.optional(v.union(v.literal("setup"), v.literal("payment"))),
-	customerId: v.optional(v.string()),
-	subscriptionId: v.optional(v.string()),
-	usesFallbackSetup: v.optional(v.boolean()),
 });
 
 /**
@@ -299,22 +152,19 @@ export const createCheckoutSession = action({
 });
 
 /**
- * Create an incomplete subscription and return a client secret for Stripe Elements
- * (SetupIntent for trials, PaymentIntent for immediate billing).
+ * Create a Checkout Session (custom UI) and return its client secret for the
+ * Payment Element via the Checkout Sessions API.
  */
 export const createEmbeddedSubscriptionCheckout = action({
 	args: {
 		interval: intervalValidator,
 		skipTrial: v.optional(v.boolean()),
+		returnUrl: v.optional(v.string()),
 	},
 	returns: v.object({
 		clientSecret: v.string(),
-		intentType: v.union(v.literal("setup"), v.literal("payment")),
-		customerId: v.string(),
-		subscriptionId: v.string(),
-		usesFallbackSetup: v.boolean(),
 	}),
-	handler: async (ctx, args): Promise<EmbeddedCheckoutResult> => {
+	handler: async (ctx, args): Promise<{ clientSecret: string }> => {
 		const identity = await ctx.auth.getUserIdentity();
 		if (!identity) {
 			throw new ConvexError({
@@ -358,13 +208,13 @@ export const createEmbeddedSubscriptionCheckout = action({
 		const applyTrial = product.trialDays > 0 && !args.skipTrial;
 		const stripe = new Stripe(requireSecretKey());
 
-		return await startEmbeddedProductCheckout(
-			stripe,
+		return await createSubscriptionEmbeddedCheckoutSession(stripe, {
 			customerId,
 			userId,
 			product,
 			applyTrial,
-		);
+			returnUrl: resolveCheckoutReturnUrl(args.returnUrl),
+		});
 	},
 });
 
@@ -372,6 +222,7 @@ export const createEmbeddedSubscriptionCheckout = action({
 export const createEmbeddedUpgradeCheckout = action({
 	args: {
 		targetInterval: intervalValidator,
+		returnUrl: v.optional(v.string()),
 	},
 	returns: embeddedCheckoutResponseValidator,
 	handler: async (ctx, args): Promise<EmbeddedCheckoutResponse> => {
@@ -385,6 +236,7 @@ export const createEmbeddedUpgradeCheckout = action({
 
 		const userId = identity.subject;
 		const stripe = new Stripe(requireSecretKey());
+		const returnUrl = resolveCheckoutReturnUrl(args.returnUrl);
 
 		const targetProduct: Doc<"products"> | null = await ctx.runQuery(
 			internal.stripe.products.queries.getByInterval,
@@ -409,36 +261,6 @@ export const createEmbeddedUpgradeCheckout = action({
 		}
 
 		const customerId = customer.stripeCustomerId;
-
-		const resumeIncompleteCheckout =
-			async (): Promise<EmbeddedCheckoutResponse | null> => {
-				const { data: openSubscriptions } = await stripe.subscriptions.list({
-					customer: customerId,
-					status: "incomplete",
-					limit: 5,
-					expand: [
-						"data.latest_invoice.confirmation_secret",
-						"data.pending_setup_intent",
-					],
-				});
-				const pendingTarget = openSubscriptions.find(
-					(openSub) =>
-						openSub.items.data[0]?.price.id === targetProduct.stripePriceId,
-				);
-				if (!pendingTarget) return null;
-
-				const checkout = await resolveEmbeddedCheckoutSecret(
-					stripe,
-					pendingTarget,
-					false,
-					customerId,
-					userId,
-				);
-				return checkout ? { ...checkout, completed: false } : null;
-			};
-
-		const resumed = await resumeIncompleteCheckout();
-		if (resumed) return resumed;
 
 		const subscription = await getActiveSubscriptionForUser(ctx, userId);
 		if (!subscription) {
@@ -484,14 +306,14 @@ export const createEmbeddedUpgradeCheckout = action({
 				clerkUserId: userId,
 			});
 
-			const checkout = await startEmbeddedProductCheckout(
-				stripe,
+			const checkout = await createSubscriptionEmbeddedCheckoutSession(stripe, {
 				customerId,
 				userId,
-				targetProduct,
-				false,
-			);
-			return { ...checkout, completed: false };
+				product: targetProduct,
+				applyTrial: false,
+				returnUrl,
+			});
+			return { completed: false, clientSecret: checkout.clientSecret };
 		}
 
 		const stripeSub = await stripe.subscriptions.retrieve(
@@ -512,7 +334,7 @@ export const createEmbeddedUpgradeCheckout = action({
 				proration_behavior: "always_invoice",
 				payment_behavior: "pending_if_incomplete",
 				metadata: { userId },
-				expand: ["latest_invoice.confirmation_secret", "pending_setup_intent"],
+				expand: ["latest_invoice"],
 			},
 		);
 
@@ -520,15 +342,18 @@ export const createEmbeddedUpgradeCheckout = action({
 			clerkUserId: userId,
 		});
 
-		const checkout = await resolveEmbeddedCheckoutSecret(
-			stripe,
-			updated,
-			false,
-			customerId,
-			userId,
-		);
-		if (checkout) {
-			return { ...checkout, completed: false };
+		const invoiceId = subscriptionLatestInvoiceId(updated);
+		if (invoiceId) {
+			const invoice = await stripe.invoices.retrieve(invoiceId);
+			if (invoice.amount_due > 0 && invoice.status === "open") {
+				const checkout = await createProrationPaymentCheckoutSession(stripe, {
+					customerId,
+					userId,
+					invoice,
+					returnUrl,
+				});
+				return { completed: false, clientSecret: checkout.clientSecret };
+			}
 		}
 
 		return { completed: true };
@@ -989,7 +814,9 @@ async function resolvePaymentMethodDetails(
 		if (latestInvoiceId) {
 			const invoice = (await stripe.invoices.retrieve(latestInvoiceId, {
 				expand: ["payment_intent"],
-			})) as InvoiceWithSecrets;
+			})) as Stripe.Invoice & {
+				payment_intent?: Stripe.PaymentIntent | string | null;
+			};
 			const paymentIntent = invoice.payment_intent;
 			if (paymentIntent && typeof paymentIntent === "object") {
 				const fromIntent = await expandPaymentMethod(
@@ -1244,7 +1071,7 @@ export const syncCustomerEmail = action({
 		}
 
 		const email = args.email.trim();
-		if (!email || !email.includes("@")) {
+		if (!email?.includes("@")) {
 			throw new ConvexError({
 				code: "INVALID_ARGUMENT",
 				message: "A valid email address is required.",

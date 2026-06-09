@@ -4,10 +4,9 @@ import { PageLoader } from "@legacy-building/ui/components/page-loader";
 import { useCurrentUser } from "@legacy-building/ui/hooks/use-current-user";
 import { Link } from "@tanstack/react-router";
 import { useMutation, useQuery } from "convex/react";
-import { Info, Loader2, User, X } from "lucide-react";
+import { Info, User, X } from "lucide-react";
 import { useEffect, useState } from "react";
 
-import { AccountPasswordSection } from "@/components/account/account-password-section";
 import {
 	accountBillingBannerClass,
 	accountBillingBannerDismissClass,
@@ -16,8 +15,6 @@ import {
 	accountDangerButtonClass,
 	accountDangerZoneBodyClass,
 	accountDangerZoneHeaderClass,
-	accountInputClass,
-	accountLabelClass,
 	accountPageClass,
 	accountPrimaryButtonClass,
 	accountSecondaryButtonClass,
@@ -26,30 +23,15 @@ import {
 	accountWarningBoxClass,
 } from "@/components/account/accountFormStyles";
 import { DeleteAccountDialog } from "@/components/account/delete-account-dialog";
+import { PersonalInfoCard } from "@/components/account/personal-info-card";
 import { Button } from "@/components/journal/ui/button";
-import { Input } from "@/components/journal/ui/input";
-import {
-	formatNameAsUsername,
-	isGoogleOAuthProvider,
-} from "@/lib/account/username";
+import { defaultUsername, isGoogleOAuthProvider } from "@/lib/account/username";
 import {
 	messageFromUnknownError,
 	toastMutationError,
 	toastMutationSuccess,
 } from "@/lib/journal/toast";
 import { ROUTES } from "@/lib/routes";
-
-function defaultUsername(
-	convexName: string | undefined,
-	clerkFullName: string | null | undefined,
-	isGoogle: boolean,
-): string {
-	if (convexName?.trim()) return convexName.trim();
-	if (isGoogle && clerkFullName?.trim()) {
-		return formatNameAsUsername(clerkFullName);
-	}
-	return clerkFullName?.trim() ?? "";
-}
 
 function formatShortDate(ms: number) {
 	return new Date(ms).toLocaleDateString(undefined, {
@@ -90,8 +72,6 @@ export function DashboardAccountPage() {
 			isGoogleOAuthProvider(account.provider),
 		),
 	);
-	const showPasswordUpdate = !isGoogle;
-
 	const email =
 		user?.primaryEmailAddress?.emailAddress ?? convexUser?.email ?? "";
 
@@ -197,66 +177,13 @@ export function DashboardAccountPage() {
 							</p>
 						</div>
 
-						<div className={accountCardClass}>
-							<div className="grid gap-5 sm:grid-cols-2">
-								<div className="flex flex-col gap-1.5 sm:col-span-2">
-									<label
-										htmlFor="account-username"
-										className={accountLabelClass}
-									>
-										Username
-									</label>
-									<div className="flex flex-col gap-3 sm:flex-row sm:items-center">
-										<Input
-											id="account-username"
-											value={username}
-											onChange={(e) => setUsername(e.target.value)}
-											className={accountInputClass}
-											autoComplete="username"
-										/>
-										<Button
-											type="button"
-											disabled={savingUsername}
-											onClick={() => void handleUsernameUpdate()}
-											className={accountPrimaryButtonClass}
-										>
-											{savingUsername ? (
-												<>
-													<Loader2
-														className="size-4 animate-spin"
-														aria-hidden
-													/>
-													Updating…
-												</>
-											) : (
-												"Update Username"
-											)}
-										</Button>
-									</div>
-								</div>
-
-								<div className="flex flex-col gap-1.5">
-									<label htmlFor="account-email" className={accountLabelClass}>
-										Email Address
-									</label>
-									<Input
-										id="account-email"
-										type="email"
-										value={email}
-										readOnly
-										disabled
-										className={accountInputClass}
-										aria-label="Email address (read only)"
-									/>
-								</div>
-
-								{showPasswordUpdate ? (
-									<div className="flex flex-col gap-1.5">
-										<AccountPasswordSection />
-									</div>
-								) : null}
-							</div>
-						</div>
+						<PersonalInfoCard
+							username={username}
+							onUsernameChange={setUsername}
+							onUsernameUpdate={() => void handleUsernameUpdate()}
+							savingUsername={savingUsername}
+							email={email}
+						/>
 					</section>
 
 					<section className="flex flex-col gap-4">
@@ -346,6 +273,7 @@ export function DashboardAccountPage() {
 								<div className="flex justify-end">
 									<Button
 										type="button"
+										variant="destructive"
 										onClick={() => setDeleteOpen(true)}
 										className={accountDangerButtonClass}
 									>

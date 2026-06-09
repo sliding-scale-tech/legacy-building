@@ -2,21 +2,18 @@ import { api } from "@legacy-building/backend/convex/_generated/api";
 import { Button } from "@legacy-building/ui/components/button";
 import { PageLoader } from "@legacy-building/ui/components/page-loader";
 import { brand } from "@legacy-building/ui/lib/brand-journal";
-import { Elements } from "@stripe/react-stripe-js";
+import { CheckoutElementsProvider } from "@stripe/react-stripe-js/checkout";
 import { loadStripe } from "@stripe/stripe-js";
 import { Link, useNavigate } from "@tanstack/react-router";
 import { useAction, useConvex, useQuery } from "convex/react";
 import { ConvexError } from "convex/values";
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { toast } from "sonner";
 
 import { CheckoutOrderSummary } from "@/components/billing/CheckoutOrderSummary";
 import { CheckoutPaymentForm } from "@/components/billing/CheckoutPaymentForm";
 import type { BillingPlanChoice } from "@/lib/billing/billingContent";
-import {
-	type CheckoutFlow,
-	planToCheckoutArgs,
-} from "@/lib/billing/checkoutSearch";
+import type { CheckoutFlow } from "@/lib/billing/checkoutSearch";
 import { formatAmount } from "@/lib/billing/plans";
 import { ROUTES } from "@/lib/routes";
 
@@ -62,14 +59,21 @@ export function CheckoutPage({ plan: initialPlan, flow }: CheckoutPageProps) {
 	const createEmbeddedUpgradeCheckout = useAction(
 		api.stripe.actions.createEmbeddedUpgradeCheckout,
 	);
-	const finalizeTrialSetup = useAction(
-		api.stripe.actions.finalizeEmbeddedTrialSetup,
-	);
 
 	const isUpgrade = flow === "upgrade";
 	const [plan, setPlan] = useState<BillingPlanChoice>(initialPlan);
 
+	const resetCheckoutSession = useCallback(() => {
+		setCheckoutReady(false);
+		setClientSecret(null);
+		setInitializing(false);
+		checkoutSessionActiveRef.current = false;
+		checkoutInitKeyRef.current = null;
+	}, []);
+
 	const handlePlanChange = (nextPlan: BillingPlanChoice) => {
+		if (nextPlan === plan) return;
+		resetCheckoutSession();
 		setPlan(nextPlan);
 		void navigate({
 			to: ROUTES.dashboardBillingCheckout,
@@ -78,16 +82,18 @@ export function CheckoutPage({ plan: initialPlan, flow }: CheckoutPageProps) {
 		});
 	};
 
+	const [checkoutReady, setCheckoutReady] = useState(false);
 	const [clientSecret, setClientSecret] = useState<string | null>(null);
-	const [intentType, setIntentType] = useState<"setup" | "payment">("setup");
-	const [subscriptionId, setSubscriptionId] = useState<string | null>(null);
-	const [usesFallbackSetup, setUsesFallbackSetup] = useState(false);
-	const [initializing, setInitializing] = useState(true);
-	// Upgrade checkout cancels the trial sub server-side; keep the user on checkout
-	// even after Convex reports no live subscription.
+	const [initializing, setInitializing] = useState(false);
 	const checkoutSessionActiveRef = useRef(isUpgrade);
 	const checkoutInitKeyRef = useRef<string | null>(null);
 	const checkoutInitKey = `${flow}:${plan}`;
+
+	const checkoutReturnUrl = useMemo(
+		() =>
+			`${window.location.origin}${ROUTES.dashboardBillingSuccess}?session_id={CHECKOUT_SESSION_ID}`,
+		[],
+	);
 
 	const monthlyProduct = products?.find((p) => p.interval === "monthly");
 	const annualProduct = products?.find((p) => p.interval === "annual");
@@ -110,7 +116,7 @@ export function CheckoutPage({ plan: initialPlan, flow }: CheckoutPageProps) {
 	}, [subscription, navigate, isUpgrade]);
 
 	useEffect(() => {
-		if (!publishableKey) return;
+		if (!checkoutReady || !publishableKey) return;
 		if (checkoutInitKeyRef.current === checkoutInitKey) return;
 		checkoutInitKeyRef.current = checkoutInitKey;
 
@@ -120,24 +126,20 @@ export function CheckoutPage({ plan: initialPlan, flow }: CheckoutPageProps) {
 			checkoutSessionActiveRef.current = true;
 			setInitializing(true);
 			setClientSecret(null);
-			setSubscriptionId(null);
-			setUsesFallbackSetup(false);
 			try {
 				if (isUpgrade) {
 					const interval = plan === "annual" ? "annual" : "monthly";
 					const result = await createEmbeddedUpgradeCheckout({
 						targetInterval: interval,
+						returnUrl: checkoutReturnUrl,
 					});
 					if (cancelled) return;
 					if (result.completed) {
 						window.location.href = `${window.location.origin}${ROUTES.dashboardBillingSuccess}`;
 						return;
 					}
-					if (result.clientSecret && result.intentType) {
+					if (result.clientSecret) {
 						setClientSecret(result.clientSecret);
-						setIntentType(result.intentType);
-						setSubscriptionId(result.subscriptionId ?? null);
-						setUsesFallbackSetup(result.usesFallbackSetup ?? false);
 					} else {
 						throw new ConvexError({
 							code: "CHECKOUT_FAILED",
@@ -147,12 +149,13 @@ export function CheckoutPage({ plan: initialPlan, flow }: CheckoutPageProps) {
 					return;
 				}
 
-				const result = await createEmbeddedCheckout(planToCheckoutArgs(plan));
+				const result = await createEmbeddedCheckout({
+					interval: plan === "annual" ? "annual" : "monthly",
+					skipTrial: plan === "monthly",
+					returnUrl: checkoutReturnUrl,
+				});
 				if (!cancelled) {
 					setClientSecret(result.clientSecret);
-					setIntentType(result.intentType);
-					setSubscriptionId(result.subscriptionId);
-					setUsesFallbackSetup(result.usesFallbackSetup);
 				}
 			} catch (error) {
 				if (!cancelled) {
@@ -175,7 +178,9 @@ export function CheckoutPage({ plan: initialPlan, flow }: CheckoutPageProps) {
 			cancelled = true;
 		};
 	}, [
+		checkoutReady,
 		checkoutInitKey,
+		checkoutReturnUrl,
 		createEmbeddedCheckout,
 		createEmbeddedUpgradeCheckout,
 		isUpgrade,
@@ -286,46 +291,60 @@ export function CheckoutPage({ plan: initialPlan, flow }: CheckoutPageProps) {
 						</p>
 					</header>
 
-					{initializing || !clientSecret || !stripePromise ? (
-						<div className="flex min-h-[360px] items-center justify-center rounded-2xl border border-border bg-card">
-							<PageLoader overlay={false} />
-						</div>
-					) : (
-						<div className="grid gap-8 lg:grid-cols-[minmax(0,1fr)_minmax(0,1.1fr)]">
-							<CheckoutOrderSummary
-								plan={plan}
-								onPlanChange={handlePlanChange}
-								monthlyProduct={monthlyProduct}
-								annualProduct={annualProduct}
-								hideTrial={isUpgrade}
-							/>
+					<div className="grid gap-8 lg:grid-cols-[minmax(0,1fr)_minmax(0,1.1fr)]">
+						<CheckoutOrderSummary
+							plan={plan}
+							onPlanChange={handlePlanChange}
+							monthlyProduct={monthlyProduct}
+							annualProduct={annualProduct}
+							hideTrial={isUpgrade}
+						/>
 
+						{!checkoutReady ? (
+							<div className="flex min-h-[360px] flex-col justify-center gap-4 rounded-2xl border border-border bg-card p-6 shadow-sm sm:p-8">
+								<h2 className="font-semibold text-foreground text-xl">
+									Ready to continue?
+								</h2>
+								<p className="text-muted-foreground text-sm leading-relaxed">
+									Review your plan on the left. When you&apos;re ready, continue
+									to securely enter your payment details. Nothing is charged
+									until you complete the form.
+								</p>
+								<Button
+									type="button"
+									className="h-12 rounded-xl bg-primary text-primary-foreground hover:bg-primary/90"
+									onClick={() => setCheckoutReady(true)}
+								>
+									Continue to payment
+								</Button>
+							</div>
+						) : initializing || !clientSecret || !stripePromise ? (
+							<div className="flex min-h-[360px] items-center justify-center rounded-2xl border border-border bg-card">
+								<PageLoader overlay={false} />
+							</div>
+						) : (
 							<div className="rounded-2xl border border-border bg-card p-6 shadow-sm sm:p-8">
-								<Elements
+								<CheckoutElementsProvider
 									key={clientSecret}
 									stripe={stripePromise}
 									options={{
 										clientSecret,
-										appearance: {
-											theme: "stripe",
-											variables: {
-												colorPrimary: brand.primary,
-												borderRadius: "12px",
+										elementsOptions: {
+											appearance: {
+												theme: "stripe",
+												variables: {
+													colorPrimary: brand.primary,
+													borderRadius: "12px",
+												},
 											},
 										},
 									}}
 								>
-									<CheckoutPaymentForm
-										intentType={intentType}
-										amountLabel={payLabel}
-										subscriptionId={subscriptionId}
-										usesFallbackSetup={usesFallbackSetup}
-										onFinalizeTrialSetup={finalizeTrialSetup}
-									/>
-								</Elements>
+									<CheckoutPaymentForm amountLabel={payLabel} />
+								</CheckoutElementsProvider>
 							</div>
-						</div>
-					)}
+						)}
+					</div>
 				</div>
 			</div>
 		</div>
