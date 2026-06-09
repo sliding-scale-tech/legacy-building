@@ -17,11 +17,16 @@ export function AuthLayout({ children }: AuthLayoutProps) {
 				<div className="flex w-full justify-center lg:justify-start">
 					<div className="w-full max-w-md">
 						<div className="mb-6 flex justify-center lg:hidden">
-							<img
-								src={assets.logo}
-								alt="Legacy Building"
-								className="h-10 w-auto object-contain"
-							/>
+							<div
+								className="flex items-center justify-center rounded-2xl px-5 py-3 shadow-sm"
+								style={{ backgroundColor: brand.primary }}
+							>
+								<img
+									src={assets.whiteLogo}
+									alt="Legacy Building"
+									className="h-9 w-auto max-w-[220px] object-contain"
+								/>
+							</div>
 						</div>
 						{children}
 					</div>

@@ -79,6 +79,7 @@ export const create = mutation({
 export const update = mutation({
 	args: {
 		id: v.id("journalEntries"),
+		journalId: v.optional(v.id("journals")),
 		title: v.string(),
 		dateMs: v.number(),
 		body: v.optional(v.string()),
@@ -96,6 +97,11 @@ export const update = mutation({
 		}
 		assertEntryOwner(entry, userId);
 		await getOwnedJournal(ctx, entry.journalId, userId);
+
+		const nextJournalId = args.journalId ?? entry.journalId;
+		if (nextJournalId !== entry.journalId) {
+			await getOwnedJournal(ctx, nextJournalId, userId);
+		}
 
 		if (entry.mode === "writing" && !args.body?.trim()) {
 			throw new ConvexError({
@@ -145,6 +151,7 @@ export const update = mutation({
 		await ctx.db.patch(args.id, {
 			title: args.title.trim(),
 			dateMs: args.dateMs,
+			journalId: nextJournalId,
 			body: entry.mode === "writing" ? args.body?.trim() : entry.body,
 			imageId,
 			imageUrl,
@@ -152,7 +159,11 @@ export const update = mutation({
 			audioUrl,
 		});
 
-		await ctx.db.patch(entry.journalId, { updatedAtMs: Date.now() });
+		const now = Date.now();
+		await ctx.db.patch(entry.journalId, { updatedAtMs: now });
+		if (nextJournalId !== entry.journalId) {
+			await ctx.db.patch(nextJournalId, { updatedAtMs: now });
+		}
 	},
 });
 

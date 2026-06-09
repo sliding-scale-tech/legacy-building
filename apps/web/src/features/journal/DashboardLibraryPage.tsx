@@ -91,14 +91,6 @@ export function DashboardLibraryPage() {
 		}
 	}, [journals, selectedJournalId]);
 
-	useEffect(() => {
-		if (!journals || !entryPanelJournalId) return;
-		if (!journals.some((j: Doc<"journals">) => j._id === entryPanelJournalId)) {
-			setEntryPanelOpen(false);
-			setEntryPanelJournalId(null);
-		}
-	}, [journals, entryPanelJournalId]);
-
 	const openCreate = useCallback(
 		() => guardJournalAction(() => setCreateOpen(true)),
 		[guardJournalAction],
@@ -189,7 +181,6 @@ export function DashboardLibraryPage() {
 
 			<AddJournalEntryPanel
 				journalId={entryPanelJournalId}
-				journals={journals ?? []}
 				open={entryPanelOpen}
 				onOpenChange={handleEntryPanelOpenChange}
 			/>

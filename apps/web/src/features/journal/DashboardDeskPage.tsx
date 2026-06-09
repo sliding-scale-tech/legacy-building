@@ -1,9 +1,7 @@
 import { useUser } from "@clerk/react";
-import { api } from "@legacy-building/backend/convex/_generated/api";
 import type { Id } from "@legacy-building/backend/convex/_generated/dataModel";
 import { useCurrentUser } from "@legacy-building/ui/hooks/use-current-user";
 import { assets } from "@legacy-building/ui/lib/brand-journal";
-import { useQuery } from "convex/react";
 import { useCallback, useState } from "react";
 import { ProfileAvatarEditor } from "@/components/account/profile-avatar-editor";
 import { useJournalPaywall } from "@/components/billing/JournalPaywallProvider";
@@ -12,21 +10,18 @@ import { DeskHeroCard } from "@/components/journal/dashboard/DeskHeroCard";
 import { DeskRecentJournal } from "@/components/journal/dashboard/DeskRecentJournal";
 import { AddJournalEntryPanel } from "@/components/journal/library/AddJournalEntryPanel";
 import { JournalDetailSheet } from "@/components/journal/library/JournalDetailSheet";
-import { DEFAULT_STORY_TAB, type StoryTab } from "@/lib/journal/journalTypes";
+import type { StoryTab } from "@/lib/journal/journalTypes";
 
 export function DashboardDeskPage() {
 	const { user } = useUser();
 	const { convexUser } = useCurrentUser();
 	const { guardJournalAction } = useJournalPaywall();
 
-	const [storyTab, setStoryTab] = useState<StoryTab>(DEFAULT_STORY_TAB);
 	const [selectedJournalId, setSelectedJournalId] =
 		useState<Id<"journals"> | null>(null);
 	const [entryPanelJournalId, setEntryPanelJournalId] =
 		useState<Id<"journals"> | null>(null);
 	const [entryPanelOpen, setEntryPanelOpen] = useState(false);
-
-	const journals = useQuery(api.journal.queries.listByType, { type: storyTab });
 
 	const userName =
 		convexUser?.name ??
@@ -40,9 +35,8 @@ export function DashboardDeskPage() {
 	const hasCustomPhoto = Boolean(convexUser?.profilePictureId);
 
 	const handleOpenJournal = useCallback(
-		(journalId: Id<"journals">, tab: StoryTab) => {
+		(journalId: Id<"journals">, _tab: StoryTab) => {
 			guardJournalAction(() => {
-				setStoryTab(tab);
 				setEntryPanelOpen(false);
 				setEntryPanelJournalId(null);
 				setSelectedJournalId(journalId);
@@ -52,9 +46,8 @@ export function DashboardDeskPage() {
 	);
 
 	const handleAddEntry = useCallback(
-		(journalId: Id<"journals">, tab: StoryTab) => {
+		(journalId: Id<"journals">, _tab: StoryTab) => {
 			guardJournalAction(() => {
-				setStoryTab(tab);
 				setSelectedJournalId(null);
 				setEntryPanelJournalId(journalId);
 				setEntryPanelOpen(true);
@@ -115,7 +108,6 @@ export function DashboardDeskPage() {
 
 			<AddJournalEntryPanel
 				journalId={entryPanelJournalId}
-				journals={journals ?? []}
 				open={entryPanelOpen}
 				onOpenChange={handleEntryPanelOpenChange}
 			/>

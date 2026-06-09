@@ -9,12 +9,11 @@ import {
 	ImageBackground,
 	Linking,
 	ScrollView,
-	Text,
 	View,
 } from "react-native";
-import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { DeskProfileAvatar } from "@/components/desk/desk-profile-avatar";
 import { DeskRecentJournal } from "@/components/desk/desk-recent-journal";
+import { DashboardScreenHeader } from "@/components/navigation/dashboard-screen-header";
 import { useNativeCurrentUser } from "@/hooks/use-native-current-user";
 import {
 	pickProfileImage,
@@ -23,7 +22,6 @@ import {
 import { nativeAssets } from "@/lib/assets";
 
 export default function DeskScreen() {
-	const insets = useSafeAreaInsets();
 	const { user } = useUser();
 	const { convexUser, isLoading } = useNativeCurrentUser();
 	const ensureCurrentUser = useMutation(api.user.mutations.ensureCurrentUser);
@@ -99,14 +97,10 @@ export default function DeskScreen() {
 
 	return (
 		<View className="flex-1 bg-background">
-			<View
-				className="bg-primary px-4 pb-4"
-				style={{ paddingTop: insets.top + 12 }}
-			>
-				<Text className="text-center font-semibold text-lg text-primary-foreground">
-					{userName}&apos;s Desk
-				</Text>
-			</View>
+			<DashboardScreenHeader
+				title={`${userName}'s Desk`}
+				avatarUrl={avatarUrl}
+			/>
 
 			<ImageBackground
 				source={{ uri: nativeAssets.deskHeroBackground }}

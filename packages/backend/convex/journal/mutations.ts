@@ -154,6 +154,7 @@ export const update = mutation({
 		id: v.id("journals"),
 		title: v.string(),
 		dateMs: v.number(),
+		type: v.optional(journalType),
 		dedication: v.optional(v.string()),
 		coverImageId: v.optional(v.id("_storage")),
 	},
@@ -180,9 +181,18 @@ export const update = mutation({
 			coverImageUrl = url;
 		}
 
+		const nextType = args.type;
+		const typeChanged = nextType !== undefined && nextType !== journal.type;
+		const sortOrder =
+			typeChanged && nextType !== undefined
+				? await nextSortOrderForType(ctx, userId, nextType)
+				: journal.sortOrder;
+
 		await ctx.db.patch(args.id, {
 			title: normalizeJournalTitle(args.title),
 			dateMs: args.dateMs,
+			...(args.type !== undefined ? { type: args.type } : {}),
+			...(typeChanged ? { sortOrder } : {}),
 			dedication: args.dedication,
 			coverImageId,
 			coverImageUrl,

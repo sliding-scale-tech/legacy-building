@@ -14,7 +14,7 @@ import {
 } from "react";
 import { createPortal } from "react-dom";
 import { DeleteJournalDialog } from "@/components/journal/library/DeleteJournalDialog";
-import { EditJournalSidebarForm } from "@/components/journal/library/EditJournalSidebarForm";
+import { EditJournalDialog } from "@/components/journal/library/EditJournalDialog";
 import { JournalCoverImage } from "@/components/journal/library/JournalCoverImage";
 import { JournalEntryDetailView } from "@/components/journal/library/JournalEntryDetailView";
 import { JournalEntryRow } from "@/components/journal/library/JournalEntryRow";
@@ -61,7 +61,7 @@ function SidebarIconButton({
 			onClick={onClick}
 			aria-label={ariaLabel}
 			className={cn(
-				"size-[30px] shrink-0 rounded p-[5px] hover:bg-transparent hover:opacity-80",
+				"flex size-[30px] max-h-[30px] min-h-[30px] min-w-[30px] max-w-[30px] shrink-0 self-start rounded-[4px] p-[5px] hover:bg-transparent hover:opacity-80",
 				className,
 			)}
 		>
@@ -340,19 +340,19 @@ export function JournalDetailSheet({
 						}
 						className={cn(
 							"fixed inset-y-0 right-0 z-[1506] flex flex-col",
-							"w-3/4 max-w-none md:w-full md:max-w-[400px]",
+							"w-full max-w-none md:max-w-[400px]",
 							"transition-transform duration-200 ease-in-out",
 							open ? "translate-x-0" : "pointer-events-none translate-x-full",
 						)}
-						style={{ backgroundColor: brand.librarySidebarBg }}
+						style={{
+							backgroundColor:
+								selectedEntryId && !exportMode
+									? brand.libraryMint
+									: brand.librarySidebarBg,
+						}}
 					>
 						{open ? (
-							journalEditing && loadedJournal ? (
-								<EditJournalSidebarForm
-									journal={loadedJournal}
-									onCancel={() => setJournalEditing(false)}
-								/>
-							) : selectedEntryId && !exportMode ? (
+							selectedEntryId && !exportMode ? (
 								<JournalEntryDetailView
 									entryId={selectedEntryId}
 									onBack={() => setSelectedEntryId(null)}
@@ -376,10 +376,10 @@ export function JournalDetailSheet({
 										<SidebarIconButton
 											ariaLabel="Close journal"
 											onClick={handleClose}
-											className="absolute top-2.5 left-2.5 bg-white"
+											className="absolute top-2.5 left-2.5 z-[3] cursor-pointer bg-white hover:bg-white"
 										>
 											<X
-												className="size-5"
+												className="size-full"
 												style={{ color: brand.primary }}
 												strokeWidth={2}
 											/>
@@ -548,6 +548,12 @@ export function JournalDetailSheet({
 				</>,
 				document.body,
 			)}
+
+			<EditJournalDialog
+				journal={loadedJournal}
+				open={journalEditing && loadedJournal !== null}
+				onOpenChange={setJournalEditing}
+			/>
 
 			<DeleteJournalDialog
 				journalId={journalId}
