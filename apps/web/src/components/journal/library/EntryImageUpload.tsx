@@ -8,6 +8,7 @@ type EntryImageUploadProps = {
 	accentColor: string;
 	imagePreview: string | null;
 	invalid?: boolean;
+	fullWidth?: boolean;
 	onFileChange: (
 		e: React.ChangeEvent<HTMLInputElement>,
 	) => void | Promise<void>;
@@ -18,18 +19,25 @@ export function EntryImageUpload({
 	accentColor,
 	imagePreview,
 	invalid,
+	fullWidth = false,
 	onFileChange,
 }: EntryImageUploadProps) {
 	const imageRef = useRef<HTMLInputElement>(null);
 	const iconColor = accentColor || brand.primary;
 
 	return (
-		<div className="relative w-[265px] max-w-full self-start">
+		<div
+			className={cn(
+				"relative max-w-full",
+				fullWidth ? "w-full self-stretch" : "w-[265px] self-start",
+			)}
+		>
 			<button
 				type="button"
 				onClick={() => imageRef.current?.click()}
 				className={cn(
-					"relative flex h-[200px] w-[265px] max-w-full cursor-pointer items-center justify-center overflow-hidden rounded-[12px] border bg-white p-3",
+					"relative flex h-[200px] max-w-full cursor-pointer items-center justify-center overflow-hidden rounded-[12px] border bg-white p-3",
+					fullWidth ? "w-full" : "w-[265px]",
 					invalid ? "border-[#b0200c]" : "border-[#c7c7c7]",
 				)}
 				aria-label="Upload image"

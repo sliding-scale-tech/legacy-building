@@ -7,9 +7,10 @@ import * as WebBrowser from "expo-web-browser";
 import { useThemeColor } from "heroui-native/hooks";
 import { useState } from "react";
 import { Alert, Pressable, ScrollView, Text, View } from "react-native";
-import { useSafeAreaInsets } from "react-native-safe-area-context";
 
+import { DashboardScreenHeader } from "@/components/navigation/dashboard-screen-header";
 import { useNativeCurrentUser } from "@/hooks/use-native-current-user";
+import { nativeAssets } from "@/lib/assets";
 import { messageFromError } from "@/lib/error-utils";
 import { nativeLegalRoutes } from "@/lib/legal-routes";
 import { nativeLegalUrl } from "@/lib/native-legal-url";
@@ -48,7 +49,6 @@ function AccountRow({
 }
 
 export default function AccountScreen() {
-	const insets = useSafeAreaInsets();
 	const router = useRouter();
 	const { user } = useUser();
 	const { signOut } = useClerk();
@@ -63,27 +63,10 @@ export default function AccountScreen() {
 		user?.primaryEmailAddress?.emailAddress ?? convexUser?.email ?? "";
 	const canChangePassword = user?.passwordEnabled ?? false;
 
-	const handleSignOut = async () => {
-		if (busy) return;
-		setBusy(true);
-		try {
-			await signOut();
-			router.replace("/(auth)");
-		} catch {
-			setBusy(false);
-		}
-	};
-
-	const confirmSignOut = () => {
-		Alert.alert("Log out?", "You'll need to sign in again.", [
-			{ text: "Cancel", style: "cancel" },
-			{
-				text: "Log out",
-				style: "destructive",
-				onPress: () => void handleSignOut(),
-			},
-		]);
-	};
+	const avatarUrl =
+		convexUser?.profilePictureUrl ??
+		user?.imageUrl ??
+		nativeAssets.defaultAvatar;
 
 	const handleDeleteAccount = async () => {
 		if (busy) return;
@@ -129,14 +112,10 @@ export default function AccountScreen() {
 
 	return (
 		<View className="flex-1 bg-background">
-			<View
-				className="bg-primary px-5 pb-5"
-				style={{ paddingTop: insets.top + 12 }}
-			>
-				<Text className="font-semibold text-2xl text-primary-foreground">
-					{name}&apos;s Account
-				</Text>
-			</View>
+			<DashboardScreenHeader
+				title={`${name}'s Account`}
+				avatarUrl={avatarUrl}
+			/>
 
 			<ScrollView
 				className="flex-1"
@@ -165,12 +144,6 @@ export default function AccountScreen() {
 				) : null}
 
 				<View className="h-6 bg-secondary/20" />
-
-				<AccountRow
-					title="Log out"
-					onPress={confirmSignOut}
-					chevronColor={accent}
-				/>
 
 				<View className="items-center gap-6 px-6 pt-8">
 					<Text className="text-center text-base text-foreground">

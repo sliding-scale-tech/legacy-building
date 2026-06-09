@@ -5,9 +5,9 @@ import type {
 } from "@legacy-building/backend/convex/_generated/dataModel";
 import { brand, dashboardLayout } from "@legacy-building/ui/lib/brand-journal";
 import { cn } from "@legacy-building/ui/lib/utils";
-import { useMutation } from "convex/react";
+import { useMutation, useQuery } from "convex/react";
 import { ChevronDown } from "lucide-react";
-import { useCallback, useEffect, useId, useState } from "react";
+import { useCallback, useEffect, useId, useMemo, useState } from "react";
 import { createPortal } from "react-dom";
 import { AudioRecorderField } from "@/components/journal/library/AudioRecorderField";
 import { DateField } from "@/components/journal/library/DateField";
@@ -25,6 +25,8 @@ import {
 	bubbleInputClass,
 	bubbleLabelClass,
 	bubbleRowGap24,
+	bubbleSelectContentClass,
+	bubbleSelectItemClass,
 	bubbleSelectTriggerClass,
 	bubbleTextareaClass,
 } from "@/components/journal/library/libraryFormStyles";
@@ -47,9 +49,10 @@ import {
 } from "@/lib/journal/toast";
 import { uploadToStorage } from "@/lib/journal/uploadToStorage";
 
+type JournalWithCover = Doc<"journals"> & { coverImageUrl?: string };
+
 type AddJournalEntryPanelProps = {
 	journalId: Id<"journals"> | null;
-	journals: Array<Doc<"journals"> & { coverImageUrl?: string }>;
 	open: boolean;
 	onOpenChange: (open: boolean) => void;
 	onCreated?: () => void;
@@ -57,7 +60,6 @@ type AddJournalEntryPanelProps = {
 
 export function AddJournalEntryPanel({
 	journalId,
-	journals,
 	open,
 	onOpenChange,
 	onCreated,
@@ -67,6 +69,25 @@ export function AddJournalEntryPanel({
 	const generateUploadUrl = useMutation(
 		api.journal.mutations.generateUploadUrl,
 	);
+	const allJournals = useQuery(
+		api.journal.queries.listByType,
+		open ? {} : "skip",
+	);
+	const preselectedJournal = useQuery(
+		api.journal.queries.getById,
+		open && journalId ? { id: journalId } : "skip",
+	);
+
+	const journalOptions = useMemo((): JournalWithCover[] => {
+		const list = (allJournals ?? []) as JournalWithCover[];
+		if (
+			preselectedJournal &&
+			!list.some((journal) => journal._id === preselectedJournal._id)
+		) {
+			return [preselectedJournal as JournalWithCover, ...list];
+		}
+		return list;
+	}, [allJournals, preselectedJournal]);
 
 	const [mounted, setMounted] = useState(false);
 	const [visible, setVisible] = useState(false);
@@ -130,15 +151,12 @@ export function AddJournalEntryPanel({
 	useEffect(() => {
 		if (open) {
 			resetForm();
+			if (journalId) setSelectedJournalId(journalId);
 			requestAnimationFrame(() => setVisible(true));
 		} else {
 			setVisible(false);
 		}
-	}, [open, resetForm]);
-
-	useEffect(() => {
-		if (journalId) setSelectedJournalId(journalId);
-	}, [journalId]);
+	}, [open, journalId, resetForm]);
 
 	useEffect(() => {
 		if (!open) return;
@@ -252,6 +270,7 @@ export function AddJournalEntryPanel({
 		<div className={bubbleFieldStack}>
 			<span className={bubbleLabelClass}>Select a journal</span>
 			<Select
+				key={`${selectedJournalId ?? "none"}-${journalOptions.length}`}
 				value={selectedJournalId ?? undefined}
 				onValueChange={(value) => setSelectedJournalId(value as Id<"journals">)}
 			>
@@ -261,9 +280,18 @@ export function AddJournalEntryPanel({
 				>
 					<SelectValue placeholder="Select a journal" />
 				</SelectTrigger>
-				<SelectContent className="z-[1600]">
-					{journals.map((journal) => (
-						<SelectItem key={journal._id} value={journal._id}>
+				<SelectContent
+					position="popper"
+					align="start"
+					sideOffset={6}
+					className={bubbleSelectContentClass}
+				>
+					{journalOptions.map((journal) => (
+						<SelectItem
+							key={journal._id}
+							value={journal._id}
+							className={bubbleSelectItemClass}
+						>
 							{journal.title}
 						</SelectItem>
 					))}

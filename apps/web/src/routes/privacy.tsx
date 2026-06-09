@@ -1,11 +1,11 @@
 import {
 	PRIVACY_DESCRIPTION,
-	PRIVACY_PARAGRAPHS,
 	PRIVACY_TITLE,
 } from "@legacy-building/ui/lib/privacy";
 import { createFileRoute } from "@tanstack/react-router";
 
 import { LegalDocumentPage } from "@/components/legal/legal-document-page";
+import { PRIVACY_POLICY_HTML } from "@/lib/legal/privacy-policy-html";
 
 export const Route = createFileRoute("/privacy")({
 	component: PrivacyPage,
@@ -19,7 +19,7 @@ function PrivacyPage() {
 		<LegalDocumentPage
 			title={PRIVACY_TITLE}
 			description={PRIVACY_DESCRIPTION}
-			paragraphs={PRIVACY_PARAGRAPHS}
+			htmlContent={PRIVACY_POLICY_HTML}
 		/>
 	);
 }

@@ -1,22 +1,37 @@
 import { api } from "@legacy-building/backend/convex/_generated/api";
-import type { Id } from "@legacy-building/backend/convex/_generated/dataModel";
+import type {
+	Doc,
+	Id,
+} from "@legacy-building/backend/convex/_generated/dataModel";
 import { brand } from "@legacy-building/ui/lib/brand-journal";
 import { cn } from "@legacy-building/ui/lib/utils";
-import { useMutation } from "convex/react";
-import { Camera, ChevronLeft } from "lucide-react";
-import { useCallback, useEffect, useId, useRef, useState } from "react";
+import { useMutation, useQuery } from "convex/react";
+import { ChevronLeft } from "lucide-react";
+import { useCallback, useEffect, useId, useMemo, useState } from "react";
 import { AudioRecorderField } from "@/components/journal/library/AudioRecorderField";
 import { DateField } from "@/components/journal/library/DateField";
+import { EntryImageUpload } from "@/components/journal/library/EntryImageUpload";
 import {
-	accentForMode,
-	fieldInputClass,
-	fieldLabelClass,
-	fieldTextareaClass,
-	uploadedImageFitClass,
+	bubbleCreateButtonClass,
+	bubbleDownloadButtonClass,
+	bubbleFieldStack,
+	bubbleInputClass,
+	bubbleLabelClass,
+	bubbleRowGap24,
+	bubbleSelectContentClass,
+	bubbleSelectItemClass,
+	bubbleSelectTriggerClass,
+	bubbleTextareaClass,
 } from "@/components/journal/library/libraryFormStyles";
-import { SidebarEditActions } from "@/components/journal/library/SidebarEditActions";
 import { Button } from "@/components/journal/ui/button";
 import { Input } from "@/components/journal/ui/input";
+import {
+	Select,
+	SelectContent,
+	SelectItem,
+	SelectTrigger,
+	SelectValue,
+} from "@/components/journal/ui/select";
 import { Textarea } from "@/components/journal/ui/textarea";
 import { compressImageFile } from "@/lib/journal/compressImageFile";
 import {
@@ -30,6 +45,8 @@ import {
 } from "@/lib/journal/toast";
 import { uploadToStorage } from "@/lib/journal/uploadToStorage";
 
+type JournalWithCover = Doc<"journals"> & { coverImageUrl?: string };
+
 type EditJournalEntrySidebarFormProps = {
 	entry: EnrichedJournalEntry;
 	onCancel: () => void;
@@ -42,28 +59,41 @@ export function EditJournalEntrySidebarForm({
 	onSaved,
 }: EditJournalEntrySidebarFormProps) {
 	const formId = useId();
-	const imageRef = useRef<HTMLInputElement>(null);
 	const updateEntry = useMutation(api.journal.entries.mutations.update);
 	const generateUploadUrl = useMutation(
 		api.journal.mutations.generateUploadUrl,
 	);
 
-	const mode = entry.mode;
-	const accent = entryAccentColor(mode);
+	const allJournals = useQuery(api.journal.queries.listByType, {});
+	const preselectedJournal = useQuery(api.journal.queries.getById, {
+		id: entry.journalId,
+	});
+
+	const journalOptions = useMemo((): JournalWithCover[] => {
+		const list = (allJournals ?? []) as JournalWithCover[];
+		if (
+			preselectedJournal &&
+			!list.some((journal) => journal._id === preselectedJournal._id)
+		) {
+			return [preselectedJournal as JournalWithCover, ...list];
+		}
+		return list;
+	}, [allJournals, preselectedJournal]);
+
+	const isRecording = entry.mode === "recording";
+	const accent = entryAccentColor(entry.mode);
 
 	const [title, setTitle] = useState(entry.title);
-	const [date, setDate] = useState<Date | undefined>(
-		() => new Date(entry.dateMs),
-	);
+	const [date, setDate] = useState<Date>(() => new Date(entry.dateMs));
 	const [body, setBody] = useState(entry.body ?? "");
+	const [selectedJournalId, setSelectedJournalId] = useState<Id<"journals">>(
+		entry.journalId,
+	);
 	const [imageFile, setImageFile] = useState<File | null>(null);
 	const [imagePreview, setImagePreview] = useState<string | null>(
 		entry.imageUrl ?? null,
 	);
 	const [audioFile, setAudioFile] = useState<File | null>(null);
-	const [hasExistingAudio, setHasExistingAudio] = useState(
-		Boolean(entry.audioId),
-	);
 	const [submitting, setSubmitting] = useState(false);
 	const [error, setError] = useState<string | null>(null);
 	const [showErrors, setShowErrors] = useState(false);
@@ -72,26 +102,27 @@ export function EditJournalEntrySidebarForm({
 		setTitle(entry.title);
 		setDate(new Date(entry.dateMs));
 		setBody(entry.body ?? "");
+		setSelectedJournalId(entry.journalId);
 		setImageFile(null);
 		setImagePreview(entry.imageUrl ?? null);
 		setAudioFile(null);
-		setHasExistingAudio(Boolean(entry.audioId));
 		setError(null);
 		setShowErrors(false);
-		if (imageRef.current) imageRef.current.value = "";
-	}, [entry.title, entry.dateMs, entry.body, entry.imageUrl, entry.audioId]);
+	}, [entry.title, entry.dateMs, entry.body, entry.journalId, entry.imageUrl]);
 
 	const titleInvalid = !title.trim();
-	const dateInvalid = date === undefined;
-	const bodyInvalid = mode === "writing" && !body.trim();
-	const audioInvalid =
-		mode === "recording" && !hasExistingAudio && audioFile === null;
-	const imageInvalid = !imageFile && !imagePreview;
+	const dateInvalid = Number.isNaN(date.getTime());
+	const bodyInvalid = !isRecording && !body.trim();
+	const audioInvalid = isRecording && audioFile === null && !entry.audioUrl;
+	const imageInvalid = imageFile === null && !imagePreview;
+	const journalInvalid = selectedJournalId === null;
+
 	const isValid =
 		!titleInvalid &&
 		!dateInvalid &&
 		!imageInvalid &&
-		(mode === "writing" ? !bodyInvalid : !audioInvalid);
+		!journalInvalid &&
+		(isRecording ? !audioInvalid : !bodyInvalid);
 
 	const handleCancel = useCallback(() => {
 		if (imagePreview?.startsWith("blob:")) {
@@ -119,9 +150,44 @@ export function EditJournalEntrySidebarForm({
 		setImagePreview(URL.createObjectURL(file));
 	};
 
-	const handleSave = async () => {
+	const handleDownload = () => {
+		if (!isRecording && body.trim()) {
+			const blob = new Blob([body], { type: "text/plain" });
+			const url = URL.createObjectURL(blob);
+			const a = document.createElement("a");
+			a.href = url;
+			a.download = `${title.trim() || "entry"}.txt`;
+			a.click();
+			URL.revokeObjectURL(url);
+			return;
+		}
+		if (isRecording && audioFile) {
+			const url = URL.createObjectURL(audioFile);
+			const a = document.createElement("a");
+			a.href = url;
+			a.download = audioFile.name;
+			a.click();
+			URL.revokeObjectURL(url);
+			return;
+		}
+		if (isRecording && entry.audioUrl) {
+			void fetch(entry.audioUrl)
+				.then((res) => res.blob())
+				.then((blob) => {
+					const url = URL.createObjectURL(blob);
+					const a = document.createElement("a");
+					a.href = url;
+					a.download = `${title.trim() || "recording"}.webm`;
+					a.click();
+					URL.revokeObjectURL(url);
+				})
+				.catch(() => window.open(entry.audioUrl, "_blank"));
+		}
+	};
+
+	const handleUpdate = async () => {
 		setShowErrors(true);
-		if (!isValid) return;
+		if (!isValid || !selectedJournalId) return;
 
 		setSubmitting(true);
 		setError(null);
@@ -136,7 +202,7 @@ export function EditJournalEntrySidebarForm({
 			}
 
 			let audioId: Id<"_storage"> | undefined;
-			if (mode === "recording" && audioFile) {
+			if (isRecording && audioFile) {
 				audioId = await uploadToStorage(
 					audioFile,
 					() => generateUploadUrl(),
@@ -146,15 +212,17 @@ export function EditJournalEntrySidebarForm({
 
 			await updateEntry({
 				id: entry._id,
+				journalId: selectedJournalId,
 				title: title.trim(),
 				dateMs: date.getTime(),
-				body: mode === "writing" ? body.trim() : undefined,
+				body: isRecording ? undefined : body.trim(),
 				imageId,
 				audioId,
 			});
+
 			toastMutationSuccess("Entry updated.");
 			onSaved?.();
-			onCancel();
+			handleCancel();
 		} catch (err) {
 			const message = messageFromUnknownError(
 				err,
@@ -167,137 +235,143 @@ export function EditJournalEntrySidebarForm({
 		}
 	};
 
-	const heading =
-		mode === "writing" ? "Edit your story" : "Edit your recording";
+	const downloadBtnClass = isRecording
+		? cn(bubbleDownloadButtonClass, "border-[#dca114] text-[#dca114]")
+		: bubbleDownloadButtonClass;
 
 	return (
 		<form
 			id={formId}
 			className="flex min-h-0 flex-1 flex-col overflow-hidden"
+			style={{ backgroundColor: brand.libraryMint }}
 			onSubmit={(e) => {
 				e.preventDefault();
-				void handleSave();
+				void handleUpdate();
 			}}
 		>
-			<div className="relative min-h-[140px] shrink-0">
-				<button
-					type="button"
-					onClick={() => imageRef.current?.click()}
-					className={cn(
-						"relative flex min-h-[140px] w-full cursor-pointer items-center justify-center overflow-hidden bg-white",
-						showErrors && imageInvalid
-							? "ring-2 ring-[#b0200c] ring-inset"
-							: "",
-					)}
-				>
-					{imagePreview ? (
-						<img
-							src={imagePreview}
-							alt="Entry preview"
-							className={cn("absolute inset-0", uploadedImageFitClass)}
-						/>
-					) : null}
-					<span
-						className="pointer-events-none absolute right-2 bottom-2 flex size-8 items-center justify-center rounded-full bg-white shadow-sm"
-						aria-hidden
+			<div className="library-modal-scroll flex min-h-0 flex-1 flex-col gap-6 overflow-y-auto overscroll-contain px-3 py-4">
+				<div className="flex items-center gap-2.5">
+					<Button
+						type="button"
+						variant="ghost"
+						size="icon"
+						onClick={handleCancel}
+						className="size-[30px] shrink-0 rounded bg-white p-[5px] hover:bg-white hover:opacity-80"
+						aria-label="Back to entry"
 					>
-						<Camera
-							className="size-4"
-							style={{ color: accent }}
+						<ChevronLeft
+							className="size-5"
+							style={{ color: brand.textMuted }}
 							strokeWidth={2}
 						/>
-					</span>
-				</button>
-				<input
-					ref={imageRef}
-					type="file"
-					accept="image/*"
-					className="sr-only"
-					onChange={handleImageChange}
-				/>
-				<Button
-					type="button"
-					variant="ghost"
-					size="icon"
-					onClick={handleCancel}
-					className="absolute top-2.5 left-2.5 size-[30px] rounded bg-white p-[5px] hover:bg-white hover:opacity-80"
-					aria-label="Cancel editing"
+					</Button>
+					<h2 className="font-semibold text-[#1a1a1a] text-base leading-[1.4]">
+						{isRecording ? "Edit your recording" : "Edit your story"}
+					</h2>
+				</div>
+
+				<div
+					className={cn(
+						"grid w-full grid-cols-1 sm:grid-cols-2",
+						bubbleRowGap24,
+					)}
 				>
-					<ChevronLeft
-						className="size-5"
-						style={{ color: accent }}
-						strokeWidth={2}
-					/>
-				</Button>
-			</div>
-
-			<div
-				className="library-modal-scroll flex min-h-0 flex-1 flex-col gap-4 overflow-y-auto overscroll-contain px-3 py-4"
-				style={{ backgroundColor: brand.entryDetailPanelBg }}
-			>
-				<h2 className="font-semibold text-[#1a1a1a] text-base leading-[1.4]">
-					{heading}
-				</h2>
-
-				<div className="flex flex-col gap-1">
-					<label htmlFor={`${formId}-title`} className={fieldLabelClass}>
-						Title
-					</label>
-					<Input
-						id={`${formId}-title`}
-						value={title}
-						onChange={(e) => setTitle(e.target.value)}
-						className={fieldInputClass(showErrors && titleInvalid)}
-						aria-invalid={showErrors && titleInvalid}
-					/>
+					<div className={bubbleFieldStack}>
+						<label htmlFor={`${formId}-title`} className={bubbleLabelClass}>
+							Title
+						</label>
+						<Input
+							id={`${formId}-title`}
+							value={title}
+							onChange={(e) => setTitle(e.target.value)}
+							className={bubbleInputClass(showErrors && titleInvalid)}
+							aria-invalid={showErrors && titleInvalid}
+						/>
+					</div>
+					<div className={bubbleFieldStack}>
+						<span className={bubbleLabelClass}>Date</span>
+						<DateField
+							value={date}
+							onChange={(value) => value && setDate(value)}
+							invalid={showErrors && dateInvalid}
+							popoverClassName="z-[1600]"
+							className={cn(showErrors && dateInvalid && "border-[#b0200c]")}
+						/>
+					</div>
 				</div>
 
-				<div className="flex flex-col gap-1">
-					<span className={fieldLabelClass}>Date</span>
-					<DateField
-						value={date}
-						onChange={setDate}
-						invalid={showErrors && dateInvalid}
-						popoverClassName="z-[1600]"
-					/>
-				</div>
-
-				{mode === "writing" ? (
-					<div className="flex flex-col gap-1">
-						<label htmlFor={`${formId}-body`} className={fieldLabelClass}>
+				{isRecording ? (
+					<div className={bubbleFieldStack}>
+						<AudioRecorderField
+							accentColor={accent}
+							value={audioFile}
+							onChange={setAudioFile}
+							invalid={showErrors && audioInvalid}
+						/>
+					</div>
+				) : (
+					<div className={bubbleFieldStack}>
+						<label htmlFor={`${formId}-body`} className={bubbleLabelClass}>
 							Entry Log
 						</label>
 						<Textarea
 							id={`${formId}-body`}
 							value={body}
 							onChange={(e) => setBody(e.target.value)}
-							className={fieldTextareaClass(showErrors && bodyInvalid)}
+							className={bubbleTextareaClass(showErrors && bodyInvalid)}
 							aria-invalid={showErrors && bodyInvalid}
 						/>
 					</div>
-				) : (
-					<div className="flex flex-col gap-1">
-						<span className={fieldLabelClass}>Recording</span>
-						<AudioRecorderField
-							accentColor={accentForMode(mode)}
-							value={audioFile}
-							onChange={(file) => {
-								setAudioFile(file);
-								if (file) setHasExistingAudio(true);
-							}}
-							invalid={showErrors && audioInvalid}
-						/>
-						{hasExistingAudio && !audioFile ? (
-							<p className="text-[#525252] text-xs">
-								Current recording is kept unless you record or upload a new one.
-							</p>
-						) : null}
-					</div>
 				)}
+
+				<div className={bubbleFieldStack}>
+					<span className={bubbleLabelClass}>Select a journal</span>
+					<Select
+						key={`${selectedJournalId}-${journalOptions.length}`}
+						value={selectedJournalId}
+						onValueChange={(value) =>
+							setSelectedJournalId(value as Id<"journals">)
+						}
+					>
+						<SelectTrigger
+							aria-label="Journal"
+							className={bubbleSelectTriggerClass(showErrors && journalInvalid)}
+						>
+							<SelectValue placeholder="Select a journal" />
+						</SelectTrigger>
+						<SelectContent
+							position="popper"
+							align="start"
+							sideOffset={6}
+							className={bubbleSelectContentClass}
+						>
+							{journalOptions.map((journal) => (
+								<SelectItem
+									key={journal._id}
+									value={journal._id}
+									className={bubbleSelectItemClass}
+								>
+									{journal.title}
+								</SelectItem>
+							))}
+						</SelectContent>
+					</Select>
+				</div>
+
+				<div className={bubbleFieldStack}>
+					<span className={bubbleLabelClass}>Update image</span>
+					<EntryImageUpload
+						accentColor={accent}
+						imagePreview={imagePreview}
+						invalid={showErrors && imageInvalid}
+						fullWidth
+						onFileChange={handleImageChange}
+					/>
+				</div>
 
 				{showErrors && !isValid ? (
 					<p className="text-[#b0200c] text-sm" role="alert">
-						Please fill in all fields before saving.
+						Please fill in all fields before updating your entry.
 					</p>
 				) : null}
 
@@ -306,13 +380,28 @@ export function EditJournalEntrySidebarForm({
 						{error}
 					</p>
 				) : null}
-			</div>
 
-			<SidebarEditActions
-				onCancel={handleCancel}
-				submitting={submitting}
-				accentColor={accent}
-			/>
+				<div className="flex w-full gap-6 pb-2">
+					<Button
+						type="button"
+						onClick={handleDownload}
+						className={downloadBtnClass}
+					>
+						Download
+					</Button>
+					<Button
+						type="submit"
+						disabled={submitting}
+						className={cn(
+							bubbleCreateButtonClass,
+							isRecording && "bg-[#dca114]",
+						)}
+						style={isRecording ? undefined : { backgroundColor: brand.primary }}
+					>
+						{submitting ? "Updating…" : "Update"}
+					</Button>
+				</div>
+			</div>
 		</form>
 	);
 }

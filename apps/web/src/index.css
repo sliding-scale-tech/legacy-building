@@ -56,3 +56,75 @@
 	width: 0;
 	height: 0;
 }
+
+/* Termly-exported Terms of Service HTML */
+.legal-termly-content {
+	color: #595959;
+	font-size: 0.9375rem;
+	line-height: 1.65;
+}
+
+.legal-termly-content h1 {
+	margin-bottom: 0.5rem;
+	font-size: 1.5rem;
+	font-weight: 700;
+	color: #1a1a1a;
+	line-height: 1.3;
+}
+
+.legal-termly-content h2 {
+	margin-top: 1.75rem;
+	margin-bottom: 0.75rem;
+	font-size: 1.125rem;
+	font-weight: 700;
+	color: #1a1a1a;
+	line-height: 1.4;
+}
+
+.legal-termly-content h3 {
+	margin-top: 1.25rem;
+	margin-bottom: 0.5rem;
+	font-size: 1rem;
+	font-weight: 600;
+	color: #1a1a1a;
+	line-height: 1.4;
+}
+
+.legal-termly-content p,
+.legal-termly-content li,
+.legal-termly-content .legal-body_text {
+	margin-bottom: 0.875rem;
+}
+
+.legal-termly-content ul {
+	margin: 0.75rem 0 1rem;
+	padding-left: 1.5rem;
+	list-style: disc;
+}
+
+.legal-termly-content a {
+	color: #003afa;
+	text-decoration: underline;
+	text-underline-offset: 2px;
+}
+
+.legal-termly-content a:hover {
+	opacity: 0.85;
+}
+
+.legal-termly-content .legal-subtitle {
+	margin-bottom: 1.25rem;
+	font-size: 0.875rem;
+	color: #525252;
+}
+
+.legal-termly-content .legal-title + .legal-subtitle {
+	margin-bottom: 1.25rem;
+	font-size: 0.875rem;
+	color: #525252;
+}
+
+.legal-termly-content strong {
+	font-weight: 600;
+	color: #1a1a1a;
+}

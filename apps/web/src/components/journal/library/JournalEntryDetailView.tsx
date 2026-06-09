@@ -67,16 +67,22 @@ export function JournalEntryDetailView({
 
 	if (entry === undefined) {
 		return (
-			<div className="flex min-h-0 flex-1 flex-col">
-				<div className="min-h-[200px] animate-pulse bg-[#ececec]" />
-				<div className="flex-1 animate-pulse bg-[#f5f5f5]" />
+			<div
+				className="flex min-h-0 flex-1 flex-col"
+				style={{ backgroundColor: brand.libraryMint }}
+			>
+				<div className="min-h-[200px] animate-pulse bg-white" />
+				<div className="flex-1 animate-pulse bg-[#ebf6f6]" />
 			</div>
 		);
 	}
 
 	if (entry === null) {
 		return (
-			<div className="flex flex-1 flex-col items-center justify-center gap-3 p-6">
+			<div
+				className="flex flex-1 flex-col items-center justify-center gap-3 p-6"
+				style={{ backgroundColor: brand.libraryMint }}
+			>
 				<p className="text-[#525252] text-sm">Entry not found</p>
 				<Button
 					type="button"
@@ -123,8 +129,11 @@ export function JournalEntryDetailView({
 
 	return (
 		<>
-			<div className="flex min-h-0 flex-1 flex-col overflow-hidden">
-				<div className="relative min-h-[200px] shrink-0">
+			<div
+				className="flex min-h-0 flex-1 flex-col overflow-hidden"
+				style={{ backgroundColor: brand.libraryMint }}
+			>
+				<div className="relative min-h-[200px] shrink-0 bg-white">
 					<EntryCoverImage
 						imageId={enriched.imageId}
 						imageUrl={enriched.imageUrl}
@@ -145,7 +154,7 @@ export function JournalEntryDetailView({
 
 				<div
 					className="flex min-h-0 flex-1 flex-col gap-2 overflow-y-auto overscroll-contain p-5"
-					style={{ backgroundColor: brand.entryDetailPanelBg }}
+					style={{ backgroundColor: brand.libraryMint }}
 				>
 					<div className="flex items-start justify-between gap-2">
 						<h3 className="min-w-0 flex-1 font-semibold text-[#1a1a1a] text-base leading-[1.4]">
