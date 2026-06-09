@@ -22,10 +22,18 @@ import { JournalExportFooter } from "@/components/journal/library/JournalExportF
 import { JournalSidebarWaitOverlay } from "@/components/journal/library/JournalSidebarWaitOverlay";
 import { Button } from "@/components/journal/ui/button";
 import { Checkbox } from "@/components/journal/ui/checkbox";
+import {
+	MIN_BOOK_ORDER_ENTRIES,
+	minimumBookOrderMessage,
+} from "@/lib/journal/bookOrder";
 import { exportJournalEntriesToPdf } from "@/lib/journal/exportJournalPdf";
 import { formatDate } from "@/lib/journal/formatDate";
 import type { EnrichedJournalEntry } from "@/lib/journal/journalEntryTypes";
-import { toastMutationError, toastMutationSuccess } from "@/lib/journal/toast";
+import {
+	toastBubbleMessage,
+	toastMutationError,
+	toastMutationSuccess,
+} from "@/lib/journal/toast";
 
 type JournalDetailSheetProps = {
 	journalId: Id<"journals"> | null;
@@ -230,6 +238,11 @@ export function JournalDetailSheet({
 		const selectedEntries = exportableEntries.filter((entry) =>
 			selectedEntryIds.has(entry._id),
 		);
+
+		if (selectedEntries.length < MIN_BOOK_ORDER_ENTRIES) {
+			toastBubbleMessage(minimumBookOrderMessage(selectedEntries.length));
+			return;
+		}
 
 		setOrdering(true);
 		setExportError(null);

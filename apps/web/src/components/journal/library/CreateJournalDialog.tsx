@@ -10,6 +10,7 @@ import { Button } from "@/components/journal/ui/button";
 import { Dialog, DialogTitle } from "@/components/journal/ui/dialog";
 import { DialogContentWithOverlay } from "@/components/journal/ui/dialog-content-with-overlay";
 import { Input } from "@/components/journal/ui/input";
+import { compressImageFile } from "@/lib/journal/compressImageFile";
 import type { StoryTab } from "@/lib/journal/journalTypes";
 import {
 	messageFromUnknownError,
@@ -107,9 +108,10 @@ export function CreateJournalDialog({
 		[onOpenChange, resetForm],
 	);
 
-	const handleCoverChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-		const file = e.target.files?.[0];
-		if (!file) return;
+	const handleCoverChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+		const raw = e.target.files?.[0];
+		if (!raw) return;
+		const file = await compressImageFile(raw);
 		if (coverPreview?.startsWith("blob:")) {
 			URL.revokeObjectURL(coverPreview);
 		}
@@ -160,7 +162,7 @@ export function CreateJournalDialog({
 		<Dialog open={open} onOpenChange={handleClose}>
 			<DialogContentWithOverlay
 				showCloseButton={false}
-				overlayClassName="z-[2001] bg-foreground/60"
+				overlayClassName="z-[2001] bg-foreground/60 duration-300 ease-out"
 				className={cn(
 					"fixed top-[100px] right-0 left-0 z-[2002] mx-auto flex w-[calc(100%-20px)] flex-col",
 					"min-h-[296px] min-w-0 max-w-[600px]",
@@ -169,6 +171,7 @@ export function CreateJournalDialog({
 					"overflow-hidden rounded-[20px] border-0 bg-white p-0",
 					"shadow-[0_4px_24px_rgba(0,0,0,0.12)] ring-0",
 					"sm:max-w-[600px]",
+					"duration-300 ease-out",
 				)}
 				onOpenAutoFocus={(e) => e.preventDefault()}
 			>
@@ -267,7 +270,7 @@ export function CreateJournalDialog({
 									<img
 										src={coverPreview}
 										alt="Cover preview"
-										className="absolute inset-0 size-full object-contain p-3"
+										className="absolute inset-0 size-full object-contain object-center p-3"
 									/>
 								) : null}
 							</button>

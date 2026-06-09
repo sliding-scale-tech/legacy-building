@@ -197,7 +197,7 @@ export default function NewEntryScreen() {
 					<Image
 						source={{ uri: image.uri }}
 						className="h-44 w-full"
-						resizeMode="cover"
+						resizeMode="contain"
 					/>
 					<Pressable
 						onPress={() => setImage(null)}

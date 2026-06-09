@@ -130,7 +130,7 @@ export default function JournalEntryDetailScreen() {
 							<Image
 								source={{ uri: entry.imageUrl }}
 								className="h-60 w-full"
-								resizeMode="cover"
+								resizeMode="contain"
 								accessibilityLabel="Entry photo"
 							/>
 						</View>

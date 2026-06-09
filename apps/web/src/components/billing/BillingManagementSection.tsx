@@ -8,6 +8,8 @@ import { ExternalLink, Loader2, Receipt } from "lucide-react";
 import { useState } from "react";
 import { toast } from "sonner";
 
+import { CancelSubscriptionModal } from "@/components/billing/CancelSubscriptionModal";
+
 import {
 	formatAmount,
 	intervalLabel,
@@ -116,7 +118,7 @@ export function BillingManagementSection() {
 
 	const [portalPending, setPortalPending] = useState(false);
 	const [mutationPending, setMutationPending] = useState(false);
-	const [confirmingCancel, setConfirmingCancel] = useState(false);
+	const [cancelModalOpen, setCancelModalOpen] = useState(false);
 
 	const hasActivePlan =
 		subscription !== null &&
@@ -131,6 +133,18 @@ export function BillingManagementSection() {
 	const summary = describeSubscription(subscription);
 	const canCancel = hasActivePlan && !subscription.cancelAtPeriodEnd;
 	const canReactivate = hasActivePlan && subscription.cancelAtPeriodEnd;
+	const planName =
+		subscription.plan?.name ??
+		(subscription.interval
+			? `${intervalLabel(subscription.interval)} Plan`
+			: "Subscription");
+	const cancelPlanSummary =
+		subscription.plan && subscription.interval
+			? `${planName} · ${formatAmount(subscription.plan.amountCents, subscription.plan.currency)}${intervalSuffix(subscription.interval).replace(" /", "/")}`
+			: planName;
+	const periodEndDate = subscription.currentPeriodEnd
+		? formatDate(subscription.currentPeriodEnd)
+		: "—";
 
 	const openPortal = async () => {
 		if (portalPending) return;
@@ -152,7 +166,7 @@ export function BillingManagementSection() {
 		try {
 			await cancelSubscription({ atPeriodEnd: true });
 			toast.success("Your subscription will end at the period close.");
-			setConfirmingCancel(false);
+			setCancelModalOpen(false);
 		} catch (error) {
 			toast.error(messageFromError(error));
 		} finally {
@@ -221,33 +235,13 @@ export function BillingManagementSection() {
 							</button>
 						) : null}
 						{canCancel ? (
-							confirmingCancel ? (
-								<>
-									<button
-										type="button"
-										onClick={handleCancel}
-										disabled={mutationPending}
-										className="inline-flex h-9 items-center rounded-lg bg-[#c2410c] px-4 font-medium text-sm text-white disabled:opacity-60"
-									>
-										Confirm cancel
-									</button>
-									<button
-										type="button"
-										onClick={() => setConfirmingCancel(false)}
-										className="inline-flex h-9 items-center rounded-lg border border-white/20 px-4 font-medium text-sm text-white"
-									>
-										Keep plan
-									</button>
-								</>
-							) : (
-								<button
-									type="button"
-									onClick={() => setConfirmingCancel(true)}
-									className="inline-flex h-9 items-center rounded-lg border border-white/20 px-4 font-medium text-sm text-white/80 hover:text-white"
-								>
-									Cancel subscription
-								</button>
-							)
+							<button
+								type="button"
+								onClick={() => setCancelModalOpen(true)}
+								className="inline-flex h-9 items-center rounded-lg border border-white/20 px-4 font-medium text-sm text-white/80 hover:text-white"
+							>
+								Cancel subscription
+							</button>
 						) : null}
 					</div>
 				</div>
@@ -317,6 +311,15 @@ export function BillingManagementSection() {
 					<p className="text-sm text-white/60">No invoices yet</p>
 				</div>
 			) : null}
+
+			<CancelSubscriptionModal
+				open={cancelModalOpen}
+				onOpenChange={setCancelModalOpen}
+				planSummary={cancelPlanSummary}
+				periodEndDate={periodEndDate}
+				onConfirm={handleCancel}
+				pending={mutationPending}
+			/>
 		</div>
 	);
 }

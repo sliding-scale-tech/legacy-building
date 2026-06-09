@@ -128,7 +128,7 @@ export function JournalEntryDetailView({
 					<EntryCoverImage
 						imageId={enriched.imageId}
 						imageUrl={enriched.imageUrl}
-						className="absolute inset-0 size-full object-cover"
+						className="absolute inset-0 size-full object-contain p-3"
 					/>
 					<SidebarIconButton
 						ariaLabel="Back to entries"

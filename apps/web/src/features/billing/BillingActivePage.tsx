@@ -6,6 +6,8 @@ import { ConvexError } from "convex/values";
 import { Check, Download, ExternalLink, Loader2 } from "lucide-react";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
+import { CancelSubscriptionModal } from "@/components/billing/CancelSubscriptionModal";
+import { ContactSupportModal } from "@/components/billing/ContactSupportModal";
 import {
 	type BillingInvoice,
 	ViewInvoicesModal,
@@ -48,11 +50,8 @@ const billingPrimaryButtonClass =
 const billingTextLinkClass =
 	"font-medium text-primary text-sm transition-colors hover:underline active:scale-[0.98] active:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 disabled:opacity-60";
 
-const billingDestructiveTextLinkClass =
-	"font-medium text-destructive text-sm transition-colors hover:underline active:scale-[0.98] active:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-destructive focus-visible:ring-offset-2 disabled:opacity-60";
-
-const billingMutedTextLinkClass =
-	"font-medium text-muted-foreground text-sm transition-colors hover:underline active:scale-[0.98] active:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2";
+const billingCancelButtonClass =
+	"inline-flex h-11 items-center justify-center rounded-xl border border-red-100 bg-red-50 px-6 font-medium text-red-600 text-sm transition-[color,background-color,transform] hover:bg-red-100 active:scale-[0.98] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-200 focus-visible:ring-offset-2 disabled:opacity-60";
 
 const billingIconButtonClass =
 	"inline-flex items-center justify-center rounded-lg border border-border text-muted-foreground transition-[color,background-color,transform] hover:bg-card active:scale-[0.98] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 disabled:opacity-40";
@@ -74,6 +73,9 @@ export function BillingActivePage({ showWelcome }: BillingActivePageProps) {
 		api.stripe.actions.createBillingPortalSession,
 	);
 	const cancelSubscription = useAction(api.stripe.actions.cancelSubscription);
+	const reactivateSubscription = useAction(
+		api.stripe.actions.reactivateSubscription,
+	);
 
 	const [paymentMethod, setPaymentMethod] = useState<{
 		brand: string;
@@ -83,7 +85,9 @@ export function BillingActivePage({ showWelcome }: BillingActivePageProps) {
 	} | null>(null);
 	const [portalPending, setPortalPending] = useState(false);
 	const [cancelPending, setCancelPending] = useState(false);
-	const [confirmCancel, setConfirmCancel] = useState(false);
+	const [reactivatePending, setReactivatePending] = useState(false);
+	const [cancelModalOpen, setCancelModalOpen] = useState(false);
+	const [supportModalOpen, setSupportModalOpen] = useState(false);
 	const [invoices, setInvoices] = useState<BillingInvoice[]>([]);
 	const [invoicesLoading, setInvoicesLoading] = useState(true);
 	const [invoicesModalOpen, setInvoicesModalOpen] = useState(false);
@@ -145,6 +149,10 @@ export function BillingActivePage({ showWelcome }: BillingActivePageProps) {
 	const renewDate = subscription.currentPeriodEnd
 		? formatDate(subscription.currentPeriodEnd)
 		: "—";
+	const cancelPlanSummary =
+		subscription.plan && subscription.interval
+			? `${planName} · ${formatAmount(subscription.plan.amountCents, subscription.plan.currency)}${intervalSuffix(subscription.interval).replace(" /", "/")}`
+			: planName;
 	const latestInvoice = invoices[0];
 
 	const openInvoice = (invoice: BillingInvoice) => {
@@ -173,11 +181,24 @@ export function BillingActivePage({ showWelcome }: BillingActivePageProps) {
 		try {
 			await cancelSubscription({ atPeriodEnd: true });
 			toast.success("Your subscription will end at the period close.");
-			setConfirmCancel(false);
+			setCancelModalOpen(false);
 		} catch (error) {
 			toast.error(messageFromError(error));
 		} finally {
 			setCancelPending(false);
+		}
+	};
+
+	const handleReactivate = async () => {
+		if (reactivatePending) return;
+		setReactivatePending(true);
+		try {
+			await reactivateSubscription({});
+			toast.success("Your subscription will continue to renew.");
+		} catch (error) {
+			toast.error(messageFromError(error));
+		} finally {
+			setReactivatePending(false);
 		}
 	};
 
@@ -201,15 +222,16 @@ export function BillingActivePage({ showWelcome }: BillingActivePageProps) {
 							) : null}
 						</div>
 						<div className="flex shrink-0 flex-row flex-nowrap items-center gap-2 sm:gap-3">
-							<a
-								href="mailto:support@legacybuilding.com"
+							<button
+								type="button"
+								onClick={() => setSupportModalOpen(true)}
 								className={cn(
 									billingOutlineButtonClass,
 									"h-10 shrink-0 whitespace-nowrap px-3 sm:px-4",
 								)}
 							>
 								Contact Support
-							</a>
+							</button>
 							<Link
 								to={ROUTES.dashboardBillingCompare}
 								className={cn(
@@ -261,43 +283,55 @@ export function BillingActivePage({ showWelcome }: BillingActivePageProps) {
 								</ul>
 							</div>
 
-							<div className="flex flex-col items-center gap-4 border-border border-t pt-6 md:flex-row md:items-center md:justify-start">
-								<Link
-									to={ROUTES.dashboardBillingCompare}
-									className={cn(
-										billingPrimaryButtonClass,
-										"h-11 px-6 font-semibold",
-									)}
-								>
-									Upgrade Subscription
-								</Link>
-								{confirmCancel ? (
-									<div className="flex flex-wrap items-center justify-center gap-2 md:justify-start">
-										<button
-											type="button"
-											onClick={() => void handleCancel()}
-											disabled={cancelPending}
-											className={billingDestructiveTextLinkClass}
-										>
-											Confirm cancel
-										</button>
-										<button
-											type="button"
-											onClick={() => setConfirmCancel(false)}
-											className={billingMutedTextLinkClass}
-										>
-											Keep plan
-										</button>
-									</div>
-								) : (
-									<button
-										type="button"
-										onClick={() => setConfirmCancel(true)}
-										className={billingDestructiveTextLinkClass}
+							<div className="flex flex-col gap-4 border-border border-t pt-6">
+								<div className="flex flex-col gap-3 sm:flex-row sm:items-center">
+									<Link
+										to={ROUTES.dashboardBillingCompare}
+										className={cn(
+											billingPrimaryButtonClass,
+											"h-11 px-6 font-semibold sm:shrink-0",
+										)}
 									>
-										Cancel Plan
-									</button>
-								)}
+										Upgrade Subscription
+									</Link>
+									{subscription.cancelAtPeriodEnd ? (
+										<button
+											type="button"
+											onClick={() => void handleReactivate()}
+											disabled={reactivatePending}
+											className={cn(
+												billingOutlineButtonClass,
+												"h-11 px-6 sm:shrink-0",
+											)}
+										>
+											{reactivatePending ? (
+												<>
+													<Loader2
+														className="size-4 animate-spin"
+														aria-hidden
+													/>
+													Resuming…
+												</>
+											) : (
+												"Resume Subscription"
+											)}
+										</button>
+									) : (
+										<button
+											type="button"
+											onClick={() => setCancelModalOpen(true)}
+											className={cn(billingCancelButtonClass, "sm:shrink-0")}
+										>
+											Cancel Plan
+										</button>
+									)}
+								</div>
+								{subscription.cancelAtPeriodEnd ? (
+									<p className="text-muted-foreground text-sm">
+										Your plan is scheduled to cancel on {renewDate}. Resume to
+										keep your subscription.
+									</p>
+								) : null}
 							</div>
 						</div>
 
@@ -420,6 +454,20 @@ export function BillingActivePage({ showWelcome }: BillingActivePageProps) {
 				onOpenChange={setInvoicesModalOpen}
 				invoices={invoices}
 				loading={invoicesLoading}
+			/>
+
+			<CancelSubscriptionModal
+				open={cancelModalOpen}
+				onOpenChange={setCancelModalOpen}
+				planSummary={cancelPlanSummary}
+				periodEndDate={renewDate}
+				onConfirm={handleCancel}
+				pending={cancelPending}
+			/>
+
+			<ContactSupportModal
+				open={supportModalOpen}
+				onOpenChange={setSupportModalOpen}
 			/>
 		</div>
 	);
