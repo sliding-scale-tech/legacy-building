@@ -64,15 +64,26 @@ export function ImageCarousel({
 			className="flex h-full transition-transform duration-500 ease-in-out"
 			style={{ transform: `translateX(-${activeIndex * 100}%)` }}
 		>
-			{imageUrls.map((url) => (
-				<img
-					key={url}
-					src={url}
-					alt={alt}
-					className="h-[200px] w-full shrink-0 object-contain"
-					draggable={false}
-				/>
-			))}
+			{imageUrls.map((url, index) => {
+				const shouldLoad = Math.abs(index - activeIndex) <= 1;
+				return (
+					<div
+						key={url}
+						className="flex h-[200px] w-full shrink-0 items-center justify-center"
+					>
+						{shouldLoad ? (
+							<img
+								src={url}
+								alt={alt}
+								loading={index === activeIndex ? "eager" : "lazy"}
+								decoding="async"
+								className="h-full w-full object-contain"
+								draggable={false}
+							/>
+						) : null}
+					</div>
+				);
+			})}
 		</div>
 	);
 

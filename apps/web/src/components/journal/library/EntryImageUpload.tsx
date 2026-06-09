@@ -2,15 +2,18 @@ import { brand } from "@legacy-building/ui/lib/brand-journal";
 import { cn } from "@legacy-building/ui/lib/utils";
 import { Camera } from "lucide-react";
 import { useRef } from "react";
+import { uploadedImageFitClass } from "@/components/journal/library/libraryFormStyles";
 
 type EntryImageUploadProps = {
 	accentColor: string;
 	imagePreview: string | null;
 	invalid?: boolean;
-	onFileChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
+	onFileChange: (
+		e: React.ChangeEvent<HTMLInputElement>,
+	) => void | Promise<void>;
 };
 
-/** Bubble PictureInput: min 265×200, 12px radius, centered camera icon. */
+/** Bubble PictureInput: 265×200px tile, centered camera icon only. */
 export function EntryImageUpload({
 	accentColor,
 	imagePreview,
@@ -18,38 +21,36 @@ export function EntryImageUpload({
 	onFileChange,
 }: EntryImageUploadProps) {
 	const imageRef = useRef<HTMLInputElement>(null);
+	const iconColor = accentColor || brand.primary;
 
 	return (
-		<div className="relative w-full min-w-0">
+		<div className="relative w-[265px] max-w-full self-start">
 			<button
 				type="button"
 				onClick={() => imageRef.current?.click()}
 				className={cn(
-					"relative flex min-h-[200px] w-full min-w-0 cursor-pointer items-center justify-center overflow-hidden rounded-[12px] border bg-white",
+					"relative flex h-[200px] w-[265px] max-w-full cursor-pointer items-center justify-center overflow-hidden rounded-[12px] border bg-white p-3",
 					invalid ? "border-[#b0200c]" : "border-[#c7c7c7]",
 				)}
+				aria-label="Upload image"
 				aria-invalid={invalid}
 			>
 				{imagePreview ? (
 					<img
 						src={imagePreview}
 						alt="Entry preview"
-						className="absolute inset-0 size-full object-contain p-3"
+						decoding="async"
+						className={cn("absolute inset-0", uploadedImageFitClass)}
 					/>
-				) : null}
-			</button>
-			{!imagePreview ? (
-				<span
-					className="pointer-events-none absolute top-1/2 left-1/2 flex size-[30px] -translate-x-1/2 -translate-y-1/2 items-center justify-center"
-					aria-hidden
-				>
+				) : (
 					<Camera
-						className="size-[30px]"
-						style={{ color: accentColor || brand.primary }}
+						className="size-[30px] shrink-0"
+						style={{ color: iconColor }}
 						strokeWidth={1.75}
+						aria-hidden
 					/>
-				</span>
-			) : null}
+				)}
+			</button>
 			<input
 				ref={imageRef}
 				type="file"

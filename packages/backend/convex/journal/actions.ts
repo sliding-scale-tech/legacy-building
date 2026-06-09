@@ -11,7 +11,9 @@ import {
 	DOCUGENERATE_TEMPLATE_IDS,
 	estimateBookPages,
 	generateBookPdf,
+	MIN_BOOK_ORDER_ENTRIES,
 	mapEntriesForDocugenerate,
+	minimumBookOrderMessage,
 	resolveThumbnailUrl,
 } from "./orderHelpers";
 
@@ -39,6 +41,13 @@ export const createBookOrderCheckout = action({
 				clerkUserId: identity.subject,
 			},
 		);
+
+		if (entries.length < MIN_BOOK_ORDER_ENTRIES) {
+			throw new ConvexError({
+				code: "INSUFFICIENT_ENTRIES",
+				message: minimumBookOrderMessage(entries.length),
+			});
+		}
 
 		const templateId = DOCUGENERATE_TEMPLATE_IDS[journal.type];
 		const bookName = journal.title?.trim() || "My Legacy Book";
@@ -106,8 +115,6 @@ export const createBookOrderCheckout = action({
 const DOCUGENERATE_URL = "https://api.docugenerate.com/v1/document";
 const PEECHO_URL = "https://www.peecho.com/rest/v2/publication/create";
 
-/** Peecho minimum entry count for a printed book (Bubble parity). */
-const MIN_ORDER_ENTRIES = 22;
 /** Peecho checkout page base; publication id is appended: `/print/{id}`. */
 const PEECHO_CHECKOUT_BASE = "https://www.peecho.com/print";
 
@@ -333,13 +340,10 @@ export const orderBook = action({
 			? allEntries.filter((e) => selected.has(e._id))
 			: allEntries;
 
-		if (orderEntries.length < MIN_ORDER_ENTRIES) {
-			const remaining = MIN_ORDER_ENTRIES - orderEntries.length;
+		if (orderEntries.length < MIN_BOOK_ORDER_ENTRIES) {
 			throw new ConvexError({
 				code: "INSUFFICIENT_ENTRIES",
-				message: `A printed book needs at least ${MIN_ORDER_ENTRIES} entries. Your journal has ${orderEntries.length}, so add ${remaining} more ${
-					remaining === 1 ? "entry" : "entries"
-				} to place an order.`,
+				message: minimumBookOrderMessage(orderEntries.length),
 			});
 		}
 

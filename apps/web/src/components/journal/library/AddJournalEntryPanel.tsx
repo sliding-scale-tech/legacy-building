@@ -18,6 +18,8 @@ import {
 } from "@/components/journal/library/EntryModeTabs";
 import {
 	accentForMode,
+	bubbleCreateButtonClass,
+	bubbleDownloadButtonClass,
 	bubbleFieldStack,
 	bubbleFormShell,
 	bubbleInputClass,
@@ -37,6 +39,7 @@ import {
 	SelectValue,
 } from "@/components/journal/ui/select";
 import { Textarea } from "@/components/journal/ui/textarea";
+import { compressImageFile } from "@/lib/journal/compressImageFile";
 import {
 	messageFromUnknownError,
 	toastMutationError,
@@ -68,6 +71,8 @@ export function AddJournalEntryPanel({
 	const [mounted, setMounted] = useState(false);
 	const [visible, setVisible] = useState(false);
 	const [mode, setMode] = useState<EntryMode>("writing");
+	const [selectedJournalId, setSelectedJournalId] =
+		useState<Id<"journals"> | null>(journalId);
 	const [title, setTitle] = useState("");
 	const [date, setDate] = useState<Date | undefined>(undefined);
 	const [body, setBody] = useState("");
@@ -78,7 +83,6 @@ export function AddJournalEntryPanel({
 	const [error, setError] = useState<string | null>(null);
 	const [showErrors, setShowErrors] = useState(false);
 
-	const selectedJournal = journals.find((j) => j._id === journalId);
 	const accent = accentForMode(mode);
 
 	const titleInvalid = !title.trim();
@@ -86,7 +90,7 @@ export function AddJournalEntryPanel({
 	const bodyInvalid = mode === "writing" && !body.trim();
 	const audioInvalid = mode === "recording" && audioFile === null;
 	const imageInvalid = imageFile === null;
-	const journalInvalid = journalId === null;
+	const journalInvalid = selectedJournalId === null;
 
 	const isValid =
 		!titleInvalid &&
@@ -97,6 +101,7 @@ export function AddJournalEntryPanel({
 
 	const resetForm = useCallback(() => {
 		setMode("writing");
+		setSelectedJournalId(journalId);
 		setTitle("");
 		setDate(undefined);
 		setBody("");
@@ -108,7 +113,7 @@ export function AddJournalEntryPanel({
 		});
 		setError(null);
 		setShowErrors(false);
-	}, []);
+	}, [journalId]);
 
 	const closeWithAnimation = useCallback(() => {
 		setVisible(false);
@@ -132,6 +137,10 @@ export function AddJournalEntryPanel({
 	}, [open, resetForm]);
 
 	useEffect(() => {
+		if (journalId) setSelectedJournalId(journalId);
+	}, [journalId]);
+
+	useEffect(() => {
 		if (!open) return;
 		const onKeyDown = (e: KeyboardEvent) => {
 			if (e.key === "Escape") closeWithAnimation();
@@ -149,9 +158,10 @@ export function AddJournalEntryPanel({
 		};
 	}, [open]);
 
-	const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-		const file = e.target.files?.[0];
-		if (!file) return;
+	const handleImageChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+		const raw = e.target.files?.[0];
+		if (!raw) return;
+		const file = await compressImageFile(raw);
 		if (imagePreview?.startsWith("blob:")) URL.revokeObjectURL(imagePreview);
 		setImageFile(file);
 		setImagePreview(URL.createObjectURL(file));
@@ -180,7 +190,12 @@ export function AddJournalEntryPanel({
 
 	const handleCreate = async () => {
 		setShowErrors(true);
-		if (!isValid || !journalId || date === undefined || imageFile === null)
+		if (
+			!isValid ||
+			!selectedJournalId ||
+			date === undefined ||
+			imageFile === null
+		)
 			return;
 
 		setSubmitting(true);
@@ -202,7 +217,7 @@ export function AddJournalEntryPanel({
 			}
 
 			await createEntry({
-				journalId,
+				journalId: selectedJournalId,
 				title: title.trim(),
 				dateMs: date.getTime(),
 				mode,
@@ -228,28 +243,30 @@ export function AddJournalEntryPanel({
 
 	if (!mounted || !open || !journalId) return null;
 
-	const heading = mode === "writing" ? "Write your story" : "Record your story";
 	const downloadBtnClass =
 		mode === "writing"
-			? "border border-[#008080] bg-[#ebf6f6] text-[#008080]"
-			: "border border-[#dca114] bg-[#ebf6f6] text-[#dca114]";
+			? bubbleDownloadButtonClass
+			: cn(bubbleDownloadButtonClass, "border-[#dca114] text-[#dca114]");
 
 	const journalSelect = (
 		<div className={bubbleFieldStack}>
 			<span className={bubbleLabelClass}>Select a journal</span>
-			<Select disabled value={journalId ?? undefined}>
+			<Select
+				value={selectedJournalId ?? undefined}
+				onValueChange={(value) => setSelectedJournalId(value as Id<"journals">)}
+			>
 				<SelectTrigger
 					aria-label="Journal"
 					className={bubbleSelectTriggerClass(showErrors && journalInvalid)}
 				>
-					<SelectValue placeholder={selectedJournal?.title ?? "Journal"} />
+					<SelectValue placeholder="Select a journal" />
 				</SelectTrigger>
 				<SelectContent className="z-[1600]">
-					{selectedJournal ? (
-						<SelectItem value={selectedJournal._id}>
-							{selectedJournal.title}
+					{journals.map((journal) => (
+						<SelectItem key={journal._id} value={journal._id}>
+							{journal.title}
 						</SelectItem>
-					) : null}
+					))}
 				</SelectContent>
 			</Select>
 		</div>
@@ -305,12 +322,10 @@ export function AddJournalEntryPanel({
 				scrollbarClassName="w-1.5 border-0 bg-transparent p-0.5 hover:bg-transparent"
 				thumbClassName="rounded-full bg-[#c7c7c7]/80 hover:bg-[#a6a6a6]"
 			>
-				<div className="flex flex-col gap-3 px-4 pr-2 pb-4">
-					<EntryModeTabs value={mode} onChange={setMode} />
-
-					<h2 className="text-center font-semibold text-[#1a1a1a] text-xl leading-[1.4] sm:text-[28px]">
-						{heading}
-					</h2>
+				<div className="flex flex-col gap-6 px-2 pt-2 pr-2 pb-4">
+					<div className="flex justify-center">
+						<EntryModeTabs value={mode} onChange={setMode} />
+					</div>
 
 					<form
 						id={formId}
@@ -404,14 +419,11 @@ export function AddJournalEntryPanel({
 							</p>
 						) : null}
 
-						<div className="flex justify-center gap-6">
+						<div className="flex w-full justify-center gap-6 pt-2">
 							<Button
 								type="button"
 								onClick={handleDownload}
-								className={cn(
-									"h-11 min-w-[60px] max-w-[200px] flex-1 rounded-[12px] px-5 font-medium text-sm leading-none shadow-none hover:opacity-90",
-									downloadBtnClass,
-								)}
+								className={downloadBtnClass}
 							>
 								Download
 							</Button>
@@ -419,9 +431,14 @@ export function AddJournalEntryPanel({
 								type="submit"
 								disabled={submitting || !isValid}
 								className={cn(
-									"h-11 min-w-[60px] max-w-[200px] flex-1 rounded-[12px] px-5 font-medium text-sm text-white leading-none shadow-none hover:opacity-95 disabled:opacity-60",
+									bubbleCreateButtonClass,
+									mode === "recording" && "bg-[#dca114]",
 								)}
-								style={{ backgroundColor: accent }}
+								style={
+									mode === "writing"
+										? { backgroundColor: brand.primary }
+										: undefined
+								}
 							>
 								{submitting ? "Creating…" : "Create"}
 							</Button>

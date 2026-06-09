@@ -65,14 +65,11 @@ export const getRecentForDesk = query({
 			.collect();
 
 		const sortedEntries = journalEntries.sort((a, b) => b.dateMs - a.dateMs);
-		const slideImageUrls: string[] = [];
-
-		for (const entry of sortedEntries) {
-			const imageUrl = await resolveEntryImageUrl(ctx, entry);
-			if (imageUrl) {
-				slideImageUrls.push(imageUrl);
-			}
-		}
+		const slideImageUrls = (
+			await Promise.all(
+				sortedEntries.map((entry) => resolveEntryImageUrl(ctx, entry)),
+			)
+		).filter((url): url is string => Boolean(url));
 
 		if (slideImageUrls.length === 0 && enriched.coverImageUrl) {
 			slideImageUrls.push(enriched.coverImageUrl);

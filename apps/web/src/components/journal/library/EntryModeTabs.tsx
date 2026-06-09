@@ -13,17 +13,16 @@ type EntryModeTabsProps = {
 	onChange: (mode: EntryMode) => void;
 };
 
-/** Bubble.io tab strip: 2 columns, 170px min-width, 3px radius on active tab. */
+/** Bubble.io tab strip: 2 columns, 170px min-width each, 3px radius on active tab. */
 export function EntryModeTabs({ value, onChange }: EntryModeTabsProps) {
 	return (
 		<div
-			className="mx-auto grid w-full grid-cols-2 gap-0"
+			className="mx-auto inline-grid min-w-[140px] grid-cols-2 gap-0"
 			role="tablist"
 			aria-label="Entry mode"
 		>
 			{MODES.map((option) => {
 				const isActive = value === option.id;
-				const isWriting = option.id === "writing";
 				return (
 					<button
 						key={option.id}
@@ -32,18 +31,12 @@ export function EntryModeTabs({ value, onChange }: EntryModeTabsProps) {
 						aria-selected={isActive}
 						onClick={() => onChange(option.id)}
 						className={cn(
-							"min-h-10 min-w-0 cursor-pointer px-2.5 py-2.5 font-normal text-sm leading-[1.4] transition-colors sm:text-base",
+							"min-h-10 min-w-[170px] cursor-pointer self-start px-2.5 py-2.5 font-normal text-base leading-[1.4] transition-colors",
 							isActive
-								? isWriting
-									? "rounded-[3px] bg-[#008080] text-white"
-									: "rounded-[3px] text-white"
-								: "bg-white text-[#1a1a1a]",
+								? "rounded-[3px] text-white"
+								: "rounded-none bg-white text-[#1a1a1a]",
 						)}
-						style={
-							isActive && !isWriting
-								? { backgroundColor: brand.alert }
-								: undefined
-						}
+						style={isActive ? { backgroundColor: brand.primary } : undefined}
 					>
 						{option.label}
 					</button>

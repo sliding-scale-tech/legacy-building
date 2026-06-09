@@ -9,19 +9,33 @@ type EntryCoverImageProps = {
 	className?: string;
 };
 
+function isHttpUrl(url: string | undefined): url is string {
+	return url?.startsWith("http") ?? false;
+}
+
 export function EntryCoverImage({
 	imageId,
 	imageUrl,
 	className,
 }: EntryCoverImageProps) {
 	const [failedSrc, setFailedSrc] = useState<string | null>(null);
+	const [refreshFromStorage, setRefreshFromStorage] = useState(false);
+
+	const hasCachedUrl = isHttpUrl(imageUrl);
+	const shouldFetchStorage =
+		Boolean(imageId) && (!hasCachedUrl || refreshFromStorage);
 
 	const storageUrl = useQuery(
 		api.journal.entries.queries.getEntryImageUrl,
-		imageId ? { storageId: imageId } : "skip",
+		shouldFetchStorage && imageId ? { storageId: imageId } : "skip",
 	);
 
-	const src = imageUrl ?? storageUrl ?? undefined;
+	const src = refreshFromStorage
+		? (storageUrl ?? undefined)
+		: hasCachedUrl
+			? imageUrl
+			: (storageUrl ?? undefined);
+
 	const loadError = failedSrc === src;
 
 	if (!src || loadError) {
@@ -38,8 +52,16 @@ export function EntryCoverImage({
 		<img
 			src={src}
 			alt=""
+			loading="lazy"
+			decoding="async"
 			className={className}
-			onError={() => setFailedSrc(src)}
+			onError={() => {
+				if (!refreshFromStorage && imageId && hasCachedUrl) {
+					setRefreshFromStorage(true);
+					return;
+				}
+				setFailedSrc(src);
+			}}
 		/>
 	);
 }

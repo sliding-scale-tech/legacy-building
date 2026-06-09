@@ -350,7 +350,7 @@ export default function CreateJournalScreen() {
 								<Image
 									source={{ uri: coverUri }}
 									className="size-full"
-									resizeMode="cover"
+									resizeMode="contain"
 								/>
 							) : (
 								<View className="items-center gap-1">
