@@ -14,7 +14,7 @@ type CancelSubscriptionModalProps = {
 };
 
 const modalButtonClass =
-	"inline-flex h-11 flex-1 items-center justify-center rounded-xl border font-medium text-sm transition-[color,background-color,transform] active:scale-[0.98] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-60";
+	"inline-flex h-11 min-h-11 w-full shrink-0 items-center justify-center rounded-xl border px-4 font-medium text-sm transition-[color,background-color,transform] active:scale-[0.98] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-60 sm:flex-1 sm:min-w-0";
 
 export function CancelSubscriptionModal({
 	open,
@@ -30,7 +30,7 @@ export function CancelSubscriptionModal({
 				showCloseButton={false}
 				overlayClassName="bg-foreground/60 duration-300 ease-out"
 				className={cn(
-					"z-[2002] w-[calc(100%-2rem)] max-w-[480px] gap-0 overflow-hidden rounded-2xl",
+					"!flex !flex-col z-[2002] w-[calc(100%-2rem)] max-w-[480px] gap-0 overflow-hidden rounded-2xl",
 					"border border-border bg-popover p-0 text-popover-foreground shadow-xl",
 					"duration-300 ease-out sm:max-w-[480px]",
 				)}
@@ -62,7 +62,7 @@ export function CancelSubscriptionModal({
 						<p>After that, your account will revert to the free plan.</p>
 					</div>
 
-					<div className="flex flex-col-reverse gap-3 sm:flex-row">
+					<div className="flex flex-col-reverse gap-3 sm:flex-row sm:items-stretch">
 						<button
 							type="button"
 							onClick={() => onOpenChange(false)}

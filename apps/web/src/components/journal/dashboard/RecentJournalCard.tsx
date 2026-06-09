@@ -32,7 +32,7 @@ export function RecentJournalCard({
 		<div
 			className={cn("flex w-full max-w-[min(340px,100%)] flex-col", className)}
 		>
-			<h2 className="mb-2 font-semibold text-[#1a1a1a] text-base leading-[1.4]">
+			<h2 className="mb-2 text-center font-bold text-[#1a1a1a] text-[clamp(2.125rem,5.5vw,2.375rem)] leading-[1.4]">
 				Recent Journal
 			</h2>
 
