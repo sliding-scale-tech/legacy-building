@@ -5,12 +5,13 @@ import { useRouter } from "expo-router";
 import { Spinner } from "heroui-native";
 import { useState } from "react";
 import { Pressable, ScrollView, Text, View } from "react-native";
-import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import { JournalListItem } from "@/components/library/journal-list-item";
 import { LibraryEmptyState } from "@/components/library/library-empty-state";
 import { StoryTabs } from "@/components/library/story-tabs";
+import { DashboardScreenHeader } from "@/components/navigation/dashboard-screen-header";
 import { useNativeCurrentUser } from "@/hooks/use-native-current-user";
+import { nativeAssets } from "@/lib/assets";
 import {
 	DEFAULT_STORY_TAB,
 	STORY_TABS,
@@ -18,7 +19,6 @@ import {
 } from "@/lib/journal/story-types";
 
 export default function LibraryScreen() {
-	const insets = useSafeAreaInsets();
 	const router = useRouter();
 	const { user } = useUser();
 	const { convexUser } = useNativeCurrentUser();
@@ -45,16 +45,17 @@ export default function LibraryScreen() {
 	const storyLabel =
 		STORY_TABS.find((t) => t.id === storyType)?.label ?? "My Story";
 
+	const avatarUrl =
+		convexUser?.profilePictureUrl ??
+		user?.imageUrl ??
+		nativeAssets.defaultAvatar;
+
 	return (
 		<View className="flex-1 bg-secondary/30">
-			<View
-				className="bg-primary px-4 pb-4"
-				style={{ paddingTop: insets.top + 12 }}
-			>
-				<Text className="text-center font-semibold text-lg text-primary-foreground">
-					{displayName}&apos;s Library
-				</Text>
-			</View>
+			<DashboardScreenHeader
+				title={`${displayName}'s Library`}
+				avatarUrl={avatarUrl}
+			/>
 
 			<ScrollView
 				className="flex-1"

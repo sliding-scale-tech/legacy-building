@@ -5,8 +5,14 @@ const WEB_APP_ORIGIN =
 	process.env.EXPO_PUBLIC_WEB_APP_URL?.replace(/\/$/, "") ??
 	"http://localhost:3001";
 
+export function nativeWebAppUrl(path: string) {
+	return `${WEB_APP_ORIGIN}${path.startsWith("/") ? path : `/${path}`}`;
+}
+
 export function nativeLegalUrl(
 	path: (typeof nativeLegalRoutes)[keyof typeof nativeLegalRoutes],
 ) {
-	return `${WEB_APP_ORIGIN}${path}`;
+	return nativeWebAppUrl(path);
 }
+
+export const nativeBillingUrl = () => nativeWebAppUrl("/dashboard/billing");

@@ -1,4 +1,21 @@
-import { BookOpen, Download, Mic } from "lucide-react";
+import { Download, Mic } from "lucide-react";
+
+const PHOSPHOR_SPRITE = "/static/icon_libraries/phosphor-2.1.0-regular.svg";
+
+function PhosphorBookOpenTextIcon({ className }: { className?: string }) {
+	return (
+		<svg
+			viewBox="0 0 32 32"
+			data-icon-set="phosphor"
+			className={className}
+			fill="currentColor"
+			aria-hidden="true"
+		>
+			<title>Journal entry</title>
+			<use width={32} height={32} href={`${PHOSPHOR_SPRITE}#book-open-text`} />
+		</svg>
+	);
+}
 
 import { Button } from "@/components/journal/ui/button";
 import { Checkbox } from "@/components/journal/ui/checkbox";
@@ -135,11 +152,7 @@ export function JournalEntryRow({
 						aria-hidden
 					/>
 				) : (
-					<BookOpen
-						className="size-5 shrink-0 text-white"
-						strokeWidth={2}
-						aria-hidden
-					/>
+					<PhosphorBookOpenTextIcon className="size-6 shrink-0 text-white" />
 				)}
 			</div>
 		</div>

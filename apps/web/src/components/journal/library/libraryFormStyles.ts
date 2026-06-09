@@ -32,10 +32,25 @@ export function bubbleTextareaClass(invalid: boolean) {
 
 export function bubbleSelectTriggerClass(invalid: boolean) {
 	return cn(
-		"h-11 w-full min-w-0 rounded-[12px] border bg-white px-3 font-normal text-[#1a1a1a] text-sm shadow-none focus-visible:ring-0",
-		invalid ? "border-[#b0200c]" : "border-[#c7c7c7]",
+		bubbleInputClass(invalid),
+		"!w-full justify-between text-left",
+		"data-placeholder:text-[#737373]",
+		"[&_[data-slot=select-value]]:min-w-0 [&_[data-slot=select-value]]:flex-1 [&_[data-slot=select-value]]:truncate",
+		"[&_svg]:size-4 [&_svg]:shrink-0 [&_svg]:text-[#737373]",
 	);
 }
+
+export const bubbleSelectContentClass = cn(
+	"z-[1600] w-[var(--radix-select-trigger-width)] min-w-[var(--radix-select-trigger-width)]",
+	"overflow-hidden rounded-[12px] border border-[#c7c7c7] bg-white p-1.5",
+	"shadow-[0_4px_16px_rgba(0,0,0,0.1)] ring-0",
+);
+
+export const bubbleSelectItemClass = cn(
+	"cursor-pointer rounded-[10px] py-2.5 pr-9 pl-3 font-normal text-[#1a1a1a] text-sm leading-[1.4]",
+	"data-highlighted:bg-[#e6f4f4] data-highlighted:text-[#1a1a1a]",
+	"[&_svg]:size-4 [&_svg]:text-[#008080]",
+);
 
 export const bubbleDownloadButtonClass =
 	"h-11 min-w-[60px] max-w-[200px] flex-1 rounded-[12px] border border-[#008080] bg-white px-5 font-medium text-[#008080] text-sm leading-none shadow-none hover:bg-white hover:opacity-90";

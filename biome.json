@@ -84,6 +84,16 @@
 					}
 				}
 			}
+		},
+		{
+			"includes": ["apps/web/src/lib/legal/*.html"],
+			"linter": {
+				"rules": {
+					"a11y": {
+						"useAnchorContent": "off"
+					}
+				}
+			}
 		}
 	]
 }
