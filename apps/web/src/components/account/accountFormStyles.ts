@@ -12,16 +12,25 @@ export const accountSectionSubtitleClass =
 export const accountCardClass =
 	"rounded-2xl border border-primary/20 bg-primary/5 p-5 shadow-sm sm:p-6";
 
+export const accountPersonalInfoCardClass =
+	"rounded-2xl border border-[#d4eaea] bg-[#eff8f8] p-5 shadow-sm sm:p-6";
+
+export const accountPersonalInfoDividerClass =
+	"border-0 border-t border-[#d9e8e8]";
+
 export const accountLabelClass =
-	"font-medium text-foreground text-sm leading-[1.4]";
+	"font-normal text-foreground text-sm leading-[1.4]";
 
 export const accountInputClass = cn(
-	"h-11 w-full min-w-0 rounded-xl border border-border bg-card px-3 font-normal text-foreground text-sm shadow-none",
-	"focus-visible:border-primary focus-visible:ring-0 disabled:cursor-default disabled:bg-muted disabled:text-muted-foreground disabled:opacity-100",
+	"h-11 w-full min-w-0 rounded-xl border border-[#e0e0e0] bg-white px-3 font-normal text-foreground text-sm shadow-none",
+	"focus-visible:border-primary focus-visible:ring-0 disabled:cursor-default disabled:bg-white disabled:text-foreground disabled:opacity-100",
 );
 
+export const accountPersonalInfoEditButtonClass =
+	"inline-flex size-5 shrink-0 items-center justify-center text-primary transition-colors hover:text-primary/80";
+
 export const accountPrimaryButtonClass =
-	"inline-flex h-11 shrink-0 items-center justify-center rounded-xl bg-primary px-6 font-medium text-primary-foreground text-sm shadow-none hover:bg-primary/90 disabled:opacity-60";
+	"inline-flex h-11 shrink-0 items-center justify-center rounded-xl bg-[#69b1b1] px-6 font-semibold text-sm text-white shadow-none hover:bg-[#5da3a3] disabled:opacity-60";
 
 export const accountSecondaryButtonClass =
 	"inline-flex h-10 items-center justify-center rounded-xl border border-border bg-card px-5 font-medium text-muted-foreground text-sm shadow-sm hover:bg-muted";
@@ -33,7 +42,7 @@ export const accountDangerZoneBodyClass =
 	"rounded-b-2xl border border-destructive/30 bg-card px-5 py-5 sm:px-6 sm:py-6";
 
 export const accountDangerButtonClass =
-	"inline-flex h-11 items-center justify-center rounded-xl bg-destructive px-6 font-semibold text-destructive-foreground text-sm shadow-none hover:bg-destructive/90";
+	"h-10 rounded-xl border border-destructive/25 px-5 font-medium shadow-none";
 
 export const accountWarningBoxClass =
 	"rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-amber-900 text-sm leading-relaxed dark:border-amber-500/30 dark:bg-amber-500/10 dark:text-amber-200";

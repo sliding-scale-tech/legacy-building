@@ -1,7 +1,7 @@
 import { v } from "convex/values";
 
 import { query } from "../../_generated/server";
-import { assertEntryOwner, getOwnedJournal, requireClerkUserId } from "../auth";
+import { assertEntryOwner, requireClerkUserId } from "../auth";
 import { enrichEntry } from "../enrich";
 
 export const getEntryImageUrl = query({

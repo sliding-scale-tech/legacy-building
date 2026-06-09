@@ -3,6 +3,7 @@ import { v } from "convex/values";
 import { components } from "../_generated/api";
 import { query } from "../_generated/server";
 import { userHasPaidFeatureAccess } from "./access";
+import { listSubscriptionsForClerkUser } from "./helpers";
 
 type ComponentSubscription = {
 	stripeSubscriptionId: string;
@@ -47,16 +48,8 @@ export const getMySubscription = query({
 		const identity = await ctx.auth.getUserIdentity();
 		if (!identity) return null;
 
-		const customer = await ctx.runQuery(
-			components.stripe.public.getCustomerByUserId,
-			{ userId: identity.subject },
-		);
-		if (!customer) return null;
-
-		const subscriptions: ComponentSubscription[] = await ctx.runQuery(
-			components.stripe.public.listSubscriptions,
-			{ stripeCustomerId: customer.stripeCustomerId },
-		);
+		const subscriptions: ComponentSubscription[] =
+			await listSubscriptionsForClerkUser(ctx, identity.subject);
 		if (subscriptions.length === 0) return null;
 
 		const liveSubscriptions = subscriptions.filter((sub) =>

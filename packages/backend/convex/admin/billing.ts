@@ -2,6 +2,7 @@ import { components } from "../_generated/api";
 import type { Doc } from "../_generated/dataModel";
 import type { QueryCtx } from "../_generated/server";
 import { userHasPaidFeatureAccess } from "../stripe/access";
+import { listSubscriptionsForClerkUser } from "../stripe/helpers";
 
 const LIVE_SUBSCRIPTION_STATUSES = new Set([
 	"active",
@@ -77,10 +78,8 @@ export async function getAdminUserBillingDetail(
 		user.clerkId,
 	);
 
-	const subscriptions: StripeComponentSubscription[] = await ctx.runQuery(
-		components.stripe.public.listSubscriptionsByUserId,
-		{ userId: user.clerkId },
-	);
+	const subscriptions: StripeComponentSubscription[] =
+		await listSubscriptionsForClerkUser(ctx, user.clerkId);
 
 	const liveSubscriptions = subscriptions.filter((subscription) =>
 		LIVE_SUBSCRIPTION_STATUSES.has(subscription.status),
