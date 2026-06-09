@@ -13,13 +13,20 @@ import {
 } from "@legacy-building/ui/components/field";
 import { Input } from "@legacy-building/ui/components/input";
 import {
+	InputOTP,
+	InputOTPGroup,
+	InputOTPSlot,
+} from "@legacy-building/ui/components/input-otp";
+import {
 	firstClerkErrorCode,
 	firstClerkErrorMessage,
 } from "@legacy-building/ui/lib/clerk-errors";
 import { navigateAfterAuth } from "@legacy-building/ui/lib/navigation";
 import { useNavigate } from "@tanstack/react-router";
+import { Loader2 } from "lucide-react";
 import { useState } from "react";
 import { Controller, useForm } from "react-hook-form";
+import { PasswordInput } from "@/components/auth/password-input";
 import {
 	type ForgotPasswordCodeFormValues,
 	type ForgotPasswordEmailFormValues,
@@ -32,6 +39,9 @@ import { ROUTES } from "@/lib/routes";
 
 const authFieldClass =
 	"h-12 rounded-full border-border bg-popover px-5 text-base shadow-sm placeholder:text-muted-foreground md:text-sm";
+
+const otpSlotClass =
+	"size-11 rounded-md border-border bg-popover text-base shadow-sm first:rounded-l-md last:rounded-r-md md:size-12 md:text-lg";
 
 type Props = {
 	initialEmail?: string;
@@ -159,6 +169,15 @@ export function ForgotPasswordForm({ initialEmail = "", onBack }: Props) {
 	const codeRootError = codeForm.formState.errors.root;
 	const passwordRootError = passwordForm.formState.errors.root;
 
+	const sendingCode =
+		fetchStatus === "fetching" || emailForm.formState.isSubmitting;
+	const verifyingCode =
+		fetchStatus === "fetching" || codeForm.formState.isSubmitting;
+	const settingPassword =
+		fetchStatus === "fetching" || passwordForm.formState.isSubmitting;
+	const codeValue = codeForm.watch("code");
+	const isCodeComplete = codeValue.length === 6;
+
 	return (
 		<div className="flex flex-col gap-5">
 			<div className="flex items-start justify-between gap-4">
@@ -212,12 +231,17 @@ export function ForgotPasswordForm({ initialEmail = "", onBack }: Props) {
 					<Button
 						type="submit"
 						variant="default"
-						disabled={
-							fetchStatus === "fetching" || emailForm.formState.isSubmitting
-						}
-						className="h-12 w-full rounded-full font-semibold text-base"
+						disabled={sendingCode}
+						className="h-12 w-full gap-2 rounded-full font-semibold text-base"
 					>
-						Send reset code
+						{sendingCode ? (
+							<>
+								<Loader2 className="size-4 animate-spin" aria-hidden />
+								Sending…
+							</>
+						) : (
+							"Send reset code"
+						)}
 					</Button>
 					<Button
 						type="button"
@@ -243,16 +267,26 @@ export function ForgotPasswordForm({ initialEmail = "", onBack }: Props) {
 									<FieldLabel htmlFor={field.name} className="sr-only">
 										Reset code
 									</FieldLabel>
-									<Input
-										{...field}
+									<InputOTP
 										id={field.name}
-										type="text"
-										inputMode="numeric"
+										maxLength={6}
+										pattern="^[0-9]+$"
 										autoComplete="one-time-code"
-										placeholder="Enter code from email"
-										className={authFieldClass}
+										value={field.value}
+										onChange={field.onChange}
+										onBlur={field.onBlur}
 										aria-invalid={invalid}
-									/>
+										containerClassName="justify-center"
+									>
+										<InputOTPGroup aria-invalid={invalid}>
+											<InputOTPSlot index={0} className={otpSlotClass} />
+											<InputOTPSlot index={1} className={otpSlotClass} />
+											<InputOTPSlot index={2} className={otpSlotClass} />
+											<InputOTPSlot index={3} className={otpSlotClass} />
+											<InputOTPSlot index={4} className={otpSlotClass} />
+											<InputOTPSlot index={5} className={otpSlotClass} />
+										</InputOTPGroup>
+									</InputOTP>
 									{invalid ? (
 										<FieldError
 											errors={combinedFieldErrors(
@@ -270,13 +304,20 @@ export function ForgotPasswordForm({ initialEmail = "", onBack }: Props) {
 					) : null}
 					<Button
 						type="submit"
-						variant="default"
-						disabled={
-							fetchStatus === "fetching" || codeForm.formState.isSubmitting
-						}
-						className="h-12 w-full rounded-full font-semibold text-base"
+						variant={isCodeComplete || verifyingCode ? "default" : "secondary"}
+						disabled={!isCodeComplete || verifyingCode}
+						className="h-12 w-full gap-2 rounded-full font-semibold text-base disabled:opacity-100"
 					>
-						Verify code
+						{verifyingCode ? (
+							<>
+								<Loader2 className="size-4 animate-spin" aria-hidden />
+								Verifying…
+							</>
+						) : isCodeComplete ? (
+							"Verify code"
+						) : (
+							"Enter code"
+						)}
 					</Button>
 					<Button
 						type="button"
@@ -306,10 +347,9 @@ export function ForgotPasswordForm({ initialEmail = "", onBack }: Props) {
 									<FieldLabel htmlFor={field.name} className="sr-only">
 										New password
 									</FieldLabel>
-									<Input
+									<PasswordInput
 										{...field}
 										id={field.name}
-										type="password"
 										autoComplete="new-password"
 										placeholder="New password"
 										className={authFieldClass}
@@ -333,12 +373,17 @@ export function ForgotPasswordForm({ initialEmail = "", onBack }: Props) {
 					<Button
 						type="submit"
 						variant="default"
-						disabled={
-							fetchStatus === "fetching" || passwordForm.formState.isSubmitting
-						}
-						className="h-12 w-full rounded-full font-semibold text-base"
+						disabled={settingPassword}
+						className="h-12 w-full gap-2 rounded-full font-semibold text-base"
 					>
-						Set new password
+						{settingPassword ? (
+							<>
+								<Loader2 className="size-4 animate-spin" aria-hidden />
+								Setting password…
+							</>
+						) : (
+							"Set new password"
+						)}
 					</Button>
 					<Button
 						type="button"

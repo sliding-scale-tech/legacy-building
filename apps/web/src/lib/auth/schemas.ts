@@ -59,8 +59,8 @@ export type ForgotPasswordEmailFormValues = z.infer<
 export const forgotPasswordCodeSchema = z.object({
 	code: z
 		.string()
-		.min(1, "Enter the reset code.")
-		.regex(/^\d+$/, "Enter a valid numeric code."),
+		.length(6, "Enter the 6-digit code.")
+		.regex(/^\d{6}$/, "Enter a valid 6-digit code."),
 });
 
 export type ForgotPasswordCodeFormValues = z.infer<

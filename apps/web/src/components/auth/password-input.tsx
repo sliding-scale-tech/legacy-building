@@ -3,11 +3,13 @@ import { cn } from "@legacy-building/ui/lib/utils";
 import { EyeIcon, EyeOffIcon } from "lucide-react";
 import { forwardRef, useState } from "react";
 
-type PasswordInputProps = Omit<React.ComponentProps<"input">, "type">;
+type PasswordInputProps = Omit<React.ComponentProps<"input">, "type"> & {
+	defaultVisible?: boolean;
+};
 
 export const PasswordInput = forwardRef<HTMLInputElement, PasswordInputProps>(
-	function PasswordInput({ className, ...props }, ref) {
-		const [visible, setVisible] = useState(false);
+	function PasswordInput({ className, defaultVisible = false, ...props }, ref) {
+		const [visible, setVisible] = useState(defaultVisible);
 		return (
 			<div className="relative">
 				<Input

@@ -14,14 +14,15 @@
 		"check-types": "tsc --noEmit"
 	},
 	"dependencies": {
-		"@legacy-building/assets": "workspace:*",
 		"@base-ui/react": "^1.0.0",
 		"@clerk/react": "^6.1.1",
 		"@hookform/resolvers": "^5.2.2",
+		"@legacy-building/assets": "workspace:*",
 		"@legacy-building/backend": "workspace:*",
 		"class-variance-authority": "^0.7.1",
 		"clsx": "^2.1.1",
 		"convex": "catalog:",
+		"input-otp": "^1.4.2",
 		"lucide-react": "^0.546.0",
 		"next-themes": "catalog:",
 		"react": "^19.2.6",
