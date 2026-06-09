@@ -139,11 +139,9 @@ export function UserBillingSection({
 					</div>
 				) : null}
 			</dl>
-			{!billing.hasPaidFeatureAccess &&
-			billing.mirroredSubscriptionStatus === "trialing" ? (
+			{billing.mirroredSubscriptionStatus === "trialing" ? (
 				<p className="text-muted-foreground text-xs leading-relaxed">
-					Trial users can manage billing but journal features stay locked until
-					the first payment succeeds.
+					Trial users have journal access until the trial ends or they cancel.
 				</p>
 			) : null}
 		</div>

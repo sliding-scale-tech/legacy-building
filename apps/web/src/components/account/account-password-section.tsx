@@ -1,48 +1,56 @@
+import { useUser } from "@clerk/react";
 import PasswordChangeForm from "@legacy-building/ui/components/password-change-form";
 import { cn } from "@legacy-building/ui/lib/utils";
-import { Pencil } from "lucide-react";
+import { SquarePen } from "lucide-react";
 import { useState } from "react";
 
 import {
 	accountInputClass,
 	accountLabelClass,
+	accountPersonalInfoEditButtonClass,
 } from "@/components/account/accountFormStyles";
 import { Input } from "@/components/journal/ui/input";
 
 export function AccountPasswordSection() {
+	const { user, isLoaded } = useUser();
 	const [editing, setEditing] = useState(false);
+	const canUpdatePassword = isLoaded && Boolean(user?.passwordEnabled);
+
+	if (!canUpdatePassword) {
+		return null;
+	}
 
 	return (
-		<div className="flex flex-col gap-2">
-			<div className="flex items-center justify-between gap-2">
-				<span className={accountLabelClass}>Password Update</span>
+		<div className="flex flex-col gap-1.5">
+			<div className="flex items-center gap-1.5">
+				<span className={accountLabelClass}>Password</span>
 				<button
 					type="button"
-					onClick={() => setEditing((v) => !v)}
-					className="inline-flex size-7 items-center justify-center rounded text-[#008080] hover:bg-[#008080]/10"
+					onClick={() => setEditing((value) => !value)}
+					className={accountPersonalInfoEditButtonClass}
 					aria-label={editing ? "Close password editor" : "Edit password"}
 					aria-expanded={editing}
 				>
-					<Pencil className="size-4" strokeWidth={2} aria-hidden />
+					<SquarePen className="size-3.5" strokeWidth={2} aria-hidden />
 				</button>
 			</div>
+
+			<Input
+				type="password"
+				readOnly
+				disabled
+				value="••••••••••"
+				className={cn(accountInputClass, "tracking-widest")}
+				aria-label="Password (hidden)"
+			/>
 
 			{editing ? (
 				<PasswordChangeForm
 					appearance="light"
-					compact
+					layout="account"
 					onSuccess={() => setEditing(false)}
 				/>
-			) : (
-				<Input
-					type="password"
-					readOnly
-					disabled
-					value="••••••••••"
-					className={cn(accountInputClass, "tracking-widest")}
-					aria-label="Password (hidden)"
-				/>
-			)}
+			) : null}
 		</div>
 	);
 }

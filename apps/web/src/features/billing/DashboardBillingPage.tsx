@@ -1,5 +1,6 @@
 import { api } from "@legacy-building/backend/convex/_generated/api";
 import { PageLoader } from "@legacy-building/ui/components/page-loader";
+import { brand } from "@legacy-building/ui/lib/brand-journal";
 import { useQuery } from "convex/react";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
@@ -47,8 +48,11 @@ export function DashboardBillingPage() {
 	}
 
 	return (
-		<div className="relative flex min-h-svh w-full flex-col bg-billing-subscribe">
-			<div className="mx-auto mt-20 flex w-full max-w-[1040px] flex-1 flex-col gap-10 px-4 py-10 sm:px-6 md:px-10 md:py-12">
+		<div
+			className="relative flex min-h-svh w-full flex-col bg-billing-subscribe"
+			style={{ backgroundColor: brand.primary }}
+		>
+			<div className="mx-auto mt-20 flex w-full max-w-[900px] flex-1 flex-col px-5 py-8 sm:px-6 sm:py-10">
 				<BillingSubscribePanel />
 			</div>
 		</div>

@@ -17,7 +17,7 @@ export async function requireClerkUserId(ctx: AuthCtx): Promise<string> {
 	return identity.subject;
 }
 
-/** Require sign-in plus a live paid Stripe subscription for journal access. */
+/** Require sign-in plus an active or trialing Stripe subscription for journal access. */
 export async function requirePaidJournalAccess(
 	ctx: QueryCtx | MutationCtx,
 ): Promise<string> {

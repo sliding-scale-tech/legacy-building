@@ -1,18 +1,20 @@
 import { useUser } from "@clerk/react";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { useCurrentUser } from "@legacy-building/ui/hooks/use-current-user";
 import { brand } from "@legacy-building/ui/lib/brand-journal";
 import { cn } from "@legacy-building/ui/lib/utils";
 import {
 	PaymentElement,
-	useElements,
-	useStripe,
-} from "@stripe/react-stripe-js";
+	useCheckoutElements,
+} from "@stripe/react-stripe-js/checkout";
 import { Link } from "@tanstack/react-router";
 import { Loader2, Lock } from "lucide-react";
+import { useEffect, useMemo } from "react";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 import { z } from "zod";
 
+import { defaultUsername, isGoogleOAuthProvider } from "@/lib/account/username";
 import { ROUTES } from "@/lib/routes";
 
 const checkoutPaymentFormSchema = z.object({
@@ -22,105 +24,78 @@ const checkoutPaymentFormSchema = z.object({
 type CheckoutPaymentFormValues = z.infer<typeof checkoutPaymentFormSchema>;
 
 type CheckoutPaymentFormProps = {
-	intentType: "setup" | "payment";
 	amountLabel: string;
-	subscriptionId: string | null;
-	usesFallbackSetup: boolean;
-	onFinalizeTrialSetup: (args: {
-		subscriptionId: string;
-		setupIntentId: string;
-	}) => Promise<null>;
 };
 
-export function CheckoutPaymentForm({
-	intentType,
-	amountLabel,
-	subscriptionId,
-	usesFallbackSetup,
-	onFinalizeTrialSetup,
-}: CheckoutPaymentFormProps) {
-	const stripe = useStripe();
-	const elements = useElements();
+const DEFAULT_BILLING_COUNTRY = "US";
+
+/** Stripe requires billing `address.country` when name is collected outside Payment Element. */
+function checkoutBillingAddress(name: string) {
+	return {
+		name,
+		address: { country: DEFAULT_BILLING_COUNTRY },
+	};
+}
+
+export function CheckoutPaymentForm({ amountLabel }: CheckoutPaymentFormProps) {
+	const checkoutState = useCheckoutElements();
 	const { user } = useUser();
+	const { convexUser, isLoading: userLoading } = useCurrentUser();
 	const email = user?.primaryEmailAddress?.emailAddress ?? "";
+
+	const isGoogle = Boolean(
+		user?.externalAccounts?.some((account) =>
+			isGoogleOAuthProvider(account.provider),
+		),
+	);
+	const defaultFullName = useMemo(
+		() => defaultUsername(convexUser?.name, user?.fullName ?? null, isGoogle),
+		[convexUser?.name, user?.fullName, isGoogle],
+	);
 
 	const {
 		register,
 		handleSubmit,
-		watch,
+		reset,
 		formState: { errors, isSubmitting },
 	} = useForm<CheckoutPaymentFormValues>({
 		resolver: zodResolver(checkoutPaymentFormSchema),
-		defaultValues: {
-			fullName: user?.fullName ?? user?.firstName ?? "",
-		},
+		defaultValues: { fullName: "" },
 	});
 
-	const fullName = watch("fullName");
+	useEffect(() => {
+		if (userLoading) return;
+		reset({ fullName: defaultFullName });
+	}, [userLoading, defaultFullName, reset]);
 
 	const onSubmit = handleSubmit(async (values) => {
-		if (!stripe || !elements) return;
+		if (checkoutState.type !== "success") return;
 
-		const returnUrl = `${window.location.origin}${ROUTES.dashboardBillingSuccess}`;
+		const trimmedEmail = email.trim();
+		const trimmedName = values.fullName.trim();
+		if (!trimmedEmail) {
+			toast.error(
+				"Add an email address to your account before completing checkout.",
+			);
+			return;
+		}
 
 		try {
-			const confirmParams = {
-				return_url: returnUrl,
-				payment_method_data: {
-					billing_details: {
-						name: values.fullName.trim() || undefined,
-						email: email.trim() || undefined,
-					},
-				},
-			};
+			const confirmResult = await checkoutState.checkout.confirm({
+				billingAddress: checkoutBillingAddress(trimmedName),
+			});
 
-			const result =
-				intentType === "setup"
-					? await stripe.confirmSetup({
-							elements,
-							confirmParams,
-							redirect: "if_required",
-						})
-					: await stripe.confirmPayment({
-							elements,
-							confirmParams,
-							redirect: "if_required",
-						});
-
-			if (result.error) {
+			if (confirmResult.type === "error") {
 				toast.error(
-					result.error.message ?? "Payment failed. Please try again.",
+					confirmResult.error.message ?? "Payment failed. Please try again.",
 				);
-				return;
 			}
-
-			const paymentIntent = (result as { paymentIntent?: { status: string } })
-				.paymentIntent;
-			const setupIntent = (
-				result as { setupIntent?: { id: string; status: string } }
-			).setupIntent;
-
-			if (intentType === "setup" && usesFallbackSetup && subscriptionId) {
-				if (setupIntent?.status === "succeeded" && setupIntent.id) {
-					await onFinalizeTrialSetup({
-						subscriptionId,
-						setupIntentId: setupIntent.id,
-					});
-				}
-			}
-
-			const succeeded =
-				paymentIntent?.status === "succeeded" ||
-				setupIntent?.status === "succeeded";
-
-			if (succeeded) {
-				window.location.href = `${window.location.origin}${ROUTES.dashboardBillingSuccess}?next=billing`;
-				return;
-			}
-
-			toast.error("Payment failed. Please try again.");
-		} catch {
-			toast.error("Payment failed. Please try again.");
+		} catch (error) {
+			const message =
+				error instanceof Error
+					? error.message
+					: "Payment failed. Please try again.";
+			toast.error(message);
 		}
 	});
 
@@ -128,6 +103,22 @@ export function CheckoutPaymentForm({
 		"h-11 w-full rounded-xl border border-[#e6e6e6] bg-white px-3 text-[#1a1a1a] text-sm outline-none focus-visible:ring-2 focus-visible:ring-[#008080]/30";
 	const readOnlyInputClass =
 		"h-11 w-full cursor-not-allowed rounded-xl border border-[#e6e6e6] bg-[#f5f5f5] px-3 text-[#525252] text-sm outline-none";
+
+	if (checkoutState.type === "loading") {
+		return (
+			<div className="flex min-h-[240px] items-center justify-center">
+				<Loader2 className="size-6 animate-spin text-muted-foreground" />
+			</div>
+		);
+	}
+
+	if (checkoutState.type === "error") {
+		return (
+			<p className="text-destructive text-sm">{checkoutState.error.message}</p>
+		);
+	}
+
+	const paymentDisabled = isSubmitting;
 
 	return (
 		<form onSubmit={onSubmit} className="flex flex-col gap-6">
@@ -176,6 +167,11 @@ export function CheckoutPaymentForm({
 						autoComplete="email"
 						aria-label="Email address (read only)"
 					/>
+					{!email.trim() ? (
+						<p className="text-destructive text-xs">
+							Add an email to your account before paying.
+						</p>
+					) : null}
 				</label>
 			</div>
 
@@ -185,15 +181,17 @@ export function CheckoutPaymentForm({
 					<PaymentElement
 						options={{
 							layout: "tabs",
+							wallets: {
+								applePay: "never",
+								googlePay: "never",
+							},
 							fields: {
 								billingDetails: {
 									email: "never",
-								},
-							},
-							defaultValues: {
-								billingDetails: {
-									name: fullName || undefined,
-									email: email || undefined,
+									name: "never",
+									address: {
+										country: "never",
+									},
 								},
 							},
 						}}
@@ -203,7 +201,7 @@ export function CheckoutPaymentForm({
 
 			<button
 				type="submit"
-				disabled={!stripe || !elements || isSubmitting}
+				disabled={paymentDisabled || !email.trim()}
 				className={cn(
 					"flex h-12 w-full items-center justify-center gap-2 rounded-xl font-semibold text-sm text-white",
 					"transition-colors hover:opacity-95 disabled:cursor-not-allowed disabled:opacity-60",

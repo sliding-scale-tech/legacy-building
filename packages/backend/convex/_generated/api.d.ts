@@ -30,6 +30,7 @@ import type * as journal_storage from "../journal/storage.js";
 import type * as stripe_access from "../stripe/access.js";
 import type * as stripe_actions from "../stripe/actions.js";
 import type * as stripe_config from "../stripe/config.js";
+import type * as stripe_embeddedCheckout from "../stripe/embeddedCheckout.js";
 import type * as stripe_helpers from "../stripe/helpers.js";
 import type * as stripe_mutations from "../stripe/mutations.js";
 import type * as stripe_products_mutations from "../stripe/products/mutations.js";
@@ -69,6 +70,7 @@ declare const fullApi: ApiFromModules<{
   "stripe/access": typeof stripe_access;
   "stripe/actions": typeof stripe_actions;
   "stripe/config": typeof stripe_config;
+  "stripe/embeddedCheckout": typeof stripe_embeddedCheckout;
   "stripe/helpers": typeof stripe_helpers;
   "stripe/mutations": typeof stripe_mutations;
   "stripe/products/mutations": typeof stripe_products_mutations;

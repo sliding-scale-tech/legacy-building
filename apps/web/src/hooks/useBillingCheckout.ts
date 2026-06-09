@@ -31,7 +31,7 @@ export function useBillingCheckout() {
 	);
 	const changePlan = useAction(api.stripe.actions.changePlan);
 
-	const [selected, setSelected] = useState<BillingPlanChoice>("trial");
+	const [selected, setSelected] = useState<BillingPlanChoice | null>(null);
 	const [pending, setPending] = useState(false);
 
 	const currentInterval =
@@ -69,7 +69,9 @@ export function useBillingCheckout() {
 	);
 
 	const checkout = useCallback(async () => {
-		if (pending || (hasActiveSub && isCurrentChoice(selected))) return;
+		if (!selected || pending || (hasActiveSub && isCurrentChoice(selected))) {
+			return;
+		}
 
 		if (!hasActiveSub) {
 			void navigate({
@@ -124,6 +126,7 @@ export function useBillingCheckout() {
 	]);
 
 	const ctaLabel = (() => {
+		if (!selected) return "Select a plan to continue";
 		if (isCurrentChoice(selected)) return "Current plan";
 		if (hasActiveSub && isTrialing) {
 			return selected === "annual"

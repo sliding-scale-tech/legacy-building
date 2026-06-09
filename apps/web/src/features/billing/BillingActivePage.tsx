@@ -195,7 +195,8 @@ export function BillingActivePage({ showWelcome }: BillingActivePageProps) {
 							</p>
 							{subscription.status === "trialing" ? (
 								<p className="mt-1 font-medium text-primary text-sm">
-									Journal features unlock after your first payment.
+									You&apos;re on a free trial — journal features are unlocked
+									until your trial ends.
 								</p>
 							) : null}
 						</div>

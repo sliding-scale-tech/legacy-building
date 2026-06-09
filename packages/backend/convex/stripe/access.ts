@@ -1,10 +1,10 @@
 import { ConvexError } from "convex/values";
 
-import { components } from "../_generated/api";
 import type { MutationCtx, QueryCtx } from "../_generated/server";
-
-/** Stripe subscription statuses that unlock paid plan features (first charge completed). */
-const PAID_STRIPE_STATUSES = new Set(["active", "past_due"]);
+import {
+	FEATURE_ACCESS_STATUSES,
+	listSubscriptionsForClerkUser,
+} from "./helpers";
 
 type AccessCtx = QueryCtx | MutationCtx;
 
@@ -21,14 +21,11 @@ export async function userHasPaidFeatureAccess(
 	if (user.role === "admin") return true;
 
 	// Never trust the mirrored `users.subscriptionStatus` alone — it can lag after
-	// cancel/reset. Require a live paid Stripe subscription instead.
-	const subscriptions = await ctx.runQuery(
-		components.stripe.public.listSubscriptionsByUserId,
-		{ userId: clerkUserId },
-	);
+	// cancel/reset. Require a live Stripe subscription instead.
+	const subscriptions = await listSubscriptionsForClerkUser(ctx, clerkUserId);
 
 	return subscriptions.some((subscription) =>
-		PAID_STRIPE_STATUSES.has(subscription.status),
+		FEATURE_ACCESS_STATUSES.has(subscription.status),
 	);
 }
 
