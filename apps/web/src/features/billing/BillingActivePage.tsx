@@ -154,6 +154,8 @@ export function BillingActivePage({ showWelcome }: BillingActivePageProps) {
 			? `${planName} · ${formatAmount(subscription.plan.amountCents, subscription.plan.currency)}${intervalSuffix(subscription.interval).replace(" /", "/")}`
 			: planName;
 	const latestInvoice = invoices[0];
+	const showUpgrade =
+		!subscription.cancelAtPeriodEnd && subscription.interval !== "annual";
 
 	const openInvoice = (invoice: BillingInvoice) => {
 		if (invoice.hostedInvoiceUrl) {
@@ -285,15 +287,17 @@ export function BillingActivePage({ showWelcome }: BillingActivePageProps) {
 
 							<div className="flex flex-col gap-4 border-border border-t pt-6">
 								<div className="flex flex-col gap-3 sm:flex-row sm:items-center">
-									<Link
-										to={ROUTES.dashboardBillingCompare}
-										className={cn(
-											billingPrimaryButtonClass,
-											"h-11 px-6 font-semibold sm:shrink-0",
-										)}
-									>
-										Upgrade Subscription
-									</Link>
+									{showUpgrade ? (
+										<Link
+											to={ROUTES.dashboardBillingCompare}
+											className={cn(
+												billingPrimaryButtonClass,
+												"h-11 px-6 font-semibold sm:shrink-0",
+											)}
+										>
+											Upgrade Subscription
+										</Link>
+									) : null}
 									{subscription.cancelAtPeriodEnd ? (
 										<button
 											type="button"

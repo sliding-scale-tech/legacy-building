@@ -25,7 +25,7 @@ export function DeskHeroCard({ children, className }: DeskHeroCardProps) {
 				draggable={false}
 				className={cn(
 					"pointer-events-none absolute inset-0 size-full select-none object-cover",
-					"object-[center_38%] sm:object-[center_52%]",
+					"object-left-top sm:object-[center_52%]",
 					/* Anchor top-left so plant + glasses stay in frame on wide screens */
 					"lg:object-left-top xl:object-[12%_18%]",
 				)}
