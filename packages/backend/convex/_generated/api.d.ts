@@ -30,6 +30,7 @@ import type * as journal_storage from "../journal/storage.js";
 import type * as stripe_access from "../stripe/access.js";
 import type * as stripe_actions from "../stripe/actions.js";
 import type * as stripe_config from "../stripe/config.js";
+import type * as stripe_customerHelpers from "../stripe/customerHelpers.js";
 import type * as stripe_embeddedCheckout from "../stripe/embeddedCheckout.js";
 import type * as stripe_helpers from "../stripe/helpers.js";
 import type * as stripe_mutations from "../stripe/mutations.js";
@@ -38,6 +39,7 @@ import type * as stripe_products_queries from "../stripe/products/queries.js";
 import type * as stripe_queries from "../stripe/queries.js";
 import type * as user_actionHelpers from "../user/actionHelpers.js";
 import type * as user_actions from "../user/actions.js";
+import type * as user_deleteAccount from "../user/deleteAccount.js";
 import type * as user_mutations from "../user/mutations.js";
 import type * as user_queries from "../user/queries.js";
 
@@ -70,6 +72,7 @@ declare const fullApi: ApiFromModules<{
   "stripe/access": typeof stripe_access;
   "stripe/actions": typeof stripe_actions;
   "stripe/config": typeof stripe_config;
+  "stripe/customerHelpers": typeof stripe_customerHelpers;
   "stripe/embeddedCheckout": typeof stripe_embeddedCheckout;
   "stripe/helpers": typeof stripe_helpers;
   "stripe/mutations": typeof stripe_mutations;
@@ -78,6 +81,7 @@ declare const fullApi: ApiFromModules<{
   "stripe/queries": typeof stripe_queries;
   "user/actionHelpers": typeof user_actionHelpers;
   "user/actions": typeof user_actions;
+  "user/deleteAccount": typeof user_deleteAccount;
   "user/mutations": typeof user_mutations;
   "user/queries": typeof user_queries;
 }>;

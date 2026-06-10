@@ -7,6 +7,11 @@ import { components, internal } from "../_generated/api";
 import type { Doc } from "../_generated/dataModel";
 import { action } from "../_generated/server";
 import {
+	getOrCreateValidStripeCustomer,
+	getUsableStripeCustomer,
+	isStripeResourceMissing,
+} from "./customerHelpers";
+import {
 	createProrationPaymentCheckoutSession,
 	createSubscriptionEmbeddedCheckoutSession,
 	subscriptionLatestInvoiceId,
@@ -126,7 +131,7 @@ export const createCheckoutSession = action({
 			});
 		}
 
-		const { customerId } = await stripeSubscriptions.getOrCreateCustomer(ctx, {
+		const { customerId } = await getOrCreateValidStripeCustomer(ctx, {
 			userId,
 			email: identity.email ?? undefined,
 			name: identity.name ?? undefined,
@@ -194,7 +199,7 @@ export const createEmbeddedSubscriptionCheckout = action({
 			});
 		}
 
-		const { customerId } = await stripeSubscriptions.getOrCreateCustomer(ctx, {
+		const { customerId } = await getOrCreateValidStripeCustomer(ctx, {
 			userId,
 			email: identity.email ?? undefined,
 			name: identity.name ?? undefined,
@@ -376,10 +381,10 @@ export const getDefaultPaymentMethod = action({
 		const identity = await ctx.auth.getUserIdentity();
 		if (!identity) return null;
 
-		const customer = await ctx.runQuery(
-			components.stripe.public.getCustomerByUserId,
-			{ userId: identity.subject },
-		);
+		const customer = await getUsableStripeCustomer(ctx, {
+			userId: identity.subject,
+			email: identity.email ?? undefined,
+		});
 		if (!customer) return null;
 
 		const subscription = await getActiveSubscriptionForUser(
@@ -388,11 +393,18 @@ export const getDefaultPaymentMethod = action({
 		);
 
 		const stripe = new Stripe(requireSecretKey());
-		const paymentMethod = await resolvePaymentMethodDetails(
-			stripe,
-			customer.stripeCustomerId,
-			subscription?.stripeSubscriptionId,
-		);
+		let paymentMethod: Stripe.PaymentMethod | null = null;
+		try {
+			paymentMethod = await resolvePaymentMethodDetails(
+				stripe,
+				customer.stripeCustomerId,
+				subscription?.stripeSubscriptionId,
+			);
+		} catch (error) {
+			if (!isStripeResourceMissing(error)) {
+				throw error;
+			}
+		}
 
 		if (paymentMethod?.type !== "card" || !paymentMethod.card) {
 			return null;
@@ -859,6 +871,44 @@ function subscriptionPeriodEnd(
 	return legacySubscription.current_period_end ?? null;
 }
 
+async function fetchLatestHostedInvoiceUrl(
+	stripe: Stripe,
+	args: { customerId: string; subscriptionId: string },
+): Promise<string | null> {
+	try {
+		const { data: invoices } = await stripe.invoices.list({
+			customer: args.customerId,
+			subscription: args.subscriptionId,
+			limit: 1,
+		});
+		if (invoices[0]?.hosted_invoice_url) {
+			return invoices[0].hosted_invoice_url;
+		}
+
+		const subscription = await stripe.subscriptions.retrieve(
+			args.subscriptionId,
+			{
+				expand: ["latest_invoice"],
+			},
+		);
+		const latestInvoice = subscription.latest_invoice;
+		if (latestInvoice && typeof latestInvoice === "object") {
+			return latestInvoice.hosted_invoice_url ?? null;
+		}
+		if (typeof latestInvoice === "string") {
+			const invoice = await stripe.invoices.retrieve(latestInvoice);
+			return invoice.hosted_invoice_url ?? null;
+		}
+	} catch (error) {
+		if (isStripeResourceMissing(error)) {
+			return null;
+		}
+		throw error;
+	}
+
+	return null;
+}
+
 /** Subscription + payment details for the post-checkout success screen. */
 export const getPaymentSuccessSummary = action({
 	args: {},
@@ -874,6 +924,7 @@ export const getPaymentSuccessSummary = action({
 				v.literal("other"),
 			),
 			nextBillingDateMs: v.number(),
+			hostedInvoiceUrl: v.union(v.string(), v.null()),
 		}),
 		v.null(),
 	),
@@ -885,6 +936,7 @@ export const getPaymentSuccessSummary = action({
 		paymentMethodLabel: string;
 		paymentMethodKind: PaymentMethodKind;
 		nextBillingDateMs: number;
+		hostedInvoiceUrl: string | null;
 	} | null> => {
 		const identity = await ctx.auth.getUserIdentity();
 		if (!identity) {
@@ -909,28 +961,34 @@ export const getPaymentSuccessSummary = action({
 			currentPeriodEnd = componentSub.currentPeriodEnd;
 		}
 
-		const customer = await ctx.runQuery(
-			components.stripe.public.getCustomerByUserId,
-			{ userId },
-		);
+		const customer = await getUsableStripeCustomer(ctx, {
+			userId,
+			email: identity.email ?? undefined,
+		});
 
 		if (customer) {
-			const stripeSubResponse = await stripe.subscriptions.list({
-				customer: customer.stripeCustomerId,
-				status: "all",
-				limit: 10,
-			});
+			try {
+				const stripeSubResponse = await stripe.subscriptions.list({
+					customer: customer.stripeCustomerId,
+					status: "all",
+					limit: 10,
+				});
 
-			const liveStatuses = new Set(["active", "trialing", "past_due"]);
-			const stripeSub =
-				stripeSubResponse.data.find((sub) => liveStatuses.has(sub.status)) ??
-				stripeSubResponse.data[0];
+				const liveStatuses = new Set(["active", "trialing", "past_due"]);
+				const stripeSub =
+					stripeSubResponse.data.find((sub) => liveStatuses.has(sub.status)) ??
+					stripeSubResponse.data[0];
 
-			if (stripeSub) {
-				stripeSubscriptionId = stripeSub.id;
-				priceId = stripeSub.items.data[0]?.price.id ?? priceId;
-				currentPeriodEnd = subscriptionPeriodEnd(stripeSub);
-				trialEnd = stripeSub.trial_end;
+				if (stripeSub) {
+					stripeSubscriptionId = stripeSub.id;
+					priceId = stripeSub.items.data[0]?.price.id ?? priceId;
+					currentPeriodEnd = subscriptionPeriodEnd(stripeSub);
+					trialEnd = stripeSub.trial_end;
+				}
+			} catch (error) {
+				if (!isStripeResourceMissing(error)) {
+					throw error;
+				}
 			}
 		}
 
@@ -939,23 +997,37 @@ export const getPaymentSuccessSummary = action({
 		}
 
 		if (!currentPeriodEnd) {
-			const retrieved =
-				await stripe.subscriptions.retrieve(stripeSubscriptionId);
-			currentPeriodEnd = subscriptionPeriodEnd(retrieved);
-			if (retrieved.trial_end) trialEnd = retrieved.trial_end;
+			try {
+				const retrieved =
+					await stripe.subscriptions.retrieve(stripeSubscriptionId);
+				currentPeriodEnd = subscriptionPeriodEnd(retrieved);
+				if (retrieved.trial_end) trialEnd = retrieved.trial_end;
+			} catch (error) {
+				if (isStripeResourceMissing(error)) {
+					return null;
+				}
+				throw error;
+			}
 		}
 
 		if (!currentPeriodEnd) {
 			return null;
 		}
 
-		const paymentMethod = customer
-			? await resolvePaymentMethodDetails(
+		let paymentMethod: Stripe.PaymentMethod | null = null;
+		if (customer) {
+			try {
+				paymentMethod = await resolvePaymentMethodDetails(
 					stripe,
 					customer.stripeCustomerId,
 					stripeSubscriptionId,
-				)
-			: null;
+				);
+			} catch (error) {
+				if (!isStripeResourceMissing(error)) {
+					throw error;
+				}
+			}
+		}
 
 		const periodEndSeconds = currentPeriodEnd;
 
@@ -973,12 +1045,20 @@ export const getPaymentSuccessSummary = action({
 				? trialEnd * 1000
 				: periodEndSeconds * 1000;
 
+		const hostedInvoiceUrl = customer
+			? await fetchLatestHostedInvoiceUrl(stripe, {
+					customerId: customer.stripeCustomerId,
+					subscriptionId: stripeSubscriptionId,
+				})
+			: null;
+
 		return {
 			planName: `${planBaseName} Plan`,
 			billingCycle: interval === "annual" ? "Annual" : "Monthly",
 			paymentMethodLabel: label,
 			paymentMethodKind: kind,
 			nextBillingDateMs,
+			hostedInvoiceUrl,
 		};
 	},
 });
@@ -1128,17 +1208,24 @@ export const listMyInvoicesLive = action({
 		const identity = await ctx.auth.getUserIdentity();
 		if (!identity) return [];
 
-		const customer = await ctx.runQuery(
-			components.stripe.public.getCustomerByUserId,
-			{ userId: identity.subject },
-		);
+		const customer = await getUsableStripeCustomer(ctx, {
+			userId: identity.subject,
+			email: identity.email ?? undefined,
+		});
 		if (!customer) return [];
 
 		const stripe = new Stripe(requireSecretKey());
-		const { data } = await stripe.invoices.list({
-			customer: customer.stripeCustomerId,
-			limit: 24,
-		});
+		let data: Stripe.Invoice[] = [];
+		try {
+			({ data } = await stripe.invoices.list({
+				customer: customer.stripeCustomerId,
+				limit: 24,
+			}));
+		} catch (error) {
+			if (!isStripeResourceMissing(error)) {
+				throw error;
+			}
+		}
 
 		return data
 			.filter((invoice) => invoice.id)
