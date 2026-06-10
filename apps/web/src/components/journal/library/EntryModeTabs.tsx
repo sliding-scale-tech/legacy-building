@@ -23,6 +23,7 @@ export function EntryModeTabs({ value, onChange }: EntryModeTabsProps) {
 		>
 			{MODES.map((option) => {
 				const isActive = value === option.id;
+				const isRecording = option.id === "recording";
 				return (
 					<button
 						key={option.id}
@@ -34,9 +35,19 @@ export function EntryModeTabs({ value, onChange }: EntryModeTabsProps) {
 							"min-h-10 min-w-[170px] cursor-pointer self-start px-2.5 py-2.5 font-normal text-base leading-[1.4] transition-colors",
 							isActive
 								? "rounded-[3px] text-white"
-								: "rounded-none bg-white text-[#1a1a1a]",
+								: isRecording
+									? "rounded-none text-[#1a1a1a]"
+									: "rounded-none bg-white text-[#1a1a1a]",
 						)}
-						style={isActive ? { backgroundColor: brand.primary } : undefined}
+						style={
+							isActive
+								? {
+										backgroundColor: isRecording ? brand.alert : brand.primary,
+									}
+								: isRecording
+									? { backgroundColor: brand.alertLight }
+									: undefined
+						}
 					>
 						{option.label}
 					</button>

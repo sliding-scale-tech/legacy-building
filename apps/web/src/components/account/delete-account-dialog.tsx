@@ -1,9 +1,8 @@
-import { useClerk, useUser } from "@clerk/react";
+import { useClerk } from "@clerk/react";
 import { api } from "@legacy-building/backend/convex/_generated/api";
 import { firstClerkErrorMessage } from "@legacy-building/ui/lib/clerk-errors";
 import { cn } from "@legacy-building/ui/lib/utils";
-import { useNavigate } from "@tanstack/react-router";
-import { useMutation } from "convex/react";
+import { useAction } from "convex/react";
 import { Loader2 } from "lucide-react";
 import { useState } from "react";
 import { accountInputClass } from "@/components/account/accountFormStyles";
@@ -35,10 +34,8 @@ export function DeleteAccountDialog({
 	open,
 	onOpenChange,
 }: DeleteAccountDialogProps) {
-	const { user } = useUser();
 	const { signOut } = useClerk();
-	const navigate = useNavigate();
-	const deleteMyAccount = useMutation(api.user.mutations.deleteMyAccount);
+	const deleteMyAccount = useAction(api.user.deleteAccount.deleteMyAccount);
 	const [confirmInput, setConfirmInput] = useState("");
 	const [deleting, setDeleting] = useState(false);
 
@@ -50,15 +47,15 @@ export function DeleteAccountDialog({
 	};
 
 	const handleDelete = async () => {
-		if (!canConfirm || !user) return;
+		if (!canConfirm) return;
 		setDeleting(true);
 		try {
 			await deleteMyAccount({});
-			await user.delete();
-			await signOut();
-			toastMutationSuccess("Your account has been deleted.");
 			resetAndClose();
-			void navigate({ to: ROUTES.login });
+			toastMutationSuccess("Your account has been deleted.");
+			await signOut({
+				redirectUrl: `${window.location.origin}${ROUTES.login}`,
+			});
 		} catch (err) {
 			const clerkMsg = firstClerkErrorMessage(err);
 			toastMutationError(
@@ -95,8 +92,10 @@ export function DeleteAccountDialog({
 					Delete account permanently?
 				</AlertDialogTitle>
 				<AlertDialogDescription className="text-[#525252] text-sm leading-[1.5]">
-					This cannot be undone. Your account, all journals, entries, and
-					uploaded media will be permanently removed and cannot be recovered.
+					This cannot be undone. Your subscription will be cancelled
+					immediately, and your account, journals, entries, and uploaded media
+					will be permanently removed. You will be signed out and returned to
+					the login page.
 				</AlertDialogDescription>
 				<div className="flex flex-col gap-2">
 					<label

@@ -332,6 +332,16 @@ async function deleteAllDataForClerkUser(
 		await ctx.db.delete(journal._id);
 	}
 
+	const orphanEntries = await ctx.db
+		.query("journalEntries")
+		.withIndex("by_userId", (q) => q.eq("userId", clerkId))
+		.collect();
+
+	for (const entry of orphanEntries) {
+		await deleteEntryStorageFiles(ctx, entry);
+		await ctx.db.delete(entry._id);
+	}
+
 	const user = await ctx.db
 		.query("users")
 		.withIndex("by_clerk_id", (q) => q.eq("clerkId", clerkId))
@@ -342,21 +352,6 @@ async function deleteAllDataForClerkUser(
 		await ctx.db.delete(user._id);
 	}
 }
-
-export const deleteMyAccount = mutation({
-	args: {},
-	handler: async (ctx) => {
-		const identity = await ctx.auth.getUserIdentity();
-		if (!identity) {
-			throw new ConvexError({
-				code: "UNAUTHENTICATED",
-				message: "You must be signed in to delete your account.",
-			});
-		}
-
-		await deleteAllDataForClerkUser(ctx, identity.subject);
-	},
-});
 
 export const deleteByClerkId = internalMutation({
 	args: {
