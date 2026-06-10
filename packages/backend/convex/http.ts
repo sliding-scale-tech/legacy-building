@@ -68,7 +68,7 @@ const handleClerkWebhook = httpAction(async (ctx, request) => {
 					console.warn("user.deleted webhook missing id");
 					break;
 				}
-				await ctx.runMutation(internal.user.mutations.deleteByClerkId, {
+				await ctx.runAction(internal.user.deleteAccount.purgeClerkUserById, {
 					clerkId: id,
 				});
 				break;

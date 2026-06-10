@@ -261,9 +261,9 @@ export function DashboardAccountPage() {
 										Delete Account
 									</h3>
 									<p className="mt-1 max-w-2xl text-muted-foreground text-sm leading-relaxed">
-										Once you delete your account, there is no going back. All
-										your data, journals, and entries will be permanently
-										deleted.
+										Once you delete your account, there is no going back. Your
+										subscription will be cancelled, and all your data, journals,
+										and entries will be permanently deleted.
 									</p>
 								</div>
 								<div className={accountWarningBoxClass}>

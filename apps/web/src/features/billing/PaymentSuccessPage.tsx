@@ -16,6 +16,7 @@ type SuccessSummary = {
 	paymentMethodLabel: string;
 	paymentMethodKind: "card" | "google_pay" | "apple_pay" | "other";
 	nextBillingDateMs: number;
+	hostedInvoiceUrl: string | null;
 };
 
 const REDIRECT_SECONDS = 8;
@@ -46,15 +47,11 @@ function SummaryField({
 export function PaymentSuccessPage() {
 	const navigate = useNavigate();
 	const getSummary = useAction(api.stripe.actions.getPaymentSuccessSummary);
-	const openBillingPortal = useAction(
-		api.stripe.actions.createBillingPortalSession,
-	);
 
 	const [summary, setSummary] = useState<SuccessSummary | null>(null);
 	const [loading, setLoading] = useState(true);
 	const [summaryError, setSummaryError] = useState<string | null>(null);
 	const [secondsLeft, setSecondsLeft] = useState(REDIRECT_SECONDS);
-	const [portalPending, setPortalPending] = useState(false);
 
 	const goToBilling = useCallback(() => {
 		void navigate({
@@ -73,8 +70,10 @@ export function PaymentSuccessPage() {
 				const result = await getSummary({});
 				if (result) {
 					setSummary(result);
-					setLoading(false);
-					return;
+					if (result.hostedInvoiceUrl || attempts >= 11) {
+						setLoading(false);
+						return;
+					}
 				}
 			} catch {
 				setSummaryError("We couldn't confirm your payment yet. Please retry.");
@@ -108,18 +107,14 @@ export function PaymentSuccessPage() {
 		return () => window.clearInterval(timer);
 	}, [loading, summaryError, summary, goToBilling]);
 
-	const handleViewInvoice = async () => {
-		if (portalPending) return;
-		setPortalPending(true);
-		try {
-			const { url } = await openBillingPortal({
-				returnUrl: `${window.location.origin}${ROUTES.dashboardBillingSuccess}`,
-			});
-			window.location.href = url;
-		} catch {
-			toast.error("Could not open billing portal. Please try again.");
-			setPortalPending(false);
+	const handleViewInvoice = () => {
+		if (!summary?.hostedInvoiceUrl) {
+			toast.error(
+				"Your invoice is not ready yet. Please try again in a moment.",
+			);
+			return;
 		}
+		window.open(summary.hostedInvoiceUrl, "_blank", "noopener,noreferrer");
 	};
 
 	return (
@@ -220,11 +215,11 @@ export function PaymentSuccessPage() {
 						</button>
 						<button
 							type="button"
-							onClick={() => void handleViewInvoice()}
-							disabled={portalPending}
-							className="font-medium text-[#525252] text-sm hover:text-[#1a1a1a] disabled:opacity-60"
+							onClick={handleViewInvoice}
+							disabled={!summary?.hostedInvoiceUrl}
+							className="font-medium text-[#525252] text-sm hover:text-[#1a1a1a] disabled:cursor-not-allowed disabled:opacity-60"
 						>
-							{portalPending ? "Opening…" : "View Invoice"}
+							View Invoice
 						</button>
 						<Link
 							to={ROUTES.dashboardBilling}
